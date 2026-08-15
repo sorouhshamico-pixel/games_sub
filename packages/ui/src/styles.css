@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — see claude-gcc-gaming-store-master-prompt-ar.md section 4.
+ * Dark is the primary/default theme (gaming-store convention); light is a
+ * fully supported alternate, not an afterthought. Toggle by setting
+ * data-theme="light" on <html>; absent that, prefers-color-scheme decides.
+ */
+@theme {
+  --font-sans-ar: "Alexandria", "IBM Plex Sans Arabic", sans-serif;
+  --font-sans-en: "Inter", "IBM Plex Sans", sans-serif;
+
+  --color-brand-primary: #7c3aed;
+  --color-brand-secondary: #06b6d4;
+  --color-brand-accent: #f5b942;
+  --color-success: #22c55e;
+  --color-danger: #ef4444;
+}
+
+:root {
+  --color-background: #070b14;
+  --color-surface: #0f172a;
+  --color-surface-elevated: #162033;
+  --color-text-primary: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-border: #1e293b;
+}
+
+:root[data-theme="light"] {
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #f1f5f9;
+  --color-text-primary: #0f172a;
+  --color-text-muted: #475569;
+  --color-border: #e2e8f0;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --color-background: #f8fafc;
+    --color-surface: #ffffff;
+    --color-surface-elevated: #f1f5f9;
+    --color-text-primary: #0f172a;
+    --color-text-muted: #475569;
+    --color-border: #e2e8f0;
+  }
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

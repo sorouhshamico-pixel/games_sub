@@ -1,0 +1,873 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Identity & access
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  SUPER_ADMIN
+  OPERATIONS
+  FINANCE
+  SUPPORT
+  CATALOG_MANAGER
+  CONTENT_SEO
+  READ_ONLY_ANALYST
+  CUSTOMER
+}
+
+model User {
+  id                String    @id @default(uuid())
+  phone             String?   @unique
+  email             String?   @unique
+  passwordHash      String?
+  role              UserRole  @default(CUSTOMER)
+  isActive          Boolean   @default(true)
+  mfaEnabled        Boolean   @default(false)
+  mfaSecretEncrypted String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+
+  customerProfile CustomerProfile?
+  addresses       Address[]
+  sessions        Session[]
+  orders          Order[]
+  carts           Cart[]
+  supportTickets  SupportTicket[]
+  reviews         Review[]
+  auditLogs       AuditLog[]
+
+  @@index([role])
+  @@map("users")
+}
+
+model CustomerProfile {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName   String?
+  preferredLocale String @default("ar")
+  marketingOptIn Boolean @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("customer_profiles")
+}
+
+model Address {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label      String?
+  country    String
+  city       String?
+  line1      String?
+  line2      String?
+  postalCode String?
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("addresses")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceLabel  String?
+  ipAddress    String?
+  userAgent    String?
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+// ---------------------------------------------------------------------------
+// Catalog
+// ---------------------------------------------------------------------------
+
+model Category {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  nameAr      String
+  nameEn      String
+  parentId    String?
+  parent      Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryToCategory")
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products    Product[]
+  seoMetadata SeoMetadata?
+
+  @@map("categories")
+}
+
+model GameBrand {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  nameAr      String
+  nameEn      String
+  logoUrl     String?
+  bannerUrl   String?
+  descriptionAr String?
+  descriptionEn String?
+  identifierHelpAr String?
+  identifierHelpEn String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products    Product[]
+  seoMetadata SeoMetadata?
+
+  @@map("game_brands")
+}
+
+enum ProductType {
+  GAME_TOPUP
+  DIGITAL_CODE
+  SUBSCRIPTION
+  GIFT_CARD
+  MANUAL_DIGITAL_SERVICE
+}
+
+enum ProductLifecycleStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  OUT_OF_STOCK
+  RETIRED
+}
+
+model Product {
+  id             String   @id @default(uuid())
+  slug           String   @unique
+  type           ProductType
+  categoryId     String
+  category       Category @relation(fields: [categoryId], references: [id])
+  gameBrandId    String?
+  gameBrand      GameBrand? @relation(fields: [gameBrandId], references: [id])
+  status         ProductLifecycleStatus @default(DRAFT)
+  imageUrl       String?
+  refundEligible Boolean  @default(false)
+  refundPolicyAr String?
+  refundPolicyEn String?
+  fulfillmentEtaMinutes Int? // expected turnaround, used for SLA reporting
+  maxQuantityPerOrder Int @default(10)
+  isDemoData     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  translations    ProductTranslation[]
+  variants        ProductVariant[]
+  inputDefinitions ProductInputDefinition[]
+  seoMetadata     SeoMetadata?
+  reviews         Review[]
+
+  @@index([categoryId])
+  @@index([gameBrandId])
+  @@index([status])
+  @@map("products")
+}
+
+model ProductTranslation {
+  id          String   @id @default(uuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  locale      String
+  name        String
+  description String
+
+  @@unique([productId, locale])
+  @@map("product_translations")
+}
+
+// One customer-facing field the storefront must collect to fulfill this
+// product (Player ID, Server ID, Region, ...). See packages/contracts/product-input.ts.
+model ProductInputDefinition {
+  id           String   @id @default(uuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  key          String
+  labelAr      String
+  labelEn      String
+  helpTextAr   String?
+  helpTextEn   String?
+  fieldType    String   // text | number | select | email
+  required     Boolean  @default(true)
+  regex        String?
+  minLength    Int?
+  maxLength    Int?
+  optionsJson  Json?
+  normalize    String   @default("trim")
+  sortOrder    Int      @default(0)
+
+  @@unique([productId, key])
+  @@map("product_input_definitions")
+}
+
+enum SupportedCurrency {
+  SAR
+  AED
+  KWD
+  QAR
+  BHD
+  OMR
+}
+
+model ProductVariant {
+  id                  String   @id @default(uuid())
+  productId           String
+  product             Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku                 String   @unique
+  nameAr              String
+  nameEn              String
+  currency            SupportedCurrency
+  baseCostMinorUnits  Int      // provider cost, or internal cost basis
+  marginBasisPoints   Int      @default(0)
+  discountMinorUnits  Int      @default(0)
+  taxRateBasisPoints  Int      @default(1500) // 15% VAT default, overridable via TaxRule
+  isActive            Boolean  @default(true)
+  minQuantityPerOrder Int      @default(1)
+  maxQuantityPerOrder Int      @default(10)
+  sortOrder           Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  providerMappings ProviderProductMapping[]
+  digitalCodeBatches DigitalCodeBatch[]
+  cartItems        CartItem[]
+  orderItems       OrderItem[]
+
+  @@index([productId])
+  @@map("product_variants")
+}
+
+// ---------------------------------------------------------------------------
+// Pricing, tax, FX
+// ---------------------------------------------------------------------------
+
+model PriceRule {
+  id                 String   @id @default(uuid())
+  name               String
+  scope              String   // "global" | "category" | "product" | "variant"
+  scopeRefId         String?
+  marginBasisPoints  Int?
+  discountMinorUnits Int?
+  startsAt           DateTime?
+  endsAt             DateTime?
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("price_rules")
+}
+
+model TaxRule {
+  id                 String   @id @default(uuid())
+  countryCode        String
+  productType        ProductType?
+  taxRateBasisPoints Int
+  label              String
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([countryCode, productType])
+  @@map("tax_rules")
+}
+
+model ExchangeRate {
+  id           String   @id @default(uuid())
+  baseCurrency SupportedCurrency
+  quoteCurrency SupportedCurrency
+  rate         Decimal  @db.Decimal(18, 8)
+  fetchedAt    DateTime @default(now())
+
+  @@unique([baseCurrency, quoteCurrency, fetchedAt])
+  @@map("exchange_rates")
+}
+
+// ---------------------------------------------------------------------------
+// Fulfillment providers
+// ---------------------------------------------------------------------------
+
+model Provider {
+  id                String   @id @default(uuid())
+  code              String   @unique // e.g. "mock", "provider_x"
+  name              String
+  isActive          Boolean  @default(true)
+  priority          Int      @default(100) // lower = preferred
+  supportsWebhook   Boolean  @default(false)
+  configEncrypted   String?  // encrypted JSON: base URL, credentials reference
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  productMappings   ProviderProductMapping[]
+  balanceSnapshots  ProviderBalanceSnapshot[]
+  transactions      ProviderTransaction[]
+
+  @@map("providers")
+}
+
+model ProviderProductMapping {
+  id               String   @id @default(uuid())
+  providerId       String
+  provider         Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  variantId        String
+  variant          ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  providerSku      String
+  providerCostMinorUnits Int?
+  priority         Int      @default(100)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([providerId, variantId])
+  @@map("provider_product_mappings")
+}
+
+model ProviderBalanceSnapshot {
+  id          String   @id @default(uuid())
+  providerId  String
+  provider    Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  balanceMinorUnits Int
+  currency    SupportedCurrency
+  capturedAt  DateTime @default(now())
+
+  @@index([providerId, capturedAt])
+  @@map("provider_balance_snapshots")
+}
+
+// ---------------------------------------------------------------------------
+// Digital code inventory
+// ---------------------------------------------------------------------------
+
+model DigitalCodeBatch {
+  id          String   @id @default(uuid())
+  variantId   String
+  variant     ProductVariant @relation(fields: [variantId], references: [id])
+  importedByUserId String?
+  fileName    String?
+  totalCodes  Int
+  createdAt   DateTime @default(now())
+
+  codes DigitalCode[]
+
+  @@map("digital_code_batches")
+}
+
+enum DigitalCodeStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  VOID
+}
+
+model DigitalCode {
+  id              String   @id @default(uuid())
+  batchId         String
+  batch           DigitalCodeBatch @relation(fields: [batchId], references: [id])
+  variantId       String
+  codeCiphertext  String   // encrypted at rest; never logged
+  status          DigitalCodeStatus @default(AVAILABLE)
+  reservedForOrderItemId String? @unique
+  soldAt          DateTime?
+  createdAt       DateTime @default(now())
+
+  @@index([variantId, status])
+  @@map("digital_codes")
+}
+
+// ---------------------------------------------------------------------------
+// Cart
+// ---------------------------------------------------------------------------
+
+model Cart {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  sessionToken String? @unique // for guest carts
+  currency  SupportedCurrency @default(SAR)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id            String   @id @default(uuid())
+  cartId        String
+  cart          Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variantId     String
+  variant       ProductVariant @relation(fields: [variantId], references: [id])
+  quantity      Int      @default(1)
+  inputValuesJson Json?  // customer-entered Player ID / Server ID / etc.
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("cart_items")
+}
+
+// ---------------------------------------------------------------------------
+// Orders
+// ---------------------------------------------------------------------------
+
+enum OrderStatus {
+  DRAFT
+  PENDING_PAYMENT
+  PAYMENT_REVIEW
+  PAID
+  FULFILLMENT_QUEUED
+  PROCESSING
+  PARTIALLY_FULFILLED
+  COMPLETED
+  MANUAL_REVIEW
+  FAILED
+  CANCELLED
+  REFUND_PENDING
+  PARTIALLY_REFUNDED
+  REFUNDED
+}
+
+model Order {
+  id            String   @id @default(uuid())
+  orderNumber   String   @unique // public, non-sequential (ULID-derived)
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  guestEmail    String?
+  guestPhone    String?
+  status        OrderStatus @default(DRAFT)
+  currency      SupportedCurrency
+  subtotalMinorUnits Int
+  discountMinorUnits Int @default(0)
+  taxMinorUnits Int
+  totalMinorUnits Int
+  couponId      String?
+  coupon        Coupon?  @relation(fields: [couponId], references: [id])
+  trackingToken String   @unique // signed token for guest order tracking
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  items          OrderItem[]
+  statusEvents   OrderStatusEvent[]
+  payments       Payment[]
+  refunds        Refund[]
+  invoice        Invoice?
+  couponRedemptions CouponRedemption[]
+  supportTickets SupportTicket[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id            String   @id @default(uuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId     String
+  variant       ProductVariant @relation(fields: [variantId], references: [id])
+  quantity      Int
+  inputValuesJson Json?
+  // Full pricing + product-name snapshot at time of purchase — see
+  // packages/contracts/pricing.ts#PriceBreakdown. Historical orders must
+  // never change when the product is edited later.
+  priceSnapshotJson Json
+  productNameSnapshot String
+
+  fulfillments Fulfillment[]
+
+  @@map("order_items")
+}
+
+model OrderStatusEvent {
+  id            String   @id @default(uuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus    OrderStatus?
+  toStatus      OrderStatus
+  actorType     String   // "system" | "customer" | "admin" | "provider"
+  actorId       String?
+  reason        String?
+  correlationId String?
+  createdAt     DateTime @default(now())
+
+  @@index([orderId])
+  @@map("order_status_events")
+}
+
+// ---------------------------------------------------------------------------
+// Payments
+// ---------------------------------------------------------------------------
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+model Payment {
+  id                String   @id @default(uuid())
+  orderId           String
+  order             Order    @relation(fields: [orderId], references: [id])
+  gatewayCode       String   // "moyasar" | "mock" | ...
+  gatewayReference  String?  @unique
+  status            PaymentStatus @default(PENDING)
+  amountMinorUnits  Int
+  currency          SupportedCurrency
+  idempotencyKey    String   @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  attempts PaymentAttempt[]
+  refunds  Refund[]
+
+  @@index([orderId])
+  @@map("payments")
+}
+
+model PaymentAttempt {
+  id            String   @id @default(uuid())
+  paymentId     String
+  payment       Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  method        String?  // mada | visa | mastercard | apple_pay | stc_pay
+  status        PaymentStatus
+  gatewayRawEventId String?
+  failureReason String?
+  createdAt     DateTime @default(now())
+
+  @@map("payment_attempts")
+}
+
+model Refund {
+  id                String   @id @default(uuid())
+  orderId           String
+  order             Order    @relation(fields: [orderId], references: [id])
+  paymentId         String
+  payment           Payment  @relation(fields: [paymentId], references: [id])
+  amountMinorUnits  Int
+  reason            String?
+  status            String   // "pending" | "succeeded" | "failed"
+  requestedByUserId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("refunds")
+}
+
+// ---------------------------------------------------------------------------
+// Fulfillment execution
+// ---------------------------------------------------------------------------
+
+enum FulfillmentStatus {
+  QUEUED
+  IN_PROGRESS
+  SUCCEEDED
+  FAILED
+  MANUAL_REVIEW
+  CANCELLED
+}
+
+model Fulfillment {
+  id              String   @id @default(uuid())
+  orderItemId     String
+  orderItem       OrderItem @relation(fields: [orderItemId], references: [id])
+  providerId      String?
+  status          FulfillmentStatus @default(QUEUED)
+  attemptCount    Int      @default(0)
+  lastError       String?
+  slaDueAt        DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  providerTransactions ProviderTransaction[]
+
+  @@index([orderItemId])
+  @@index([status])
+  @@map("fulfillments")
+}
+
+model ProviderTransaction {
+  id                String   @id @default(uuid())
+  fulfillmentId     String
+  fulfillment       Fulfillment @relation(fields: [fulfillmentId], references: [id])
+  providerId        String
+  provider          Provider @relation(fields: [providerId], references: [id])
+  providerTxnRef    String
+  idempotencyKey    String   @unique
+  requestPayloadJson Json?
+  responsePayloadJson Json?
+  status            String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([providerId, providerTxnRef])
+  @@map("provider_transactions")
+}
+
+// ---------------------------------------------------------------------------
+// Marketing, content, ops
+// ---------------------------------------------------------------------------
+
+model Coupon {
+  id                  String   @id @default(uuid())
+  code                String   @unique
+  discountType        String   // "percentage" | "fixed"
+  discountValue       Int      // basis points if percentage, minor units if fixed
+  maxRedemptions      Int?
+  maxRedemptionsPerCustomer Int?
+  minOrderAmountMinorUnits Int?
+  startsAt            DateTime?
+  endsAt              DateTime?
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  orders     Order[]
+  redemptions CouponRedemption[]
+
+  @@map("coupons")
+}
+
+model CouponRedemption {
+  id        String   @id @default(uuid())
+  couponId  String
+  coupon    Coupon   @relation(fields: [couponId], references: [id])
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id])
+  userId    String?
+  createdAt DateTime @default(now())
+
+  @@map("coupon_redemptions")
+}
+
+model Invoice {
+  id           String   @id @default(uuid())
+  orderId      String   @unique
+  order        Order    @relation(fields: [orderId], references: [id])
+  invoiceNumber String  @unique
+  type         String   // "b2c_simplified" | "b2b_tax"
+  buyerTaxNumber String?
+  buyerLegalName String?
+  pdfUrl       String?
+  zatcaStatus  String?  // null until ZATCA integration is enabled
+  issuedAt     DateTime @default(now())
+
+  @@map("invoices")
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  userId      String?
+  channel     String   // "email" | "sms" | "whatsapp" | "in_app"
+  templateKey String
+  status      String   // "queued" | "sent" | "failed"
+  payloadJson Json?
+  sentAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+model WebhookEvent {
+  id              String   @id @default(uuid())
+  source          String   // "moyasar" | provider code
+  externalEventId String
+  signatureValid  Boolean
+  payloadJson     Json
+  processedAt     DateTime?
+  createdAt       DateTime @default(now())
+
+  @@unique([source, externalEventId])
+  @@map("webhook_events")
+}
+
+model IdempotencyKey {
+  key         String   @id
+  scope       String   // "payment_intent" | "fulfillment" | "refund"
+  responseJson Json?
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  @@map("idempotency_keys")
+}
+
+// Transactional outbox: written in the same DB transaction as the state
+// change it announces, then relayed to workers/webhooks by a dispatcher.
+model OutboxEvent {
+  id          String   @id @default(uuid())
+  eventType   String
+  payloadJson Json
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([publishedAt])
+  @@map("outbox_events")
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  rating      Int
+  comment     String?
+  isApproved  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("reviews")
+}
+
+model SupportTicket {
+  id          String   @id @default(uuid())
+  orderId     String?
+  order       Order?   @relation(fields: [orderId], references: [id])
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  subject     String
+  status      String   @default("open") // "open" | "pending" | "resolved" | "closed"
+  priority    String   @default("normal")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("support_tickets")
+}
+
+model Page {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  type        String   // "static" | "faq" | "landing"
+  isPublished Boolean  @default(false)
+  publishAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  translations PageTranslation[]
+  seoMetadata  SeoMetadata?
+
+  @@map("pages")
+}
+
+model PageTranslation {
+  id       String @id @default(uuid())
+  pageId   String
+  page     Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  locale   String
+  title    String
+  bodyMarkdown String
+
+  @@unique([pageId, locale])
+  @@map("page_translations")
+}
+
+model BlogPost {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  isPublished Boolean  @default(false)
+  publishAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  translations BlogPostTranslation[]
+  seoMetadata  SeoMetadata?
+
+  @@map("blog_posts")
+}
+
+model BlogPostTranslation {
+  id      String @id @default(uuid())
+  postId  String
+  post    BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  locale  String
+  title   String
+  excerpt String
+  bodyMarkdown String
+
+  @@unique([postId, locale])
+  @@map("blog_post_translations")
+}
+
+model SeoMetadata {
+  id            String   @id @default(uuid())
+  titleAr       String
+  titleEn       String
+  descriptionAr String
+  descriptionEn String
+  canonicalPath String
+
+  categoryId String? @unique
+  category   Category? @relation(fields: [categoryId], references: [id])
+  gameBrandId String? @unique
+  gameBrand  GameBrand? @relation(fields: [gameBrandId], references: [id])
+  productId  String? @unique
+  product    Product? @relation(fields: [productId], references: [id])
+  pageId     String? @unique
+  page       Page? @relation(fields: [pageId], references: [id])
+  blogPostId String? @unique
+  blogPost   BlogPost? @relation(fields: [blogPostId], references: [id])
+
+  updatedAt DateTime @updatedAt
+
+  @@map("seo_metadata")
+}
+
+model FeatureFlag {
+  key       String   @id
+  isEnabled Boolean  @default(false)
+  description String?
+  updatedAt DateTime @updatedAt
+
+  @@map("feature_flags")
+}
+
+// Append-only. No update/delete path is exposed at the application layer;
+// corrections are recorded as new reversing entries.
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorUserId String?
+  actor       User?    @relation(fields: [actorUserId], references: [id])
+  action      String
+  entityType  String
+  entityId    String
+  metadataJson Json?
+  createdAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// Non-secret store configuration only (feature toggles, display settings).
+// Gateway/provider credentials live in a secrets manager, never here.
+model AppSetting {
+  key       String   @id
+  valueJson Json
+  updatedAt DateTime @updatedAt
+
+  @@map("app_settings")
+}

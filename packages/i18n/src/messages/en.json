@@ -1,0 +1,43 @@
+{
+  "brand": {
+    "name": "Store Name",
+    "tagline": "Fast, trusted game top-ups and digital subscriptions"
+  },
+  "nav": {
+    "home": "Home",
+    "games": "Games",
+    "subscriptions": "Subscriptions",
+    "giftCards": "Gift Cards",
+    "orders": "My Orders",
+    "account": "Account",
+    "search": "Search for a game or service",
+    "cart": "Cart",
+    "help": "Help"
+  },
+  "home": {
+    "heroTitle": "Top up your favorite game in under a minute",
+    "heroSubtitle": "Instant delivery for the most popular games and digital subscriptions across Saudi Arabia and the Gulf",
+    "heroCta": "Browse games",
+    "popularGames": "Popular games",
+    "trustTitle": "Why choose us",
+    "trustDelivery": "Instant delivery after payment confirmation",
+    "trustSecurity": "Fully secure and encrypted payments",
+    "trustSupport": "24/7 customer support",
+    "faqTitle": "Frequently asked questions"
+  },
+  "footer": {
+    "aboutTitle": "About the store",
+    "legalTitle": "Legal",
+    "contactTitle": "Contact us",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy",
+    "refunds": "Refund Policy",
+    "rightsReserved": "All rights reserved"
+  },
+  "common": {
+    "demoDataNotice": "Demo data for display purposes only, not real prices",
+    "loading": "Loading...",
+    "errorGeneric": "Something went wrong, please try again",
+    "empty": "No results found"
+  }
+}
