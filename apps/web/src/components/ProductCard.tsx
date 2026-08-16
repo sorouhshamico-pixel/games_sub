@@ -3,6 +3,7 @@ import { formatMoney } from "@gcc-store/ui";
 import type { ProductSummary } from "@gcc-store/contracts";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@gcc-store/i18n";
+import { ProductImagePlaceholder } from "./ProductImagePlaceholder";
 
 export function ProductCard({ product }: { product: ProductSummary }) {
   const locale = useLocale() as Locale;
@@ -22,9 +23,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
             loading="lazy"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-primary/15 to-brand-secondary/15 text-3xl font-bold text-brand-primary">
-            {name.slice(0, 1)}
-          </div>
+          <ProductImagePlaceholder label={name.slice(0, 1)} />
         )}
         {product.isDemoData ? (
           <span

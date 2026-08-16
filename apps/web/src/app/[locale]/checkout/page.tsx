@@ -27,11 +27,14 @@ export default function CheckoutPage() {
 
   if (items.length === 0 && step === "form") {
     return (
-      <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-4 py-16 text-center">
-        <p className="text-lg font-medium text-[var(--color-text-primary)]">
+      <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-4 py-20 text-center">
+        <p className="text-lg font-semibold text-[var(--color-text-primary)]">
           {locale === "ar" ? "سلتك فارغة" : "Your cart is empty"}
         </p>
-        <Link href="/games" className="rounded-xl bg-brand-primary px-5 py-2.5 text-sm font-medium text-white">
+        <Link
+          href="/games"
+          className="mt-2 inline-flex h-11 items-center justify-center rounded-xl bg-brand-primary px-6 text-sm font-semibold text-white shadow-lg shadow-brand-primary/30 transition-all hover:-translate-y-0.5 hover:brightness-110"
+        >
           {t("home.heroCta")}
         </Link>
       </div>
@@ -95,10 +98,10 @@ export default function CheckoutPage() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-10">
-      <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">{locale === "ar" ? "الدفع" : "Checkout"}</h1>
+      <h1 className="text-3xl font-bold text-[var(--color-text-primary)]">{locale === "ar" ? "الدفع" : "Checkout"}</h1>
 
-      <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-        <h2 className="mb-3 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "ملخص الطلب" : "Order summary"}</h2>
+      <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+        <h2 className="mb-3 font-bold text-[var(--color-text-primary)]">{locale === "ar" ? "ملخص الطلب" : "Order summary"}</h2>
         <ul className="flex flex-col gap-2 text-sm">
           {items.map((item) => (
             <li key={item.key} className="flex items-center justify-between text-[var(--color-text-muted)]">
@@ -127,7 +130,7 @@ export default function CheckoutPage() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder={locale === "ar" ? "05xxxxxxxx" : "05xxxxxxxx"}
-              className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-sm text-[var(--color-text-primary)]"
+              className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2.5 text-sm text-[var(--color-text-primary)] transition-colors focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-primary"
             />
           </div>
           <div>
@@ -139,7 +142,7 @@ export default function CheckoutPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-sm text-[var(--color-text-primary)]"
+              className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2.5 text-sm text-[var(--color-text-primary)] transition-colors focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-primary"
             />
           </div>
           <div>
@@ -152,7 +155,7 @@ export default function CheckoutPage() {
               value={couponCode}
               onChange={(e) => setCouponCode(e.target.value)}
               placeholder={locale === "ar" ? "أدخل الكود" : "Enter code"}
-              className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-sm uppercase text-[var(--color-text-primary)]"
+              className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2.5 text-sm uppercase text-[var(--color-text-primary)] transition-colors focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-primary"
             />
             <p className="mt-1 text-xs text-[var(--color-text-muted)]">
               {locale === "ar"
@@ -170,7 +173,7 @@ export default function CheckoutPage() {
           <button
             type="submit"
             disabled={step === "confirming"}
-            className="flex h-12 items-center justify-center rounded-xl bg-brand-primary text-base font-semibold text-white transition-colors hover:brightness-110 disabled:opacity-60"
+            className="flex h-12 items-center justify-center rounded-xl bg-brand-primary text-base font-semibold text-white shadow-lg shadow-brand-primary/30 transition-all hover:-translate-y-0.5 hover:brightness-110 disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-60 disabled:shadow-none"
           >
             {step === "confirming" ? t("common.loading") : locale === "ar" ? "متابعة الدفع" : "Continue to payment"}
           </button>
@@ -204,7 +207,7 @@ export default function CheckoutPage() {
           <button
             type="button"
             onClick={handleConfirmMockPayment}
-            className="flex h-12 items-center justify-center rounded-xl bg-success text-base font-semibold text-white hover:brightness-110"
+            className="flex h-12 items-center justify-center rounded-xl bg-success text-base font-semibold text-white shadow-lg shadow-success/30 transition-all hover:-translate-y-0.5 hover:brightness-110"
           >
             {locale === "ar" ? "محاكاة نجاح الدفع" : "Simulate successful payment"}
           </button>

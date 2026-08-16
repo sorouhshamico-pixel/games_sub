@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ProductPurchasePanel } from "@/components/ProductPurchasePanel";
 import { ProductCard } from "@/components/ProductCard";
+import { ProductImagePlaceholder } from "@/components/ProductImagePlaceholder";
 import { ApiError, getProductBySlug, listProducts } from "@/lib/api";
 import type { Locale } from "@gcc-store/i18n";
 
@@ -95,9 +96,7 @@ export default async function ProductPage({
             {product.imageUrl ? (
               <img src={product.imageUrl} alt={name} className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-primary/15 to-brand-secondary/15 text-4xl font-bold text-brand-primary">
-                {name.slice(0, 1)}
-              </div>
+              <ProductImagePlaceholder label={name.slice(0, 1)} labelClassName="text-4xl" />
             )}
           </div>
           <div className="mt-6 flex items-start justify-between gap-3">
