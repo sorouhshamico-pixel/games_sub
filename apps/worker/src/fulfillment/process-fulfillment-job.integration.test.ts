@@ -56,19 +56,28 @@ describe.skipIf(!process.env["DATABASE_URL"])("processFulfillmentJob (integratio
       where: { id: orderId },
       include: { items: { include: { fulfillments: true } } },
     });
-    return { orderStatus: order.status, fulfillmentStatus: order.items[0]?.fulfillments[0]?.status };
+    const notifications = await prisma.notification.findMany({ where: { payloadJson: { path: ["orderId"], equals: orderId } } });
+    return {
+      orderStatus: order.status,
+      fulfillmentStatus: order.items[0]?.fulfillments[0]?.status,
+      notificationTemplateKeys: notifications.map((n) => n.templateKey),
+    };
   }
 
   it.each([
-    ["succeed", "123456", OrderStatus.COMPLETED, FulfillmentStatus.SUCCEEDED],
-    ["insufficient_balance", "000000", OrderStatus.MANUAL_REVIEW, FulfillmentStatus.MANUAL_REVIEW],
-    ["timeout", "111111", OrderStatus.MANUAL_REVIEW, FulfillmentStatus.MANUAL_REVIEW],
-    ["rejected", "222222", OrderStatus.FAILED, FulfillmentStatus.FAILED],
-    ["unknown", "999999", OrderStatus.MANUAL_REVIEW, FulfillmentStatus.MANUAL_REVIEW],
-  ] as const)("maps provider outcome %s to order=%s / fulfillment=%s", async (label, playerId, expectedOrderStatus, expectedFulfillmentStatus) => {
+    ["succeed", "123456", OrderStatus.COMPLETED, FulfillmentStatus.SUCCEEDED, ["order_completed"]],
+    ["insufficient_balance", "000000", OrderStatus.MANUAL_REVIEW, FulfillmentStatus.MANUAL_REVIEW, []],
+    ["timeout", "111111", OrderStatus.MANUAL_REVIEW, FulfillmentStatus.MANUAL_REVIEW, []],
+    ["rejected", "222222", OrderStatus.FAILED, FulfillmentStatus.FAILED, ["order_failed"]],
+    ["unknown", "999999", OrderStatus.MANUAL_REVIEW, FulfillmentStatus.MANUAL_REVIEW, []],
+  ] as const)("maps provider outcome %s to order=%s / fulfillment=%s", async (label, playerId, expectedOrderStatus, expectedFulfillmentStatus, expectedNotifications) => {
     const result = await runAndInspect(label, playerId);
     expect(result.orderStatus).toBe(expectedOrderStatus);
     expect(result.fulfillmentStatus).toBe(expectedFulfillmentStatus);
+    // COMPLETED/FAILED are the only fulfillment outcomes worth notifying a
+    // customer about — MANUAL_REVIEW is an internal ops state, nothing to
+    // tell them yet.
+    expect(result.notificationTemplateKeys).toEqual(expectedNotifications);
   });
 
   it("never lets concurrent claims double-sell the same digital code", async () => {

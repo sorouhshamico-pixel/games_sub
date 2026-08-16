@@ -50,6 +50,16 @@ export class AdminOrdersController {
     });
 
     if (!order) throw new NotFoundException("Order not found");
-    return order;
+
+    // Notification has no orderId column (it's addressed by userId, since a
+    // real provider would send to a person, not an order) — payloadJson
+    // always carries orderId though, so a JSON-path filter finds the ones
+    // about this order. See docs/NOTIFICATIONS.md.
+    const notifications = await prisma.notification.findMany({
+      where: { payloadJson: { path: ["orderId"], equals: id } },
+      orderBy: { createdAt: "asc" },
+    });
+
+    return { ...order, notifications };
   }
 }

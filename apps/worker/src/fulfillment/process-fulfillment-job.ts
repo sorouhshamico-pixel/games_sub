@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { prisma, OrderStatus, FulfillmentStatus, ProductType, OrderStateMachine } from "@gcc-store/db";
+import { prisma, OrderStatus, FulfillmentStatus, ProductType, OrderStateMachine, recordNotification } from "@gcc-store/db";
+import type { NotificationTemplateKey } from "@gcc-store/db";
 import type { FulfillmentProvider } from "../providers/fulfillment-provider.interface";
 import { InsufficientProviderBalanceError, ProviderTimeoutError } from "../providers/fulfillment-provider.interface";
 import type { CircuitBreaker } from "../common/circuit-breaker";
@@ -175,9 +176,19 @@ async function finalizeOrderFulfillmentStatus(orderId: string, correlationId: st
   const order = await prisma.order.findUniqueOrThrow({ where: { id: orderId } });
   if (order.status === target) return; // already finalized by a prior delivery of this job
 
-  await prisma.$transaction((tx) =>
-    orderStateMachine.transition(tx, orderId, order.status, target, { type: "system" }, "fulfillment_result", correlationId),
-  );
+  const notificationTemplate: NotificationTemplateKey | null =
+    target === OrderStatus.COMPLETED ? "order_completed" : target === OrderStatus.FAILED ? "order_failed" : null;
+
+  await prisma.$transaction(async (tx) => {
+    await orderStateMachine.transition(tx, orderId, order.status, target, { type: "system" }, "fulfillment_result", correlationId);
+    if (notificationTemplate) {
+      await recordNotification(tx, {
+        userId: order.userId,
+        templateKey: notificationTemplate,
+        payload: { orderId: order.id, orderNumber: order.orderNumber, recipientEmail: order.guestEmail },
+      });
+    }
+  });
 }
 
 export function newCorrelationId(): string {

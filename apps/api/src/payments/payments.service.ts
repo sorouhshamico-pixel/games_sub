@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { BadRequestException, Inject, Injectable, Logger } from "@nestjs/common";
-import { prisma, OrderStatus, PaymentStatus, FulfillmentStatus, Prisma, OrderStateMachine } from "@gcc-store/db";
+import { prisma, OrderStatus, PaymentStatus, FulfillmentStatus, Prisma, OrderStateMachine, recordNotification } from "@gcc-store/db";
 import { PAYMENT_GATEWAY, type PaymentGateway, type ParsedWebhookEvent } from "./payment-gateway.interface";
 
 @Injectable()
@@ -133,6 +133,12 @@ export class PaymentsService {
             eventType: "fulfillment.queued",
             payloadJson: { orderId: order.id, correlationId } as unknown as Prisma.InputJsonValue,
           },
+        });
+
+        await recordNotification(tx, {
+          userId: order.userId,
+          templateKey: "order_confirmed",
+          payload: { orderId: order.id, orderNumber: order.orderNumber, recipientEmail: order.guestEmail },
         });
       });
     } catch (error) {

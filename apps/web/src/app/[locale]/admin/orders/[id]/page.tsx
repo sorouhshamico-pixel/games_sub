@@ -112,6 +112,22 @@ export default async function AdminOrderDetailPage({
 
       {canRefund ? <RefundForm orderId={order.id} refundableMinorUnits={refundableMinorUnits} currency={order.currency} /> : null}
 
+      {order.notifications.length > 0 ? (
+        <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+          <h2 className="mb-3 font-semibold text-[var(--color-text-primary)]">
+            {locale === "ar" ? "الإشعارات المرسلة" : "Notifications sent"}
+          </h2>
+          <ul className="flex flex-col gap-1 text-sm text-[var(--color-text-muted)]">
+            {order.notifications.map((notification) => (
+              <li key={notification.id}>
+                {notification.templateKey} — {notification.channel} — {notification.status}
+                {notification.sentAt ? ` — ${new Date(notification.sentAt).toLocaleString(locale === "ar" ? "ar-SA" : "en-US")}` : ""}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <section>
         <h2 className="mb-3 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "سجل الحالة" : "Status timeline"}</h2>
         <ol className="flex flex-col gap-2 border-s-2 border-[var(--color-border)] ps-4 text-sm">

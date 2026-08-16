@@ -69,6 +69,9 @@ describe.skipIf(!process.env["DATABASE_URL"])("Refunds (integration)", () => {
 
     const updated = await prisma.order.findUniqueOrThrow({ where: { id: orderRow.id } });
     expect(updated.status).toBe("REFUNDED");
+
+    const notifications = await prisma.notification.findMany({ where: { payloadJson: { path: ["orderId"], equals: orderRow.id } } });
+    expect(notifications.map((n) => n.templateKey)).toEqual(["order_confirmed", "refund_issued"]);
   });
 
   it("partially refunds and marks the order PARTIALLY_REFUNDED", async () => {

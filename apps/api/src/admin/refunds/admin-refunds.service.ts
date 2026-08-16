@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { prisma, OrderStatus, PaymentStatus, OrderStateMachine } from "@gcc-store/db";
+import { prisma, OrderStatus, PaymentStatus, OrderStateMachine, recordNotification } from "@gcc-store/db";
 import { PAYMENT_GATEWAY, type PaymentGateway } from "../../payments/payment-gateway.interface";
 import type { CreateRefundDto } from "./dto/create-refund.dto";
 
@@ -95,6 +95,11 @@ export class AdminRefundsService {
         "gateway_refund_succeeded",
         correlationId,
       );
+      await recordNotification(tx, {
+        userId: order.userId,
+        templateKey: "refund_issued",
+        payload: { orderId: order.id, orderNumber: order.orderNumber, amountMinorUnits: requestedAmount, recipientEmail: order.guestEmail },
+      });
     });
 
     return { ...refund, status: "succeeded" as const };

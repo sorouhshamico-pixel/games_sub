@@ -236,6 +236,7 @@ export interface AdminOrderDetail extends AdminOrderSummary {
   }>;
   statusEvents: Array<{ toStatus: string; reason: string | null; actorType: string; createdAt: string }>;
   refunds: Array<{ id: string; amountMinorUnits: number; status: string; reason: string | null; createdAt: string }>;
+  notifications: Array<{ id: string; channel: string; templateKey: string; status: string; sentAt: string | null; createdAt: string }>;
 }
 
 export function getAdminOrderDetail(id: string, options: RequestOptions = {}): Promise<AdminOrderDetail> {

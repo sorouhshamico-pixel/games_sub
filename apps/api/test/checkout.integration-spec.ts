@@ -60,6 +60,11 @@ describe.skipIf(!process.env["DATABASE_URL"])("Checkout (integration)", () => {
       "PAID",
       "FULFILLMENT_QUEUED",
     ]);
+
+    const orderRow = await prisma.order.findUniqueOrThrow({ where: { orderNumber } });
+    const notifications = await prisma.notification.findMany({ where: { payloadJson: { path: ["orderId"], equals: orderRow.id } } });
+    expect(notifications.map((n) => n.templateKey)).toEqual(["order_confirmed"]);
+    expect(notifications[0]?.status).toBe("sent");
   });
 
   it("is idempotent when the same mock payment is confirmed twice", async () => {
