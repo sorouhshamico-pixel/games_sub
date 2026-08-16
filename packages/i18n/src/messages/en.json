@@ -1,7 +1,7 @@
 {
   "brand": {
-    "name": "Store Name",
-    "tagline": "Fast, trusted game top-ups and digital subscriptions"
+    "name": "Charjo",
+    "tagline": "Instant game top-ups & digital subscriptions"
   },
   "nav": {
     "home": "Home",
@@ -15,8 +15,8 @@
     "help": "Help"
   },
   "home": {
-    "heroTitle": "Top up your favorite game in under a minute",
-    "heroSubtitle": "Instant delivery for the most popular games and digital subscriptions across Saudi Arabia and the Gulf",
+    "heroTitle": "Charge up your games and subscriptions in seconds",
+    "heroSubtitle": "A trusted platform for game top-ups and digital subscription activation across Saudi Arabia and the Gulf",
     "heroCta": "Browse games",
     "popularGames": "Popular games",
     "trustTitle": "Why choose us",

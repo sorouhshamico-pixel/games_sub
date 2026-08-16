@@ -77,42 +77,48 @@ export default async function ProductPage({
     <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <nav aria-label="breadcrumb" className="text-sm text-[var(--color-text-muted)]">
-        <Link href="/" className="hover:text-[var(--color-text-primary)]">
+      <nav aria-label="breadcrumb" className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)]">
+        <Link href="/" className="transition-colors hover:text-[var(--color-text-primary)]">
           {t("nav.home")}
         </Link>
-        {" / "}
-        <Link href="/games" className="hover:text-[var(--color-text-primary)]">
+        <span aria-hidden>/</span>
+        <Link href="/games" className="transition-colors hover:text-[var(--color-text-primary)]">
           {t("nav.games")}
         </Link>
-        {" / "}
+        <span aria-hidden>/</span>
         <span className="text-[var(--color-text-primary)]">{name}</span>
       </nav>
 
-      <div className="grid gap-10 lg:grid-cols-2">
+      <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
         <div>
-          <div className="aspect-video w-full overflow-hidden rounded-2xl bg-[var(--color-surface-elevated)]">
+          <div className="aspect-video w-full overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)]">
             {product.imageUrl ? (
               <img src={product.imageUrl} alt={name} className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-4xl font-bold text-[var(--color-text-muted)]">
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-primary/15 to-brand-secondary/15 text-4xl font-bold text-brand-primary">
                 {name.slice(0, 1)}
               </div>
             )}
           </div>
-          <h1 className="mt-6 text-2xl font-bold text-[var(--color-text-primary)]">{name}</h1>
-          {product.isDemoData ? (
-            <p className="mt-1 text-xs text-[var(--color-text-muted)]">{t("common.demoDataNotice")}</p>
-          ) : null}
+          <div className="mt-6 flex items-start justify-between gap-3">
+            <h1 className="text-2xl font-bold text-[var(--color-text-primary)] sm:text-3xl">{name}</h1>
+            {product.isDemoData ? (
+              <span className="shrink-0 rounded-full border border-[var(--color-border)] px-2.5 py-1 text-xs font-medium text-[var(--color-text-muted)]">
+                {locale === "ar" ? "تجريبي" : "Demo"}
+              </span>
+            ) : null}
+          </div>
           {description ? <p className="mt-4 text-sm leading-relaxed text-[var(--color-text-muted)]">{description}</p> : null}
         </div>
 
-        <ProductPurchasePanel product={product} />
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-6 lg:sticky lg:top-24">
+          <ProductPurchasePanel product={product} />
+        </div>
       </div>
 
       {relatedItems.length > 0 ? (
         <section>
-          <h2 className="mb-4 text-xl font-semibold text-[var(--color-text-primary)]">
+          <h2 className="mb-4 text-xl font-bold text-[var(--color-text-primary)]">
             {locale === "ar" ? "منتجات ذات صلة" : "Related products"}
           </h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">

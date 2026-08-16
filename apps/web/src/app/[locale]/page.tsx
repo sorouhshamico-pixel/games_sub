@@ -26,18 +26,34 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   }
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-14 px-4 py-10">
-      <section className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-gradient-to-br from-brand-primary/20 via-[var(--color-surface)] to-brand-secondary/10 p-8 sm:p-14">
-        <h1 className="max-w-2xl text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">
-          {t("home.heroTitle")}
-        </h1>
-        <p className="mt-4 max-w-xl text-[var(--color-text-muted)]">{t("home.heroSubtitle")}</p>
-        <Link
-          href="/games"
-          className="mt-6 inline-flex h-11 items-center justify-center rounded-xl bg-brand-primary px-5 text-base font-medium text-white transition-colors hover:brightness-110"
-        >
-          {t("home.heroCta")}
-        </Link>
+    <div className="mx-auto flex max-w-7xl flex-col gap-16 px-4 py-10">
+      <section className="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8 sm:p-16">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-24 start-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-brand-primary/30 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-32 end-0 h-80 w-80 rounded-full bg-brand-secondary/20 blur-3xl"
+        />
+        <div className="relative">
+          <h1 className="max-w-2xl text-4xl font-bold leading-tight text-[var(--color-text-primary)] sm:text-5xl">
+            {t("home.heroTitle")}
+          </h1>
+          <p className="mt-4 max-w-xl text-lg text-[var(--color-text-muted)]">{t("home.heroSubtitle")}</p>
+          <Link
+            href="/games"
+            className="mt-8 inline-flex h-12 items-center justify-center rounded-xl bg-brand-primary px-7 text-base font-semibold text-white shadow-lg shadow-brand-primary/30 transition-all hover:-translate-y-0.5 hover:brightness-110"
+          >
+            {t("home.heroCta")}
+          </Link>
+
+          <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3">
+            <TrustBadge icon={<BoltIcon />} label={t("home.trustDelivery")} />
+            <TrustBadge icon={<ShieldIcon />} label={t("home.trustSecurity")} />
+            <TrustBadge icon={<HeadsetIcon />} label={t("home.trustSupport")} />
+          </div>
+        </div>
       </section>
 
       {categories.length > 0 ? (
@@ -47,8 +63,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <Link
                 key={category.slug}
                 href={{ pathname: "/games", query: { category: category.slug } }}
-                className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-1.5 text-sm text-[var(--color-text-primary)] hover:border-brand-primary/60"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:border-brand-primary/60 hover:bg-brand-primary/5"
               >
+                <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand-secondary" />
                 {category.name}
               </Link>
             ))}
@@ -57,7 +74,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       ) : null}
 
       <section>
-        <h2 className="mb-4 text-xl font-semibold text-[var(--color-text-primary)]">{t("home.popularGames")}</h2>
+        <div className="mb-5 flex items-end justify-between">
+          <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">{t("home.popularGames")}</h2>
+          <Link href="/games" className="text-sm font-medium text-brand-secondary hover:underline">
+            {t("nav.games")} →
+          </Link>
+        </div>
         {loadError ? (
           <ErrorState title={t("common.errorGeneric")} />
         ) : popularProducts && popularProducts.items.length > 0 ? (
@@ -72,19 +94,19 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       <section>
-        <h2 className="mb-4 text-xl font-semibold text-[var(--color-text-primary)]">{t("home.trustTitle")}</h2>
+        <h2 className="mb-6 text-2xl font-bold text-[var(--color-text-primary)]">{t("home.trustTitle")}</h2>
         <div className="grid gap-4 sm:grid-cols-3">
-          <TrustCard title={t("home.trustDelivery")} />
-          <TrustCard title={t("home.trustSecurity")} />
-          <TrustCard title={t("home.trustSupport")} />
+          <FeatureCard icon={<BoltIcon />} title={t("home.trustDelivery")} />
+          <FeatureCard icon={<ShieldIcon />} title={t("home.trustSecurity")} />
+          <FeatureCard icon={<HeadsetIcon />} title={t("home.trustSupport")} />
         </div>
       </section>
 
-      <section>
-        <h2 className="mb-4 text-xl font-semibold text-[var(--color-text-primary)]">{t("home.faqTitle")}</h2>
+      <section className="rounded-2xl border border-[var(--color-border)] bg-gradient-to-br from-brand-primary/10 to-brand-secondary/10 p-8 text-center sm:p-10">
+        <h2 className="text-xl font-semibold text-[var(--color-text-primary)]">{t("home.faqTitle")}</h2>
         <Link
           href="/pages/faq"
-          className="inline-block rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-3 text-sm font-medium text-[var(--color-text-primary)] hover:border-brand-primary/60"
+          className="mt-4 inline-flex items-center gap-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-3 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:border-brand-primary/60"
         >
           {t("home.faqTitle")} →
         </Link>
@@ -93,10 +115,50 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   );
 }
 
-function TrustCard({ title }: { title: string }) {
+function TrustBadge({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-sm font-medium text-[var(--color-text-primary)]">
-      {title}
+    <div className="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+      <span className="text-brand-accent">{icon}</span>
+      {label}
     </div>
+  );
+}
+
+function FeatureCard({ icon, title }: { icon: React.ReactNode; title: string }) {
+  return (
+    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 transition-colors hover:border-brand-primary/40">
+      <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
+        {icon}
+      </div>
+      <p className="text-sm font-medium text-[var(--color-text-primary)]">{title}</p>
+    </div>
+  );
+}
+
+function BoltIcon() {
+  return (
+    <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+      <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+      <path strokeLinejoin="round" d="M12 3 4.5 6v6c0 4.5 3 7.5 7.5 9 4.5-1.5 7.5-4.5 7.5-9V6L12 3Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+
+function HeadsetIcon() {
+  return (
+    <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" d="M4 13v-1a8 8 0 0 1 16 0v1" />
+      <rect x="3" y="13" width="4" height="6" rx="1.5" />
+      <rect x="17" y="13" width="4" height="6" rx="1.5" />
+      <path strokeLinecap="round" d="M19 19v.5a3 3 0 0 1-3 3h-2.5" />
+    </svg>
   );
 }

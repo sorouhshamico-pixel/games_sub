@@ -11,27 +11,38 @@ export function ProductCard({ product }: { product: ProductSummary }) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] transition-transform hover:-translate-y-0.5 hover:border-brand-primary/60"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] transition-all hover:-translate-y-1 hover:border-brand-primary/60 hover:shadow-xl hover:shadow-brand-primary/10"
     >
-      <div className="aspect-square w-full bg-[var(--color-surface-elevated)]">
+      <div className="relative aspect-square w-full overflow-hidden bg-[var(--color-surface-elevated)]">
         {product.imageUrl ? (
-          <img src={product.imageUrl} alt={name} className="h-full w-full object-cover" loading="lazy" />
+          <img
+            src={product.imageUrl}
+            alt={name}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-3xl font-bold text-[var(--color-text-muted)]">
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-primary/15 to-brand-secondary/15 text-3xl font-bold text-brand-primary">
             {name.slice(0, 1)}
           </div>
         )}
-      </div>
-      <div className="flex flex-1 flex-col gap-1 p-3">
-        <p className="line-clamp-2 text-sm font-medium text-[var(--color-text-primary)]">{name}</p>
-        <p className="mt-auto text-sm font-semibold text-brand-accent">
-          {formatMoney(product.fromPriceMinorUnits, product.currency, locale)}
-        </p>
         {product.isDemoData ? (
-          <p className="text-xs text-[var(--color-text-muted)]" data-demo-badge>
-            {locale === "ar" ? "بيانات تجريبية" : "Demo data"}
-          </p>
+          <span
+            data-demo-badge
+            className="absolute top-2 start-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm"
+          >
+            {locale === "ar" ? "تجريبي" : "Demo"}
+          </span>
         ) : null}
+      </div>
+      <div className="flex flex-1 flex-col gap-1.5 p-3.5">
+        <p className="line-clamp-2 text-sm font-medium leading-snug text-[var(--color-text-primary)]">{name}</p>
+        <div className="mt-auto">
+          <p className="text-xs text-[var(--color-text-muted)]">{locale === "ar" ? "يبدأ من" : "Starting from"}</p>
+          <p className="text-base font-bold text-brand-accent">
+            {formatMoney(product.fromPriceMinorUnits, product.currency, locale)}
+          </p>
+        </div>
       </div>
     </Link>
   );

@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
+import { LogoMark } from "@gcc-store/ui";
 import { Link, useRouter } from "@/i18n/navigation";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { CartIcon } from "./CartIcon";
@@ -18,17 +19,18 @@ export function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[var(--color-surface)]/95 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-lg">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3">
-        <Link href="/" className="shrink-0 text-lg font-bold text-[var(--color-text-primary)]">
-          {t("brand.name")}
+        <Link href="/" className="flex shrink-0 items-center gap-2">
+          <LogoMark className="h-8 w-8" />
+          <span className="text-lg font-bold tracking-tight text-[var(--color-text-primary)]">{t("brand.name")}</span>
         </Link>
 
-        <nav className="hidden items-center gap-4 text-sm font-medium md:flex" aria-label="primary">
-          <Link href="/games" className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
+        <nav className="hidden items-center gap-5 text-sm font-medium md:flex" aria-label="primary">
+          <Link href="/games" className="text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]">
             {t("nav.games")}
           </Link>
-          <Link href="/pages/faq" className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
+          <Link href="/pages/faq" className="text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]">
             {t("nav.help")}
           </Link>
         </nav>
@@ -37,14 +39,27 @@ export function SiteHeader() {
           <label className="sr-only" htmlFor="site-search">
             {t("nav.search")}
           </label>
-          <input
-            id="site-search"
-            type="search"
-            value={searchValue}
-            onChange={(event) => setSearchValue(event.target.value)}
-            placeholder={t("nav.search")}
-            className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-primary"
-          />
+          <div className="relative">
+            <svg
+              aria-hidden
+              viewBox="0 0 24 24"
+              className="pointer-events-none absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path strokeLinecap="round" d="m20 20-3.2-3.2" />
+            </svg>
+            <input
+              id="site-search"
+              type="search"
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              placeholder={t("nav.search")}
+              className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] py-2 ps-10 pe-4 text-sm text-[var(--color-text-primary)] transition-colors placeholder:text-[var(--color-text-muted)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-primary"
+            />
+          </div>
         </form>
 
         <div className="ms-auto flex items-center gap-3">
@@ -52,7 +67,7 @@ export function SiteHeader() {
           <Link
             href="/account"
             aria-label={t("nav.account")}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)]"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-text-primary)] transition-colors hover:border-brand-primary/50 hover:bg-[var(--color-surface-elevated)]"
           >
             <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
               <circle cx="12" cy="8" r="3.2" />
