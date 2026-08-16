@@ -3,10 +3,9 @@
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "Node",
-    "declaration": true,
+    "target": "ES2022",
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "include": ["src"],
-  "exclude": ["src/**/*.test.ts"]
+  "include": ["src"]
 }

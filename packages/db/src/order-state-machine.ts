@@ -1,9 +1,9 @@
-import { Injectable } from "@nestjs/common";
-import { OrderStatus, type Prisma } from "@gcc-store/db";
+import { OrderStatus, type Prisma } from "../generated/client";
 
 // Explicit allow-list of transitions — see docs/ORDER_STATE_MACHINE.md.
 // Anything not listed here is rejected, so a bad webhook or a retried job
-// can never silently push an order into an inconsistent state.
+// can never silently push an order into an inconsistent state. Framework
+// agnostic (no NestJS import) so both apps/api and apps/worker can share it.
 const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   DRAFT: [OrderStatus.PENDING_PAYMENT, OrderStatus.CANCELLED],
   PENDING_PAYMENT: [OrderStatus.PAYMENT_REVIEW, OrderStatus.PAID, OrderStatus.FAILED, OrderStatus.CANCELLED],
@@ -38,7 +38,6 @@ export interface TransitionActor {
   id?: string;
 }
 
-@Injectable()
 export class OrderStateMachine {
   canTransition(from: OrderStatus, to: OrderStatus): boolean {
     return ALLOWED_TRANSITIONS[from]?.includes(to) ?? false;

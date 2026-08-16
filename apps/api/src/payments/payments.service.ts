@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { BadRequestException, Inject, Injectable, Logger } from "@nestjs/common";
-import { prisma, OrderStatus, PaymentStatus, FulfillmentStatus, Prisma } from "@gcc-store/db";
-import { OrderStateMachine } from "../orders/order-state-machine";
+import { prisma, OrderStatus, PaymentStatus, FulfillmentStatus, Prisma, OrderStateMachine } from "@gcc-store/db";
 import { PAYMENT_GATEWAY, type PaymentGateway, type ParsedWebhookEvent } from "./payment-gateway.interface";
 
 @Injectable()

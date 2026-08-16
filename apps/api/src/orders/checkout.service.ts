@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { prisma, OrderStatus, PaymentStatus, Prisma } from "@gcc-store/db";
+import { prisma, OrderStatus, PaymentStatus, Prisma, OrderStateMachine } from "@gcc-store/db";
 import {
   computePriceBreakdown,
   validateProductInputValues,
@@ -8,7 +8,6 @@ import {
   type SupportedCurrency,
 } from "@gcc-store/contracts";
 import { PAYMENT_GATEWAY, type PaymentGateway } from "../payments/payment-gateway.interface";
-import { OrderStateMachine } from "./order-state-machine";
 import { generateOrderNumber, generateTrackingToken } from "../common/tokens";
 import type { CheckoutRequestDto } from "./dto/checkout-request.dto";
 

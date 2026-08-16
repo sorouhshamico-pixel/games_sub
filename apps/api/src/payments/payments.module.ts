@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { OrderStateMachine } from "@gcc-store/db";
 import { PaymentsController } from "./payments.controller";
 import { PaymentsService } from "./payments.service";
 import { MockPaymentGateway } from "./mock-payment.gateway";
 import { MoyasarPaymentGateway } from "./moyasar-payment.gateway";
-import { OrderStateMachine } from "../orders/order-state-machine";
 import { PAYMENT_GATEWAY } from "./payment-gateway.interface";
 
 @Module({

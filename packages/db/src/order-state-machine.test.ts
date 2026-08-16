@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { OrderStatus } from "@gcc-store/db";
+import { OrderStatus } from "../generated/client";
 import { OrderStateMachine } from "./order-state-machine";
 
 describe("OrderStateMachine.canTransition", () => {
