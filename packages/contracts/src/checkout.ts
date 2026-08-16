@@ -44,8 +44,11 @@ export type OrderTrackingView = z.infer<typeof orderTrackingViewSchema>;
 export const checkoutResponseSchema = z.object({
   orderNumber: z.string(),
   trackingToken: z.string(),
+  subtotalMinorUnits: z.number().int(),
+  discountMinorUnits: z.number().int(),
   totalMinorUnits: z.number().int(),
   currency: z.nativeEnum(SupportedCurrency),
+  couponCode: z.string().nullable(),
   payment: z.object({
     paymentId: z.string(),
     gatewayCode: z.string(),

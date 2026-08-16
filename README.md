@@ -16,16 +16,18 @@ In short:
   queue pipeline, digital-code inventory with concurrency-safe reservation, email/password
   auth with server-side RBAC, an admin dashboard + order list, full catalog management
   (categories/products/price-tiers — create, edit, activate/deactivate, soft delete),
-  full/partial refunds with their own admin UI, secure headers + dependency audit, and all
-  three Docker images. All of this is proven in [CI](.github/workflows/ci.yml) — full
-  pipeline green: lint, typecheck, migrations, seed, unit/integration/e2e tests against
-  real Postgres and Redis, and all three Docker builds.
+  full/partial refunds with their own admin UI, order-level coupons (percentage/fixed,
+  redemption limits, minimum order amount, date windows) with their own admin UI, secure
+  headers + dependency audit, and all three Docker images. All of this is proven in
+  [CI](.github/workflows/ci.yml) — full pipeline green: lint, typecheck, migrations, seed,
+  unit/integration/e2e tests against real Postgres and Redis, and all three Docker builds.
 - **Built but not enabled**: a Moyasar payment adapter and the real-provider shape of
   fulfillment — both exist as code but were written against public API docs, not tested
   against a live sandbox, and are feature-flagged off by default.
-- **Not built yet**: pricing-rule/coupon management, provider management UI, CMS, content
-  moderation, SMS/WhatsApp notifications, ZATCA invoicing, MFA, password reset, CSP, a
-  second real fulfillment provider.
+- **Not built yet**: per-product/category price rules (the `PriceRule` model exists in the
+  schema but nothing reads it yet — coupons are the only discount mechanism wired up),
+  provider management UI, CMS, content moderation, SMS/WhatsApp notifications, ZATCA
+  invoicing, MFA, password reset, CSP, a second real fulfillment provider.
 
 ## Stack
 
@@ -128,6 +130,8 @@ them for a real deployment.
   transition allow-list, with a diagram
 - [`docs/PAYMENT_INTEGRATION.md`](docs/PAYMENT_INTEGRATION.md) — gateway interface,
   Mock vs. Moyasar, idempotency, what's verified vs. not
+- [`docs/PRICING.md`](docs/PRICING.md) — item-level pricing, order-level coupons,
+  redemption-limit concurrency, known simplifications
 - [`docs/PROVIDER_INTEGRATION.md`](docs/PROVIDER_INTEGRATION.md) — fulfillment
   provider interface, the Mock provider's test scenarios, queue plumbing
 - [`docs/AUTH.md`](docs/AUTH.md) — sessions, RBAC, what's verified, what's missing

@@ -58,3 +58,18 @@ export function computePriceBreakdown(input: {
     total: { amountMinorUnits: total, currency },
   };
 }
+
+// Order-level coupon discount, applied on top of any item-level discounts
+// already baked into computePriceBreakdown. Known simplification: this does
+// not recompute per-item tax against the post-coupon subtotal (tax is fixed
+// at the item level before the coupon is known) — see docs/PRICING.md.
+export function computeCouponDiscountMinorUnits(input: {
+  discountType: "percentage" | "fixed";
+  discountValue: number; // basis points if percentage, minor units if fixed
+  eligibleSubtotalMinorUnits: number;
+}): number {
+  const { discountType, discountValue, eligibleSubtotalMinorUnits } = input;
+  const raw =
+    discountType === "percentage" ? Math.round((eligibleSubtotalMinorUnits * discountValue) / 10000) : discountValue;
+  return Math.min(Math.max(raw, 0), eligibleSubtotalMinorUnits);
+}

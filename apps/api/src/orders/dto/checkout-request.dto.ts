@@ -39,4 +39,10 @@ export class CheckoutRequestDto {
   @IsString()
   @MinLength(6)
   guestPhone?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  couponCode?: string;
 }

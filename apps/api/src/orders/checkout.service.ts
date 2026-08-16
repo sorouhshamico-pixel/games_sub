@@ -10,12 +10,14 @@ import {
 import { PAYMENT_GATEWAY, type PaymentGateway } from "../payments/payment-gateway.interface";
 import { generateOrderNumber, generateTrackingToken } from "../common/tokens";
 import type { CheckoutRequestDto } from "./dto/checkout-request.dto";
+import { CouponService } from "./coupon.service";
 
 @Injectable()
 export class CheckoutService {
   constructor(
     @Inject(PAYMENT_GATEWAY) private readonly gateway: PaymentGateway,
     private readonly orderStateMachine: OrderStateMachine,
+    private readonly couponService: CouponService,
   ) {}
 
   async checkout(request: CheckoutRequestDto, correlationId: string) {
@@ -86,12 +88,26 @@ export class CheckoutService {
     }
 
     if (!currency) throw new BadRequestException("No items in checkout request");
-    const total = subtotal - discount + tax;
 
     const orderNumber = generateOrderNumber();
     const trackingToken = generateTrackingToken();
 
-    const order = await prisma.$transaction(async (tx) => {
+    const { order, appliedCouponCode, finalDiscount, total } = await prisma.$transaction(async (tx) => {
+      let couponId: string | null = null;
+      let appliedCouponCode: string | null = null;
+      let couponDiscount = 0;
+      if (request.couponCode) {
+        const applied = await this.couponService.applyCoupon(tx, request.couponCode, {
+          eligibleSubtotalMinorUnits: subtotal - discount,
+          guestEmail: request.guestEmail,
+        });
+        couponId = applied.couponId;
+        appliedCouponCode = applied.code;
+        couponDiscount = applied.discountMinorUnits;
+      }
+      const finalDiscount = discount + couponDiscount;
+      const total = subtotal - finalDiscount + tax;
+
       const createdOrder = await tx.order.create({
         data: {
           orderNumber,
@@ -101,12 +117,17 @@ export class CheckoutService {
           status: OrderStatus.DRAFT,
           currency,
           subtotalMinorUnits: subtotal,
-          discountMinorUnits: discount,
+          discountMinorUnits: finalDiscount,
           taxMinorUnits: tax,
           totalMinorUnits: total,
+          couponId,
           items: { createMany: { data: orderItemsData } },
         },
       });
+
+      if (couponId) {
+        await tx.couponRedemption.create({ data: { couponId, orderId: createdOrder.id } });
+      }
 
       await tx.orderStatusEvent.create({
         data: { orderId: createdOrder.id, toStatus: OrderStatus.DRAFT, actorType: "customer", correlationId },
@@ -121,7 +142,7 @@ export class CheckoutService {
         correlationId,
       );
 
-      return createdOrder;
+      return { order: createdOrder, appliedCouponCode, finalDiscount, total };
     });
 
     const idempotencyKey = randomUUID();
@@ -149,8 +170,11 @@ export class CheckoutService {
     return {
       orderNumber: order.orderNumber,
       trackingToken: order.trackingToken,
+      subtotalMinorUnits: subtotal,
+      discountMinorUnits: finalDiscount,
       totalMinorUnits: total,
       currency,
+      couponCode: appliedCouponCode,
       payment: { paymentId: payment.id, gatewayCode: this.gateway.code, checkoutUrl: intent.checkoutUrl },
     };
   }

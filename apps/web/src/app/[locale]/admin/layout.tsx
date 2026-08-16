@@ -18,6 +18,7 @@ export default async function AdminLayout({
     { href: "/admin/orders", label: locale === "ar" ? "الطلبات" : "Orders" },
     { href: "/admin/products", label: locale === "ar" ? "المنتجات" : "Products" },
     { href: "/admin/categories", label: locale === "ar" ? "الفئات" : "Categories" },
+    { href: "/admin/coupons", label: locale === "ar" ? "أكواد الخصم" : "Coupons" },
   ];
 
   return (

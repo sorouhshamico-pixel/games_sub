@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computePriceBreakdown, validateProductInputValues } from "./index";
+import { computeCouponDiscountMinorUnits, computePriceBreakdown, validateProductInputValues } from "./index";
 
 describe("computePriceBreakdown", () => {
   it("applies margin, discount, then tax in order", () => {
@@ -29,6 +29,35 @@ describe("computePriceBreakdown", () => {
     });
 
     expect(result.total.amountMinorUnits).toBe(0);
+  });
+});
+
+describe("computeCouponDiscountMinorUnits", () => {
+  it("computes a percentage discount from basis points", () => {
+    const result = computeCouponDiscountMinorUnits({
+      discountType: "percentage",
+      discountValue: 1500, // 15%
+      eligibleSubtotalMinorUnits: 2000,
+    });
+    expect(result).toBe(300);
+  });
+
+  it("returns a fixed discount as-is when it fits within the subtotal", () => {
+    const result = computeCouponDiscountMinorUnits({
+      discountType: "fixed",
+      discountValue: 500,
+      eligibleSubtotalMinorUnits: 2000,
+    });
+    expect(result).toBe(500);
+  });
+
+  it("caps the discount at the eligible subtotal, never going negative", () => {
+    const result = computeCouponDiscountMinorUnits({
+      discountType: "fixed",
+      discountValue: 5000,
+      eligibleSubtotalMinorUnits: 2000,
+    });
+    expect(result).toBe(2000);
   });
 });
 

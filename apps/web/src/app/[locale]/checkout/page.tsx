@@ -19,9 +19,11 @@ export default function CheckoutPage() {
 
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [couponCode, setCouponCode] = useState("");
   const [step, setStep] = useState<Step>("form");
   const [error, setError] = useState<string | null>(null);
   const [pendingPayment, setPendingPayment] = useState<{ paymentId: string; orderNumber: string; trackingToken: string } | null>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountMinorUnits: number; totalMinorUnits: number } | null>(null);
 
   if (items.length === 0 && step === "form") {
     return (
@@ -53,7 +55,16 @@ export default function CheckoutPage() {
         })),
         guestEmail: email || undefined,
         guestPhone: phone || undefined,
+        couponCode: couponCode.trim() || undefined,
       });
+
+      if (response.couponCode) {
+        setAppliedCoupon({
+          code: response.couponCode,
+          discountMinorUnits: response.discountMinorUnits,
+          totalMinorUnits: response.totalMinorUnits,
+        });
+      }
 
       if (response.payment.gatewayCode === "mock") {
         setPendingPayment({ paymentId: response.payment.paymentId, orderNumber: response.orderNumber, trackingToken: response.trackingToken });
@@ -131,6 +142,24 @@ export default function CheckoutPage() {
               className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-sm text-[var(--color-text-primary)]"
             />
           </div>
+          <div>
+            <label htmlFor="couponCode" className="mb-1 block text-sm font-medium text-[var(--color-text-primary)]">
+              {locale === "ar" ? "كود الخصم (اختياري)" : "Coupon code (optional)"}
+            </label>
+            <input
+              id="couponCode"
+              type="text"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+              placeholder={locale === "ar" ? "أدخل الكود" : "Enter code"}
+              className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-sm uppercase text-[var(--color-text-primary)]"
+            />
+            <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+              {locale === "ar"
+                ? "سيتم التحقق من الكود وتطبيق الخصم عند إتمام الدفع"
+                : "The code is validated and applied when you continue to payment"}
+            </p>
+          </div>
 
           {error ? (
             <p role="alert" className="rounded-xl border border-danger/40 bg-danger/5 p-3 text-sm text-danger">
@@ -148,6 +177,17 @@ export default function CheckoutPage() {
         </form>
       ) : (
         <section className="flex flex-col gap-4">
+          {appliedCoupon ? (
+            <div className="rounded-2xl border border-success/40 bg-success/5 p-4 text-sm text-[var(--color-text-primary)]">
+              <p className="font-medium">
+                {locale === "ar" ? `تم تطبيق كود الخصم ${appliedCoupon.code}` : `Coupon ${appliedCoupon.code} applied`}
+              </p>
+              <p className="mt-1 text-[var(--color-text-muted)]">
+                {locale === "ar" ? "الخصم" : "Discount"}: -{formatMoney(appliedCoupon.discountMinorUnits, currency, locale)} ·{" "}
+                {locale === "ar" ? "الإجمالي بعد الخصم" : "New total"}: {formatMoney(appliedCoupon.totalMinorUnits, currency, locale)}
+              </p>
+            </div>
+          ) : null}
           <div role="status" className="rounded-2xl border border-brand-secondary/40 bg-brand-secondary/5 p-5 text-sm text-[var(--color-text-primary)]">
             <p className="font-medium">{locale === "ar" ? "وضع الدفع التجريبي" : "Test payment mode"}</p>
             <p className="mt-2 text-[var(--color-text-muted)]">

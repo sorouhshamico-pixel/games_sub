@@ -375,3 +375,42 @@ export function deleteAdminProduct(id: string): Promise<AdminProductDetail> {
 export function deactivateAdminVariant(variantId: string): Promise<AdminProductVariant> {
   return apiMutate("DELETE", `/admin/catalog/variants/${variantId}`);
 }
+
+// --- Admin coupons ----------------------------------------------------------
+
+export interface AdminCoupon {
+  id: string;
+  code: string;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  maxRedemptions: number | null;
+  maxRedemptionsPerCustomer: number | null;
+  minOrderAmountMinorUnits: number | null;
+  startsAt: string | null;
+  endsAt: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export function getAdminCoupons(options: RequestOptions = {}): Promise<AdminCoupon[]> {
+  return apiFetch("/admin/coupons", options);
+}
+
+export interface CreateAdminCouponInput {
+  code: string;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  maxRedemptions?: number;
+  maxRedemptionsPerCustomer?: number;
+  minOrderAmountMinorUnits?: number;
+  startsAt?: string;
+  endsAt?: string;
+}
+
+export function createAdminCoupon(input: CreateAdminCouponInput): Promise<AdminCoupon> {
+  return apiPost("/admin/coupons", input);
+}
+
+export function deactivateAdminCoupon(id: string): Promise<AdminCoupon> {
+  return apiMutate("DELETE", `/admin/coupons/${id}`);
+}
