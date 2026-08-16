@@ -1,4 +1,13 @@
-import type { GameBrandDetail, GameBrandSummary, PageContent, ProductDetail, ProductSummary } from "@gcc-store/contracts";
+import type {
+  CheckoutRequest,
+  CheckoutResponse,
+  GameBrandDetail,
+  GameBrandSummary,
+  OrderTrackingView,
+  PageContent,
+  ProductDetail,
+  ProductSummary,
+} from "@gcc-store/contracts";
 
 const API_BASE_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:4000/api/v1";
 
@@ -25,6 +34,26 @@ async function apiFetch<T>(path: string): Promise<T> {
 
   if (!response.ok) {
     throw new ApiError(`request_failed_${response.status}`, response.status);
+  }
+
+  return (await response.json()) as T;
+}
+
+async function apiPost<T>(path: string, body?: unknown): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch {
+    throw new ApiError("network_error", 0);
+  }
+
+  if (!response.ok) {
+    const details = await response.json().catch(() => null);
+    throw new ApiError(details?.error?.message ?? `request_failed_${response.status}`, response.status);
   }
 
   return (await response.json()) as T;
@@ -72,4 +101,16 @@ export function getBrandBySlug(slug: string): Promise<GameBrandDetail> {
 
 export function getPage(slug: string, locale: "ar" | "en"): Promise<PageContent> {
   return apiFetch(`/content/pages/${slug}?locale=${locale}`);
+}
+
+export function checkout(request: CheckoutRequest): Promise<CheckoutResponse> {
+  return apiPost("/checkout", request);
+}
+
+export function confirmMockPayment(paymentId: string): Promise<{ confirmed: boolean }> {
+  return apiPost(`/payments/mock/${paymentId}/confirm`);
+}
+
+export function trackOrder(orderNumber: string, token: string): Promise<OrderTrackingView> {
+  return apiFetch(`/orders/${orderNumber}?token=${encodeURIComponent(token)}`);
 }
