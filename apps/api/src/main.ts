@@ -1,3 +1,15 @@
+import path from "node:path";
+import { config as loadEnv } from "dotenv";
+
+// Must run before any other local import: @gcc-store/db instantiates a
+// PrismaClient() as a top-level side effect the moment it's first
+// imported, which happens while AppModule's import graph is being
+// evaluated below — well before Nest's ConfigModule would otherwise load
+// .env. If DATABASE_URL isn't in process.env by then, Prisma initializes
+// against nothing. Root .env, since apps/api is two levels under the repo
+// root (works identically from src/ in dev and dist/ in production).
+loadEnv({ path: path.resolve(__dirname, "../../../.env") });
+
 import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
