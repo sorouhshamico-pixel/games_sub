@@ -9,12 +9,20 @@ const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   PENDING_PAYMENT: [OrderStatus.PAYMENT_REVIEW, OrderStatus.PAID, OrderStatus.FAILED, OrderStatus.CANCELLED],
   PAYMENT_REVIEW: [OrderStatus.PAID, OrderStatus.FAILED, OrderStatus.CANCELLED],
   PAID: [OrderStatus.FULFILLMENT_QUEUED, OrderStatus.REFUND_PENDING],
-  FULFILLMENT_QUEUED: [OrderStatus.PROCESSING, OrderStatus.MANUAL_REVIEW],
+  // Money is already captured by the time an order reaches either of these,
+  // so a refund has to be reachable from here too — a customer can ask to
+  // cancel before fulfillment finishes. Concurrent risk: if the worker is
+  // mid-job on this exact order when an admin refunds it, whichever
+  // transition loses the race throws (transition()'s updateMany matches 0
+  // rows) rather than silently corrupting state — acceptable for now, not
+  // yet handled by any retry/reconciliation path.
+  FULFILLMENT_QUEUED: [OrderStatus.PROCESSING, OrderStatus.MANUAL_REVIEW, OrderStatus.REFUND_PENDING],
   PROCESSING: [
     OrderStatus.PARTIALLY_FULFILLED,
     OrderStatus.COMPLETED,
     OrderStatus.MANUAL_REVIEW,
     OrderStatus.FAILED,
+    OrderStatus.REFUND_PENDING,
   ],
   PARTIALLY_FULFILLED: [OrderStatus.COMPLETED, OrderStatus.MANUAL_REVIEW, OrderStatus.REFUND_PENDING],
   MANUAL_REVIEW: [OrderStatus.COMPLETED, OrderStatus.PARTIALLY_FULFILLED, OrderStatus.FAILED, OrderStatus.REFUND_PENDING],

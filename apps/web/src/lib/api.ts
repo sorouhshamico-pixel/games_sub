@@ -216,6 +216,39 @@ export function getAdminOrders(
   return apiFetch(`/admin/orders${qs ? `?${qs}` : ""}`, options);
 }
 
+export interface AdminOrderDetail extends AdminOrderSummary {
+  subtotalMinorUnits: number;
+  discountMinorUnits: number;
+  taxMinorUnits: number;
+  items: Array<{
+    id: string;
+    quantity: number;
+    productNameSnapshot: string;
+    variant: { nameAr: string; nameEn: string; sku: string };
+    fulfillments: Array<{ id: string; status: string; lastError: string | null }>;
+  }>;
+  payments: Array<{
+    id: string;
+    gatewayCode: string;
+    status: string;
+    amountMinorUnits: number;
+    gatewayReference: string | null;
+  }>;
+  statusEvents: Array<{ toStatus: string; reason: string | null; actorType: string; createdAt: string }>;
+  refunds: Array<{ id: string; amountMinorUnits: number; status: string; reason: string | null; createdAt: string }>;
+}
+
+export function getAdminOrderDetail(id: string, options: RequestOptions = {}): Promise<AdminOrderDetail> {
+  return apiFetch(`/admin/orders/${id}`, options);
+}
+
+export function createAdminRefund(
+  orderId: string,
+  input: { amountMinorUnits?: number; reason: string },
+): Promise<{ id: string; status: string; amountMinorUnits: number }> {
+  return apiPost(`/admin/orders/${orderId}/refund`, input);
+}
+
 // --- Admin catalog ---------------------------------------------------------
 
 export interface AdminCategory {

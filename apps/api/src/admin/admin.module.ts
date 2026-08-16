@@ -1,13 +1,16 @@
 import { Module } from "@nestjs/common";
 import { AuthModule } from "../auth/auth.module";
+import { PaymentsModule } from "../payments/payments.module";
 import { DashboardController } from "./dashboard.controller";
 import { AdminOrdersController } from "./admin-orders.controller";
 import { AdminCatalogController } from "./catalog/admin-catalog.controller";
 import { AdminCatalogService } from "./catalog/admin-catalog.service";
+import { AdminRefundsController } from "./refunds/admin-refunds.controller";
+import { AdminRefundsService } from "./refunds/admin-refunds.service";
 
 @Module({
-  imports: [AuthModule],
-  controllers: [DashboardController, AdminOrdersController, AdminCatalogController],
-  providers: [AdminCatalogService],
+  imports: [AuthModule, PaymentsModule],
+  controllers: [DashboardController, AdminOrdersController, AdminCatalogController, AdminRefundsController],
+  providers: [AdminCatalogService, AdminRefundsService],
 })
 export class AdminModule {}

@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { formatMoney } from "@gcc-store/ui";
 import type { Locale } from "@gcc-store/i18n";
-import { redirect } from "@/i18n/navigation";
+import { Link, redirect } from "@/i18n/navigation";
 import { ApiError, getAdminOrders } from "@/lib/api";
 import { getServerCookieHeader } from "@/lib/server-cookies";
 
@@ -61,7 +61,11 @@ export default async function AdminOrdersPage({
           <tbody>
             {result.items.map((order) => (
               <tr key={order.id} className="border-t border-[var(--color-border)]">
-                <td className="p-3 font-mono text-xs text-[var(--color-text-primary)]">{order.orderNumber}</td>
+                <td className="p-3 font-mono text-xs">
+                  <Link href={`/admin/orders/${order.id}`} className="text-brand-primary hover:underline">
+                    {order.orderNumber}
+                  </Link>
+                </td>
                 <td className="p-3 text-[var(--color-text-primary)]">{order.status}</td>
                 <td className="p-3 text-[var(--color-text-primary)]">{formatMoney(order.totalMinorUnits, order.currency, typedLocale)}</td>
                 <td className="p-3 text-[var(--color-text-muted)]">{order.guestEmail ?? order.guestPhone ?? "—"}</td>

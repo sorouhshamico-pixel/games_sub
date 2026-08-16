@@ -82,6 +82,28 @@ mock confirm endpoint) runs entirely inside one Prisma transaction:
 Fulfillment is never triggered from the client redirect/return URL — only from a
 verified server-side webhook (or the guarded mock-confirm equivalent).
 
+## Refunds
+
+`AdminRefundsService.createRefund` (`POST /admin/orders/:id/refund`, `SUPER_ADMIN`/
+`FINANCE` only): finds the order's captured `Payment`, computes what's still refundable
+(`payment.amountMinorUnits` minus the sum of prior `succeeded` `Refund` rows), validates
+the requested amount against that, then:
+
+1. **In one transaction**: create a `Refund` row (`status: "pending"`), transition the
+   order to `REFUND_PENDING`.
+2. Call `gateway.refund(...)` — a real network call, deliberately outside that
+   transaction, same reasoning as `CheckoutService.checkout`'s `createPaymentIntent`
+   call.
+3. **On success**: `Refund` → `succeeded`, `Payment` → `REFUNDED`/`PARTIALLY_REFUNDED`,
+   order → `REFUNDED`/`PARTIALLY_REFUNDED` depending on whether anything's left
+   refundable.
+4. **On gateway failure**: `Refund` → `failed`, order stays `REFUND_PENDING` — a
+   legitimate resting state for an admin to investigate or retry, not silently reverted.
+
+Refunding an order that's still `FULFILLMENT_QUEUED`/`PROCESSING` (money captured,
+fulfillment not finished) is allowed — see `docs/ORDER_STATE_MACHINE.md` for the gap
+this closed in the state machine itself, found while building this.
+
 ## Test scenarios
 
 | Scenario | Status |
@@ -91,4 +113,7 @@ verified server-side webhook (or the guarded mock-confirm equivalent).
 | Invalid/guessed order tracking token | ✅ verified — 404 |
 | Invalid product input values (e.g. malformed Player ID) rejected at checkout | ✅ verified — 400 with field-level errors |
 | Card decline / 3-D Secure / timeout / webhook-before-callback / mismatched amount | ⬜ not yet testable — needs live Moyasar sandbox |
-| Refund (full/partial) | ⬜ interface exists (`gateway.refund`), no admin UI or endpoint wired up yet |
+| Refund, full and partial, via `POST /admin/orders/:id/refund` | ✅ verified — permanent integration tests plus a live admin-UI round trip (order → refund → order tracking page all reflect `REFUNDED`) |
+| Over-refund request (amount exceeds what's left refundable) | ✅ verified — 400 |
+| Refund attempt on an order that was never paid | ✅ verified — 400 |
+| Refund attempt by a non-`SUPER_ADMIN`/`FINANCE` session | ✅ verified — 403 |
