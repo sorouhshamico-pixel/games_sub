@@ -1,4 +1,5 @@
-import { PrismaClient, ProductType, ProductLifecycleStatus } from "../generated/client";
+import { hash as hashPassword } from "@node-rs/argon2";
+import { PrismaClient, ProductType, ProductLifecycleStatus, UserRole } from "../generated/client";
 
 const prisma = new PrismaClient();
 
@@ -387,6 +388,28 @@ async function main() {
     update: {},
     create: { key: "payments.moyasar.enabled", isEnabled: false, description: "Toggle Moyasar live payment adapter" },
   });
+
+  // Dev-only bootstrap admin. ADMIN_SEED_PASSWORD must be set explicitly in
+  // any shared/production environment — the fallback below exists purely so
+  // local `pnpm db:seed` works out of the box, and is loud about it so it's
+  // never mistaken for a real credential.
+  const adminEmail = process.env["ADMIN_SEED_EMAIL"] ?? "admin@example.com";
+  const adminPassword = process.env["ADMIN_SEED_PASSWORD"] ?? "dev-only-change-me-1234";
+  const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
+  if (!existingAdmin) {
+    await prisma.user.create({
+      data: {
+        email: adminEmail,
+        passwordHash: await hashPassword(adminPassword),
+        role: UserRole.SUPER_ADMIN,
+      },
+    });
+    if (!process.env["ADMIN_SEED_PASSWORD"]) {
+      console.warn(
+        `[seed] Created admin ${adminEmail} with the DEV-ONLY default password. Set ADMIN_SEED_EMAIL/ADMIN_SEED_PASSWORD before seeding any shared environment.`,
+      );
+    }
+  }
 
   // eslint-disable-next-line no-console -- CLI seed script output
   console.log("Seed complete:", {

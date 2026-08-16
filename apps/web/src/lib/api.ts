@@ -7,6 +7,7 @@ import type {
   PageContent,
   ProductDetail,
   ProductSummary,
+  SupportedCurrency,
 } from "@gcc-store/contracts";
 
 const API_BASE_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:4000/api/v1";
@@ -21,13 +22,28 @@ export class ApiError extends Error {
   }
 }
 
-async function apiFetch<T>(path: string): Promise<T> {
+export interface RequestOptions {
+  /**
+   * Only needed in Server Components/Route Handlers: Node's fetch has no
+   * browser cookie jar, so the incoming request's Cookie header has to be
+   * forwarded by hand (see `getServerCookieHeader` in cookies.ts). Client
+   * components instead rely on `credentials: "include"` below, since the
+   * real browser cookie jar already has the httpOnly session cookie.
+   */
+  cookieHeader?: string;
+}
+
+async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
   let response: Response;
   try {
     // Data changes frequently (prices, stock) and the API has its own
     // caching story — always fetch fresh rather than let Next.js cache
     // a stale catalog response.
-    response = await fetch(`${API_BASE_URL}${path}`, { cache: "no-store" });
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      cache: "no-store",
+      credentials: "include",
+      headers: options.cookieHeader ? { Cookie: options.cookieHeader } : undefined,
+    });
   } catch {
     throw new ApiError("network_error", 0);
   }
@@ -39,12 +55,16 @@ async function apiFetch<T>(path: string): Promise<T> {
   return (await response.json()) as T;
 }
 
-async function apiPost<T>(path: string, body?: unknown): Promise<T> {
+async function apiPost<T>(path: string, body?: unknown, options: RequestOptions = {}): Promise<T> {
   let response: Response;
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.cookieHeader ? { Cookie: options.cookieHeader } : {}),
+      },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch {
@@ -113,4 +133,61 @@ export function confirmMockPayment(paymentId: string): Promise<{ confirmed: bool
 
 export function trackOrder(orderNumber: string, token: string): Promise<OrderTrackingView> {
   return apiFetch(`/orders/${orderNumber}?token=${encodeURIComponent(token)}`);
+}
+
+export interface AuthUser {
+  id: string;
+  email: string | null;
+  role: string;
+  displayName?: string | null;
+}
+
+export function registerAccount(input: { email: string; password: string; displayName?: string }): Promise<{ user: AuthUser }> {
+  return apiPost("/auth/register", input);
+}
+
+export function login(input: { email: string; password: string }): Promise<{ user: AuthUser }> {
+  return apiPost("/auth/login", input);
+}
+
+export function logout(): Promise<{ loggedOut: boolean }> {
+  return apiPost("/auth/logout");
+}
+
+export function getMe(options: RequestOptions = {}): Promise<{ user: AuthUser }> {
+  return apiFetch("/auth/me", options);
+}
+
+export interface AdminDashboard {
+  windowDays: number;
+  revenue: { totalMinorUnits: number; orderCount: number };
+  ordersByStatus: Record<string, number>;
+  fulfillment: { successRatePercent: number | null; byStatus: Record<string, number> };
+  providers: Array<{ code: string; name: string; latestBalance: { balanceMinorUnits: number; currency: SupportedCurrency; capturedAt: string } | null }>;
+}
+
+export function getAdminDashboard(options: RequestOptions = {}): Promise<AdminDashboard> {
+  return apiFetch("/admin/dashboard", options);
+}
+
+export interface AdminOrderSummary {
+  id: string;
+  orderNumber: string;
+  status: string;
+  currency: SupportedCurrency;
+  totalMinorUnits: number;
+  guestEmail: string | null;
+  guestPhone: string | null;
+  createdAt: string;
+}
+
+export function getAdminOrders(
+  params: { status?: string; page?: number } = {},
+  options: RequestOptions = {},
+): Promise<{ items: AdminOrderSummary[]; page: number; pageSize: number; total: number }> {
+  const query = new URLSearchParams();
+  if (params.status) query.set("status", params.status);
+  if (params.page) query.set("page", String(params.page));
+  const qs = query.toString();
+  return apiFetch(`/admin/orders${qs ? `?${qs}` : ""}`, options);
 }

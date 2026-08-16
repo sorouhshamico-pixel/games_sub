@@ -14,6 +14,7 @@ import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import cookieParser from "cookie-parser";
 import { AppModule } from "./app.module";
 import { CorrelationIdMiddleware } from "./common/correlation-id.middleware";
 import { AllExceptionsFilter } from "./common/all-exceptions.filter";
@@ -21,6 +22,7 @@ import { AllExceptionsFilter } from "./common/all-exceptions.filter";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.use(cookieParser());
   app.use(new CorrelationIdMiddleware().use);
   app.useGlobalPipes(
     new ValidationPipe({

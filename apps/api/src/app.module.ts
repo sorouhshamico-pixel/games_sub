@@ -7,6 +7,8 @@ import { CatalogModule } from "./catalog/catalog.module";
 import { ContentModule } from "./content/content.module";
 import { PaymentsModule } from "./payments/payments.module";
 import { OrdersModule } from "./orders/orders.module";
+import { AuthModule } from "./auth/auth.module";
+import { AdminModule } from "./admin/admin.module";
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { OrdersModule } from "./orders/orders.module";
     ContentModule,
     PaymentsModule,
     OrdersModule,
+    AuthModule,
+    AdminModule,
   ],
   controllers: [HealthController],
 })
