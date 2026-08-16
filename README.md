@@ -12,9 +12,12 @@ file rather than implied — read those before assuming a feature is production-
 In short:
 
 - **Built and verified**: catalog browsing, cart, guest checkout, Mock payment gateway,
-  order state machine, fulfillment worker (Mock provider), digital-code inventory with
-  concurrency-safe reservation, email/password auth with server-side RBAC, a minimal
-  admin dashboard + order list.
+  order state machine, fulfillment worker (Mock provider) including the real BullMQ+Redis
+  queue pipeline, digital-code inventory with concurrency-safe reservation, email/password
+  auth with server-side RBAC, a minimal admin dashboard + order list, and all three
+  Docker images. All of this is proven in [CI](.github/workflows/ci.yml) — full pipeline
+  green: lint, typecheck, migrations, seed, unit/integration/e2e tests against real
+  Postgres and Redis, and all three Docker builds.
 - **Built but not enabled**: a Moyasar payment adapter and the real-provider shape of
   fulfillment — both exist as code but were written against public API docs, not tested
   against a live sandbox, and are feature-flagged off by default.
