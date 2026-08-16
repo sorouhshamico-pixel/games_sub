@@ -78,6 +78,11 @@ jobs:
 
       - name: API integration tests (real Postgres)
         run: pnpm --filter @gcc-store/api test:integration
+        env:
+          # Must match the "Seed database" step above — the refund
+          # integration tests log in as this seeded admin.
+          ADMIN_SEED_EMAIL: "ci-admin@example.com"
+          ADMIN_SEED_PASSWORD: ${{ secrets.CI_SEED_ADMIN_PASSWORD || 'ci-only-ephemeral-password-1234' }}
 
       - name: API e2e tests
         run: pnpm --filter @gcc-store/api test:e2e
