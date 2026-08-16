@@ -56,15 +56,27 @@ async function main() {
     },
   });
 
+  // Real stock photography (Unsplash License — free for commercial use, no
+  // attribution required), not real game screenshots/box art. These are
+  // fictional demo products, not real licensed games, so using genuine
+  // franchise imagery here would misleadingly imply a real publisher
+  // affiliation — generic gaming-themed photography avoids that while still
+  // being real photos, not flat placeholder tiles. See docs/PRICING.md-style
+  // honesty conventions elsewhere in this seed file.
+  const DEMO_TOPUP_IMAGE = "https://images.unsplash.com/photo-1688986760609-47835488547a?q=80&w=1200&auto=format&fit=crop";
+  const DEMO_SUBSCRIPTION_IMAGE = "https://images.unsplash.com/photo-1553774661-0651f14b2da4?q=80&w=1200&auto=format&fit=crop";
+  const DEMO_GIFT_CARD_IMAGE = "https://images.unsplash.com/photo-1545785028-23ee5937cf69?q=80&w=1200&auto=format&fit=crop";
+
   const topupProduct = await prisma.product.upsert({
     where: { slug: "demo-battle-arena-diamonds" },
-    update: {},
+    update: { imageUrl: DEMO_TOPUP_IMAGE },
     create: {
       slug: "demo-battle-arena-diamonds",
       type: ProductType.GAME_TOPUP,
       categoryId: gamesCategory.id,
       gameBrandId: demoGameBrand.id,
       status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_TOPUP_IMAGE,
       refundEligible: false,
       refundPolicyAr: "منتجات الشحن الرقمي غير قابلة للاسترجاع بعد نجاح التنفيذ.",
       refundPolicyEn: "Digital top-up products are non-refundable once fulfillment succeeds.",
@@ -143,12 +155,13 @@ async function main() {
 
   const subscriptionProduct = await prisma.product.upsert({
     where: { slug: "demo-streaming-plus" },
-    update: {},
+    update: { imageUrl: DEMO_SUBSCRIPTION_IMAGE },
     create: {
       slug: "demo-streaming-plus",
       type: ProductType.SUBSCRIPTION,
       categoryId: subscriptionsCategory.id,
       status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_SUBSCRIPTION_IMAGE,
       refundEligible: false,
       refundPolicyAr: "الاشتراكات الرقمية غير قابلة للاسترجاع بعد تفعيل الكود.",
       refundPolicyEn: "Digital subscriptions are non-refundable once the code is activated.",
@@ -202,12 +215,13 @@ async function main() {
 
   const giftCardProduct = await prisma.product.upsert({
     where: { slug: "demo-play-gift-card" },
-    update: {},
+    update: { imageUrl: DEMO_GIFT_CARD_IMAGE },
     create: {
       slug: "demo-play-gift-card",
       type: ProductType.GIFT_CARD,
       categoryId: giftCardsCategory.id,
       status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_GIFT_CARD_IMAGE,
       refundEligible: false,
       refundPolicyAr: "بطاقات الهدايا الرقمية غير قابلة للاسترجاع بعد تسليم الكود.",
       refundPolicyEn: "Digital gift cards are non-refundable once the code is delivered.",

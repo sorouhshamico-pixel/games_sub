@@ -25,6 +25,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         ) : (
           <ProductImagePlaceholder label={name.slice(0, 1)} />
         )}
+
         {product.isDemoData ? (
           <span
             data-demo-badge
@@ -33,16 +34,31 @@ export function ProductCard({ product }: { product: ProductSummary }) {
             {locale === "ar" ? "تجريبي" : "Demo"}
           </span>
         ) : null}
-      </div>
-      <div className="flex flex-1 flex-col gap-1.5 p-3.5">
-        <p className="line-clamp-2 text-sm font-medium leading-snug text-[var(--color-text-primary)]">{name}</p>
-        <div className="mt-auto">
-          <p className="text-xs text-[var(--color-text-muted)]">{locale === "ar" ? "يبدأ من" : "Starting from"}</p>
-          <p className="text-base font-bold text-brand-accent">
-            {formatMoney(product.fromPriceMinorUnits, product.currency, locale)}
+
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent px-3 pb-2.5 pt-8">
+          <p className="text-[10px] font-medium text-brand-accent">
+            {locale === "ar" ? "شحن رقمي فوري" : "Instant digital delivery"}
           </p>
+          <div className="mt-0.5 flex items-center gap-1">
+            <StarIcon className="h-3.5 w-3.5 shrink-0 text-brand-accent" />
+            <p className="truncate text-sm font-bold text-white">{name}</p>
+          </div>
         </div>
       </div>
+      <div className="p-3.5">
+        <p className="text-xs text-[var(--color-text-muted)]">{locale === "ar" ? "يبدأ من" : "Starting from"}</p>
+        <p className="text-base font-bold text-brand-accent">
+          {formatMoney(product.fromPriceMinorUnits, product.currency, locale)}
+        </p>
+      </div>
     </Link>
+  );
+}
+
+function StarIcon({ className }: { className?: string }) {
+  return (
+    <svg aria-hidden viewBox="0 0 24 24" className={className} fill="currentColor">
+      <path d="m12 2 2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8-5.1-4.7 6.9-.8L12 2Z" />
+    </svg>
   );
 }

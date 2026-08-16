@@ -28,6 +28,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-16 px-4 py-10">
       <section className="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8 sm:p-16">
+        <img
+          src="https://images.unsplash.com/photo-1756694938594-e760b4bd3bfb?q=75&w=1600&auto=format&fit=crop"
+          alt=""
+          aria-hidden
+          className="absolute inset-0 h-full w-full object-cover opacity-25"
+        />
+        <div aria-hidden className="absolute inset-0 bg-[var(--color-surface)]/70" />
         <div
           aria-hidden
           className="pointer-events-none absolute -top-24 start-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-brand-primary/30 blur-3xl"
