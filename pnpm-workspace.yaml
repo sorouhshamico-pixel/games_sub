@@ -1,6 +1,14 @@
 packages:
   - "apps/*"
   - "packages/*"
+overrides:
+  # Transitive dependencies with known-high advisories as of 2026-08-16 —
+  # forced to patched versions rather than waiting on next/next-intl/
+  # @nestjs/swagger to bump their own pins. See docs/SECURITY.md.
+  "lodash@<=4.17.23": ">=4.17.24"
+  "js-yaml@>=4.0.0 <4.3.1": ">=4.3.1"
+  "sharp@<0.35.0": ">=0.35.0"
+  "postcss@<=8.5.17": ">=8.5.18"
 allowBuilds:
   '@parcel/watcher': true
   '@prisma/client': true

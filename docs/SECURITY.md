@@ -51,6 +51,20 @@ is organized around those two, plus the standard web-app surface (auth, input, a
 - **Secrets.** `.env` is gitignored; `.env.example` documents every variable without
   real values; `AppSetting` (the one non-secret admin-configurable settings table) is
   explicitly documented as non-secret-storage in `schema.prisma`'s comments.
+- **Secure headers.** `apps/api` runs `helmet()` (HSTS, `X-Content-Type-Options`,
+  `X-Frame-Options`, etc. — CSP left off there since the API's only HTML surface is the
+  Swagger UI at `/api/v1/docs`, which needs inline scripts). `apps/web`, the actual
+  customer-facing HTML surface, sets the same headers via `next.config.ts`'s
+  `headers()` — verified present on real responses from both a built API and a running
+  Next.js dev server (`X-Frame-Options: DENY`, `Referrer-Policy`,
+  `Permissions-Policy`), and confirmed the site still renders. **No CSP on `apps/web`
+  either yet** — getting `script-src` wrong would silently break client-side
+  interactivity (cart, login, checkout) with no server-side signal, and this
+  environment has no headless-browser tool to verify a strict policy doesn't. Needs to
+  be added and tested in a real browser before launch.
+- **Dependency scanning in CI.** `pnpm audit --audit-level=high` runs on every push
+  (`.github/workflows/ci.yml`) — fails the build on high/critical advisories in
+  production dependencies.
 
 ## Explicitly not done yet
 
@@ -64,10 +78,8 @@ it does:
   cross-site *form POSTs* but not cross-site fetches with credentials in some edge
   cases — a proper CSRF token or `sameSite=strict` (with the UX tradeoffs that implies)
   hasn't been evaluated yet.
-- **No CSP or other secure-headers middleware** (Helmet or equivalent) wired into
-  `apps/api` yet.
-- **No dependency/SAST scanning in CI** — `.github/workflows/ci.yml` runs lint/type/test/
-  build, not `npm audit`, Snyk, or similar.
+- **No CSP** on either app (see above) and **no SAST** (Snyk/CodeQL or similar) — CI's
+  dependency scan (`pnpm audit`) only covers known-vulnerable packages, not our own code.
 - **No encryption at rest for `DigitalCode.codeCiphertext`** — see
   `docs/PROVIDER_INTEGRATION.md`; the column name is aspirational until a real key
   management story exists.

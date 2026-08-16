@@ -15,6 +15,7 @@ import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
 import { AppModule } from "./app.module";
 import { CorrelationIdMiddleware } from "./common/correlation-id.middleware";
 import { AllExceptionsFilter } from "./common/all-exceptions.filter";
@@ -22,6 +23,17 @@ import { AllExceptionsFilter } from "./common/all-exceptions.filter";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.use(
+    helmet({
+      // This API's only served HTML is the Swagger UI at /api/v1/docs,
+      // which needs inline scripts/styles to render — a strict default CSP
+      // breaks it. Every other secure-by-default header (HSTS,
+      // X-Content-Type-Options, X-Frame-Options, Referrer-Policy, ...)
+      // stays on. The customer-facing HTML surface is apps/web, which sets
+      // its own headers in next.config.ts.
+      contentSecurityPolicy: false,
+    }),
+  );
   app.use(cookieParser());
   app.use(new CorrelationIdMiddleware().use);
   app.useGlobalPipes(
