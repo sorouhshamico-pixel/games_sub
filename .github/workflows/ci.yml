@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  DATABASE_URL: "postgresql://gcc_store:gcc_store_ci_password@localhost:5432/gcc_store?schema=public"
+  REDIS_URL: "redis://localhost:6379"
+  NODE_ENV: test
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: gcc_store
+          POSTGRES_PASSWORD: gcc_store_ci_password
+          POSTGRES_DB: gcc_store
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U gcc_store"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Run database migrations
+        run: pnpm --filter @gcc-store/db exec prisma migrate deploy
+
+      - name: Seed database
+        run: pnpm db:seed
+        env:
+          # Explicit, non-default credentials for this ephemeral CI database —
+          # never reused outside this job. Real environments must set these
+          # themselves; see docs/AUTH.md.
+          ADMIN_SEED_EMAIL: "ci-admin@example.com"
+          ADMIN_SEED_PASSWORD: ${{ secrets.CI_SEED_ADMIN_PASSWORD || 'ci-only-ephemeral-password-1234' }}
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: API integration tests (real Postgres)
+        run: pnpm --filter @gcc-store/api test:integration
+
+      - name: API e2e tests
+        run: pnpm --filter @gcc-store/api test:e2e
+
+      - name: Worker e2e tests (real BullMQ + Redis)
+        run: pnpm --filter @gcc-store/worker test:e2e
+
+      - name: Build all packages
+        run: pnpm build
