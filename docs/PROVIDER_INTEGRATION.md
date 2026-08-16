@@ -73,14 +73,13 @@ struggling provider from being hammered by every queued item at once.
 
 ## What was verified, and how
 
-No Redis is available in this environment (no Docker, and there's no official Redis
-build for Windows — `redis-memory-server` was tried and doesn't support it either), so
-the BullMQ queue/worker wiring itself is built correctly against BullMQ's documented
-API and typechecked, but **not exercised live**.
+No Redis is available in the sandbox this was developed in (no Docker, and there's no
+official Redis build for Windows — `redis-memory-server` was tried and doesn't support
+it either), so nothing here was trusted on "it typechecks" alone.
 
-What *was* verified against a real (locally-run, non-Docker) Postgres instance, by
-calling `processFulfillmentJob` directly — bypassing the queue entirely, since the queue
-is just "what calls this function and when," not the business logic itself:
+`processFulfillmentJob`'s business logic was verified directly (bypassing the queue —
+the queue is just "what calls this function and when") against a real, locally-run,
+non-Docker Postgres instance during development:
 
 | Scenario | Result |
 |---|---|
@@ -91,11 +90,19 @@ is just "what calls this function and when," not the business logic itself:
 | Unknown/ambiguous result | order → `MANUAL_REVIEW`, fulfillment → `MANUAL_REVIEW` |
 | 3 concurrent claims against 2 available digital codes | exactly 2 succeeded, 1 got `null`, 0 codes left `AVAILABLE` — no double-sell |
 
-Pure logic (`retryWithBackoff`, `CircuitBreaker`, `MockFulfillmentProvider`'s scenario
-selection) has real unit tests in the committed suite. The DB-touching scenarios above
-were run manually and are not currently part of the automated suite, since they need a
-live Postgres the CI/dev setup doesn't provision yet (see `docker-compose.yml` — this is
-what it's for once Docker is available).
+These are now permanent, committed tests
+([`process-fulfillment-job.integration.test.ts`](../apps/worker/src/fulfillment/process-fulfillment-job.integration.test.ts)),
+gated on `DATABASE_URL` so they skip cleanly without a database and run for real in CI.
+
+**The actual BullMQ queue/worker wiring — the one piece that genuinely couldn't be run
+locally at all — is verified by
+[`outbox-to-fulfillment.e2e-spec.ts`](../apps/worker/test/outbox-to-fulfillment.e2e-spec.ts)
+in [CI](../.github/workflows/ci.yml)**, which provisions a real Redis service container.
+It writes a real `OutboxEvent`, runs the actual `dispatchPendingOutboxEvents` →
+`createFulfillmentQueue` → `createFulfillmentWorker` pipeline, and asserts the order
+reaches `COMPLETED` through the real queue — not a mock of it. This was written without
+being able to run it even once locally, then proven by watching the CI run to
+completion (`gh run watch`) rather than assumed to work from code review alone.
 
 ## What's not built yet
 
@@ -106,5 +113,3 @@ what it's for once Docker is available).
   encryption module (key from a secrets manager, not `AppSetting`) before any real
   inventory is imported. Don't treat the column name as a promise it isn't keeping yet.
 - No admin UI for manual review, retry, or CSV code import.
-- No CI wiring to actually spin up Postgres/Redis and run the scenarios above
-  automatically — see the CI section of the main README once written.
