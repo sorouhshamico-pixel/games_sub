@@ -33,7 +33,7 @@ COPY . .
 RUN pnpm --filter @gcc-store/contracts build \
   && pnpm --filter @gcc-store/db build \
   && pnpm --filter @gcc-store/api build \
-  && pnpm deploy --filter @gcc-store/api --prod /repo/deploy/api
+  && pnpm deploy --filter @gcc-store/api --prod --legacy /repo/deploy/api
 
 # ---------------------------------------------------------------------------
 FROM node:22-alpine AS runtime
