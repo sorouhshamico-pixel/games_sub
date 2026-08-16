@@ -84,6 +84,20 @@ async function main() {
     },
   });
 
+  const skyfallGameBrand = await prisma.gameBrand.upsert({
+    where: { slug: "demo-skyfall-legends" },
+    update: {},
+    create: {
+      slug: "demo-skyfall-legends",
+      nameAr: "ديمو سكاي فول ليجندز",
+      nameEn: "Demo Skyfall Legends",
+      descriptionAr: "لعبة باتل رويال تجريبية لعرض تدفق الشحن. استبدلها بلعبة حقيقية مرخصة قبل الإطلاق.",
+      descriptionEn: "Placeholder battle royale game used to demonstrate the top-up flow. Replace with a licensed title before launch.",
+      identifierHelpAr: "افتح اللعبة، اذهب للملف الشخصي، وانسخ Player ID الظاهر أعلى الشاشة.",
+      identifierHelpEn: "Open the game, go to your profile, and copy the Player ID shown at the top of the screen.",
+    },
+  });
+
   // Real stock photography (Unsplash License — free for commercial use, no
   // attribution required), not real game screenshots/box art. These are
   // fictional demo products, not real licensed games, so using genuine
@@ -99,6 +113,8 @@ async function main() {
   const DEMO_MUSIC_IMAGE = "https://images.unsplash.com/photo-1601066525716-3cca33c6d4c6?q=80&w=1200&auto=format&fit=crop";
   const DEMO_CLOUD_ARCADE_IMAGE = "https://images.unsplash.com/photo-1755436613066-066d20f6445a?q=80&w=1200&auto=format&fit=crop";
   const DEMO_STYLE_CARD_IMAGE = "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200&auto=format&fit=crop";
+  const DEMO_SKYFALL_IMAGE = "https://images.unsplash.com/photo-1560419015-7c427e8ae5ba?q=80&w=1200&auto=format&fit=crop";
+  const DEMO_PREMIUM_CARD_IMAGE = "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=1200&auto=format&fit=crop";
 
   const topupProduct = await prisma.product.upsert({
     where: { slug: "demo-battle-arena-diamonds" },
@@ -572,6 +588,119 @@ async function main() {
     },
   });
 
+  const skyfallProduct = await prisma.product.upsert({
+    where: { slug: "demo-skyfall-legends-credits" },
+    update: { imageUrl: DEMO_SKYFALL_IMAGE },
+    create: {
+      slug: "demo-skyfall-legends-credits",
+      type: ProductType.GAME_TOPUP,
+      categoryId: gamesCategory.id,
+      gameBrandId: skyfallGameBrand.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_SKYFALL_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "منتجات الشحن الرقمي غير قابلة للاسترجاع بعد نجاح التنفيذ.",
+      refundPolicyEn: "Digital top-up products are non-refundable once fulfillment succeeds.",
+      fulfillmentEtaMinutes: 5,
+      isDemoData: true,
+      translations: {
+        create: [
+          { locale: "ar", name: "كريدت ديمو سكاي فول ليجندز", description: "شحن كريدت مباشر إلى حساب اللعبة." },
+          { locale: "en", name: "Demo Skyfall Legends Credits", description: "Direct credits top-up to your game account." },
+        ],
+      },
+      inputDefinitions: {
+        create: [
+          {
+            key: "playerId",
+            labelAr: "معرف اللاعب (Player ID)",
+            labelEn: "Player ID",
+            helpTextAr: "رقم يظهر في صفحة الملف الشخصي داخل اللعبة.",
+            helpTextEn: "Found on your in-game profile page.",
+            fieldType: "text",
+            required: true,
+            regex: "^[0-9]{6,12}$",
+            minLength: 6,
+            maxLength: 12,
+            normalize: "digitsOnly",
+            sortOrder: 1,
+          },
+        ],
+      },
+      variants: {
+        create: [
+          {
+            sku: "DEMO-SF-CREDITS-600",
+            nameAr: "600 كريدت",
+            nameEn: "600 Credits",
+            currency: "SAR",
+            baseCostMinorUnits: 550,
+            marginBasisPoints: 1500,
+            taxRateBasisPoints: 1500,
+            sortOrder: 1,
+          },
+          {
+            sku: "DEMO-SF-CREDITS-3000",
+            nameAr: "3000 كريدت",
+            nameEn: "3000 Credits",
+            currency: "SAR",
+            baseCostMinorUnits: 2600,
+            marginBasisPoints: 1500,
+            taxRateBasisPoints: 1500,
+            sortOrder: 2,
+          },
+        ],
+      },
+    },
+  });
+
+  const premiumCardProduct = await prisma.product.upsert({
+    where: { slug: "demo-premium-gift-card" },
+    update: { imageUrl: DEMO_PREMIUM_CARD_IMAGE },
+    create: {
+      slug: "demo-premium-gift-card",
+      type: ProductType.GIFT_CARD,
+      categoryId: giftCardsCategory.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_PREMIUM_CARD_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "بطاقات الهدايا الرقمية غير قابلة للاسترجاع بعد تسليم الكود.",
+      refundPolicyEn: "Digital gift cards are non-refundable once the code is delivered.",
+      fulfillmentEtaMinutes: 2,
+      isDemoData: true,
+      translations: {
+        create: [
+          { locale: "ar", name: "بطاقة ديمو بريميوم", description: "بطاقة هدايا تجريبية متعددة الاستخدامات." },
+          { locale: "en", name: "Demo Premium Gift Card", description: "Placeholder general-purpose gift card." },
+        ],
+      },
+      variants: {
+        create: [
+          {
+            sku: "DEMO-PREMIUM-75",
+            nameAr: "75 ريال",
+            nameEn: "SAR 75",
+            currency: "SAR",
+            baseCostMinorUnits: 7500,
+            marginBasisPoints: 500,
+            taxRateBasisPoints: 1500,
+            sortOrder: 1,
+          },
+          {
+            sku: "DEMO-PREMIUM-150",
+            nameAr: "150 ريال",
+            nameEn: "SAR 150",
+            currency: "SAR",
+            baseCostMinorUnits: 15000,
+            marginBasisPoints: 500,
+            taxRateBasisPoints: 1500,
+            sortOrder: 2,
+          },
+        ],
+      },
+    },
+  });
+
   const mockProvider = await prisma.provider.upsert({
     where: { code: "mock" },
     update: {},
@@ -603,6 +732,10 @@ async function main() {
           "DEMO-CLOUD-1M",
           "DEMO-STYLE-100",
           "DEMO-STYLE-200",
+          "DEMO-SF-CREDITS-600",
+          "DEMO-SF-CREDITS-3000",
+          "DEMO-PREMIUM-75",
+          "DEMO-PREMIUM-150",
         ],
       },
     },
@@ -778,6 +911,8 @@ async function main() {
       musicProduct.slug,
       cloudArcadeProduct.slug,
       styleCardProduct.slug,
+      skyfallProduct.slug,
+      premiumCardProduct.slug,
     ],
     provider: mockProvider.code,
   });
