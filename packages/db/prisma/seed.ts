@@ -56,6 +56,34 @@ async function main() {
     },
   });
 
+  const racingGameBrand = await prisma.gameBrand.upsert({
+    where: { slug: "demo-racing-rush" },
+    update: {},
+    create: {
+      slug: "demo-racing-rush",
+      nameAr: "ديمو ريسينغ راش",
+      nameEn: "Demo Racing Rush",
+      descriptionAr: "لعبة سباقات تجريبية لعرض تدفق الشحن. استبدلها بلعبة حقيقية مرخصة قبل الإطلاق.",
+      descriptionEn: "Placeholder racing game used to demonstrate the top-up flow. Replace with a licensed title before launch.",
+      identifierHelpAr: "افتح اللعبة، اذهب للملف الشخصي، وانسخ Player ID الظاهر أعلى الشاشة.",
+      identifierHelpEn: "Open the game, go to your profile, and copy the Player ID shown at the top of the screen.",
+    },
+  });
+
+  const kingdomGameBrand = await prisma.gameBrand.upsert({
+    where: { slug: "demo-kingdom-quest" },
+    update: {},
+    create: {
+      slug: "demo-kingdom-quest",
+      nameAr: "ديمو كينغدوم كويست",
+      nameEn: "Demo Kingdom Quest",
+      descriptionAr: "لعبة استراتيجية تجريبية لعرض تدفق الشحن. استبدلها بلعبة حقيقية مرخصة قبل الإطلاق.",
+      descriptionEn: "Placeholder strategy game used to demonstrate the top-up flow. Replace with a licensed title before launch.",
+      identifierHelpAr: "افتح اللعبة، اذهب للملف الشخصي، وانسخ Player ID الظاهر أعلى الشاشة.",
+      identifierHelpEn: "Open the game, go to your profile, and copy the Player ID shown at the top of the screen.",
+    },
+  });
+
   // Real stock photography (Unsplash License — free for commercial use, no
   // attribution required), not real game screenshots/box art. These are
   // fictional demo products, not real licensed games, so using genuine
@@ -66,6 +94,11 @@ async function main() {
   const DEMO_TOPUP_IMAGE = "https://images.unsplash.com/photo-1688986760609-47835488547a?q=80&w=1200&auto=format&fit=crop";
   const DEMO_SUBSCRIPTION_IMAGE = "https://images.unsplash.com/photo-1553774661-0651f14b2da4?q=80&w=1200&auto=format&fit=crop";
   const DEMO_GIFT_CARD_IMAGE = "https://images.unsplash.com/photo-1545785028-23ee5937cf69?q=80&w=1200&auto=format&fit=crop";
+  const DEMO_RACING_IMAGE = "https://images.unsplash.com/photo-1743649978995-c76212449e15?q=80&w=1200&auto=format&fit=crop";
+  const DEMO_KINGDOM_IMAGE = "https://images.unsplash.com/photo-1570989614585-581ee5f7e165?q=80&w=1200&auto=format&fit=crop";
+  const DEMO_MUSIC_IMAGE = "https://images.unsplash.com/photo-1601066525716-3cca33c6d4c6?q=80&w=1200&auto=format&fit=crop";
+  const DEMO_CLOUD_ARCADE_IMAGE = "https://images.unsplash.com/photo-1755436613066-066d20f6445a?q=80&w=1200&auto=format&fit=crop";
+  const DEMO_STYLE_CARD_IMAGE = "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200&auto=format&fit=crop";
 
   const topupProduct = await prisma.product.upsert({
     where: { slug: "demo-battle-arena-diamonds" },
@@ -250,6 +283,295 @@ async function main() {
     },
   });
 
+  const racingProduct = await prisma.product.upsert({
+    where: { slug: "demo-racing-rush-coins" },
+    update: { imageUrl: DEMO_RACING_IMAGE },
+    create: {
+      slug: "demo-racing-rush-coins",
+      type: ProductType.GAME_TOPUP,
+      categoryId: gamesCategory.id,
+      gameBrandId: racingGameBrand.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_RACING_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "منتجات الشحن الرقمي غير قابلة للاسترجاع بعد نجاح التنفيذ.",
+      refundPolicyEn: "Digital top-up products are non-refundable once fulfillment succeeds.",
+      fulfillmentEtaMinutes: 5,
+      isDemoData: true,
+      translations: {
+        create: [
+          { locale: "ar", name: "عملات ديمو ريسينغ راش", description: "شحن عملات مباشر إلى حساب اللعبة." },
+          { locale: "en", name: "Demo Racing Rush Coins", description: "Direct coin top-up to your game account." },
+        ],
+      },
+      inputDefinitions: {
+        create: [
+          {
+            key: "playerId",
+            labelAr: "معرف اللاعب (Player ID)",
+            labelEn: "Player ID",
+            helpTextAr: "رقم يظهر في صفحة الملف الشخصي داخل اللعبة.",
+            helpTextEn: "Found on your in-game profile page.",
+            fieldType: "text",
+            required: true,
+            regex: "^[0-9]{6,12}$",
+            minLength: 6,
+            maxLength: 12,
+            normalize: "digitsOnly",
+            sortOrder: 1,
+          },
+        ],
+      },
+      variants: {
+        create: [
+          {
+            sku: "DEMO-RR-COINS-500",
+            nameAr: "500 عملة",
+            nameEn: "500 Coins",
+            currency: "SAR",
+            baseCostMinorUnits: 500,
+            marginBasisPoints: 1500,
+            taxRateBasisPoints: 1500,
+            sortOrder: 1,
+          },
+          {
+            sku: "DEMO-RR-COINS-2500",
+            nameAr: "2500 عملة",
+            nameEn: "2500 Coins",
+            currency: "SAR",
+            baseCostMinorUnits: 2300,
+            marginBasisPoints: 1500,
+            taxRateBasisPoints: 1500,
+            sortOrder: 2,
+          },
+        ],
+      },
+    },
+  });
+
+  const kingdomProduct = await prisma.product.upsert({
+    where: { slug: "demo-kingdom-quest-gems" },
+    update: { imageUrl: DEMO_KINGDOM_IMAGE },
+    create: {
+      slug: "demo-kingdom-quest-gems",
+      type: ProductType.GAME_TOPUP,
+      categoryId: gamesCategory.id,
+      gameBrandId: kingdomGameBrand.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_KINGDOM_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "منتجات الشحن الرقمي غير قابلة للاسترجاع بعد نجاح التنفيذ.",
+      refundPolicyEn: "Digital top-up products are non-refundable once fulfillment succeeds.",
+      fulfillmentEtaMinutes: 5,
+      isDemoData: true,
+      translations: {
+        create: [
+          { locale: "ar", name: "جواهر ديمو كينغدوم كويست", description: "شحن جواهر مباشر إلى حساب اللعبة." },
+          { locale: "en", name: "Demo Kingdom Quest Gems", description: "Direct gem top-up to your game account." },
+        ],
+      },
+      inputDefinitions: {
+        create: [
+          {
+            key: "playerId",
+            labelAr: "معرف اللاعب (Player ID)",
+            labelEn: "Player ID",
+            helpTextAr: "رقم يظهر في صفحة الملف الشخصي داخل اللعبة.",
+            helpTextEn: "Found on your in-game profile page.",
+            fieldType: "text",
+            required: true,
+            regex: "^[0-9]{6,12}$",
+            minLength: 6,
+            maxLength: 12,
+            normalize: "digitsOnly",
+            sortOrder: 1,
+          },
+        ],
+      },
+      variants: {
+        create: [
+          {
+            sku: "DEMO-KQ-GEMS-300",
+            nameAr: "300 جوهرة",
+            nameEn: "300 Gems",
+            currency: "SAR",
+            baseCostMinorUnits: 900,
+            marginBasisPoints: 1500,
+            taxRateBasisPoints: 1500,
+            sortOrder: 1,
+          },
+          {
+            sku: "DEMO-KQ-GEMS-1500",
+            nameAr: "1500 جوهرة",
+            nameEn: "1500 Gems",
+            currency: "SAR",
+            baseCostMinorUnits: 4200,
+            marginBasisPoints: 1500,
+            taxRateBasisPoints: 1500,
+            sortOrder: 2,
+          },
+        ],
+      },
+    },
+  });
+
+  const musicProduct = await prisma.product.upsert({
+    where: { slug: "demo-music-wave" },
+    update: { imageUrl: DEMO_MUSIC_IMAGE },
+    create: {
+      slug: "demo-music-wave",
+      type: ProductType.SUBSCRIPTION,
+      categoryId: subscriptionsCategory.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_MUSIC_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "الاشتراكات الرقمية غير قابلة للاسترجاع بعد تفعيل الكود.",
+      refundPolicyEn: "Digital subscriptions are non-refundable once the code is activated.",
+      fulfillmentEtaMinutes: 10,
+      isDemoData: true,
+      translations: {
+        create: [
+          { locale: "ar", name: "اشتراك ديمو ميوزك ويف", description: "اشتراك شهري تجريبي لخدمة بث موسيقى تجريبية." },
+          { locale: "en", name: "Demo Music Wave", description: "Placeholder monthly subscription for a demo music streaming service." },
+        ],
+      },
+      inputDefinitions: {
+        create: [
+          {
+            key: "email",
+            labelAr: "البريد الإلكتروني لحساب الاشتراك",
+            labelEn: "Account email",
+            fieldType: "email",
+            required: true,
+            regex: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+            sortOrder: 1,
+          },
+        ],
+      },
+      variants: {
+        create: [
+          {
+            sku: "DEMO-MUSIC-1M",
+            nameAr: "شهر واحد",
+            nameEn: "1 Month",
+            currency: "SAR",
+            baseCostMinorUnits: 1200,
+            marginBasisPoints: 2000,
+            taxRateBasisPoints: 1500,
+            sortOrder: 1,
+          },
+          {
+            sku: "DEMO-MUSIC-12M",
+            nameAr: "سنة كاملة",
+            nameEn: "12 Months",
+            currency: "SAR",
+            baseCostMinorUnits: 12000,
+            marginBasisPoints: 2000,
+            taxRateBasisPoints: 1500,
+            sortOrder: 2,
+          },
+        ],
+      },
+    },
+  });
+
+  const cloudArcadeProduct = await prisma.product.upsert({
+    where: { slug: "demo-cloud-arcade" },
+    update: { imageUrl: DEMO_CLOUD_ARCADE_IMAGE },
+    create: {
+      slug: "demo-cloud-arcade",
+      type: ProductType.SUBSCRIPTION,
+      categoryId: subscriptionsCategory.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_CLOUD_ARCADE_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "الاشتراكات الرقمية غير قابلة للاسترجاع بعد تفعيل الكود.",
+      refundPolicyEn: "Digital subscriptions are non-refundable once the code is activated.",
+      fulfillmentEtaMinutes: 10,
+      isDemoData: true,
+      translations: {
+        create: [
+          { locale: "ar", name: "اشتراك ديمو كلاود أركيد", description: "اشتراك شهري تجريبي لخدمة ألعاب سحابية تجريبية." },
+          { locale: "en", name: "Demo Cloud Arcade", description: "Placeholder monthly subscription for a demo cloud gaming service." },
+        ],
+      },
+      inputDefinitions: {
+        create: [
+          {
+            key: "email",
+            labelAr: "البريد الإلكتروني لحساب الاشتراك",
+            labelEn: "Account email",
+            fieldType: "email",
+            required: true,
+            regex: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+            sortOrder: 1,
+          },
+        ],
+      },
+      variants: {
+        create: [
+          {
+            sku: "DEMO-CLOUD-1M",
+            nameAr: "شهر واحد",
+            nameEn: "1 Month",
+            currency: "SAR",
+            baseCostMinorUnits: 2500,
+            marginBasisPoints: 2000,
+            taxRateBasisPoints: 1500,
+            sortOrder: 1,
+          },
+        ],
+      },
+    },
+  });
+
+  const styleCardProduct = await prisma.product.upsert({
+    where: { slug: "demo-style-gift-card" },
+    update: { imageUrl: DEMO_STYLE_CARD_IMAGE },
+    create: {
+      slug: "demo-style-gift-card",
+      type: ProductType.GIFT_CARD,
+      categoryId: giftCardsCategory.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_STYLE_CARD_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "بطاقات الهدايا الرقمية غير قابلة للاسترجاع بعد تسليم الكود.",
+      refundPolicyEn: "Digital gift cards are non-refundable once the code is delivered.",
+      fulfillmentEtaMinutes: 2,
+      isDemoData: true,
+      translations: {
+        create: [
+          { locale: "ar", name: "بطاقة ديمو ستايل", description: "بطاقة هدايا تجريبية للتسوق والأزياء." },
+          { locale: "en", name: "Demo Style Gift Card", description: "Placeholder fashion & shopping gift card." },
+        ],
+      },
+      variants: {
+        create: [
+          {
+            sku: "DEMO-STYLE-100",
+            nameAr: "100 ريال",
+            nameEn: "SAR 100",
+            currency: "SAR",
+            baseCostMinorUnits: 10000,
+            marginBasisPoints: 500,
+            taxRateBasisPoints: 1500,
+            sortOrder: 1,
+          },
+          {
+            sku: "DEMO-STYLE-200",
+            nameAr: "200 ريال",
+            nameEn: "SAR 200",
+            currency: "SAR",
+            baseCostMinorUnits: 20000,
+            marginBasisPoints: 500,
+            taxRateBasisPoints: 1500,
+            sortOrder: 2,
+          },
+        ],
+      },
+    },
+  });
+
   const mockProvider = await prisma.provider.upsert({
     where: { code: "mock" },
     update: {},
@@ -263,7 +585,27 @@ async function main() {
   });
 
   const variantsToMap = await prisma.productVariant.findMany({
-    where: { sku: { in: ["DEMO-BA-DIAMOND-100", "DEMO-BA-DIAMOND-520", "DEMO-BA-DIAMOND-1080", "DEMO-STREAM-1M", "DEMO-STREAM-3M", "DEMO-GIFT-50"] } },
+    where: {
+      sku: {
+        in: [
+          "DEMO-BA-DIAMOND-100",
+          "DEMO-BA-DIAMOND-520",
+          "DEMO-BA-DIAMOND-1080",
+          "DEMO-STREAM-1M",
+          "DEMO-STREAM-3M",
+          "DEMO-GIFT-50",
+          "DEMO-RR-COINS-500",
+          "DEMO-RR-COINS-2500",
+          "DEMO-KQ-GEMS-300",
+          "DEMO-KQ-GEMS-1500",
+          "DEMO-MUSIC-1M",
+          "DEMO-MUSIC-12M",
+          "DEMO-CLOUD-1M",
+          "DEMO-STYLE-100",
+          "DEMO-STYLE-200",
+        ],
+      },
+    },
   });
 
   for (const variant of variantsToMap) {
@@ -427,7 +769,16 @@ async function main() {
 
   // eslint-disable-next-line no-console -- CLI seed script output
   console.log("Seed complete:", {
-    products: [topupProduct.slug, subscriptionProduct.slug, giftCardProduct.slug],
+    products: [
+      topupProduct.slug,
+      subscriptionProduct.slug,
+      giftCardProduct.slug,
+      racingProduct.slug,
+      kingdomProduct.slug,
+      musicProduct.slug,
+      cloudArcadeProduct.slug,
+      styleCardProduct.slug,
+    ],
     provider: mockProvider.code,
   });
 }
