@@ -1,0 +1,14 @@
+@import "@gcc-store/ui/styles.css";
+
+html,
+body {
+  min-height: 100%;
+}
+
+:root[dir="rtl"] body {
+  font-family: var(--font-arabic), var(--font-latin), sans-serif;
+}
+
+:root[dir="ltr"] body {
+  font-family: var(--font-latin), var(--font-arabic), sans-serif;
+}

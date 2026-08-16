@@ -41,3 +41,21 @@ export const productDetailSchema = productSummarySchema.extend({
   identifierHelpEn: z.string().optional(),
 });
 export type ProductDetail = z.infer<typeof productDetailSchema>;
+
+export const gameBrandSummarySchema = z.object({
+  slug: z.string(),
+  nameAr: z.string(),
+  nameEn: z.string(),
+  logoUrl: z.string().nullable(),
+});
+export type GameBrandSummary = z.infer<typeof gameBrandSummarySchema>;
+
+export const gameBrandDetailSchema = gameBrandSummarySchema.extend({
+  bannerUrl: z.string().nullable(),
+  descriptionAr: z.string(),
+  descriptionEn: z.string(),
+  identifierHelpAr: z.string().nullable(),
+  identifierHelpEn: z.string().nullable(),
+  products: z.array(productSummarySchema),
+});
+export type GameBrandDetail = z.infer<typeof gameBrandDetailSchema>;

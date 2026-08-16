@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { prisma } from "@gcc-store/db";
 import {
   computePriceBreakdown,
+  type GameBrandDetail,
+  type GameBrandSummary,
   type ProductDetail,
   type ProductInputSchema,
   type ProductSummary,
@@ -20,6 +22,48 @@ export class CatalogService {
       slug: c.slug,
       name: locale === "ar" ? c.nameAr : c.nameEn,
     }));
+  }
+
+  async listBrands(): Promise<GameBrandSummary[]> {
+    const brands = await prisma.gameBrand.findMany({
+      where: { isActive: true },
+      orderBy: { nameEn: "asc" },
+    });
+    return brands.map((b) => ({
+      slug: b.slug,
+      nameAr: b.nameAr,
+      nameEn: b.nameEn,
+      logoUrl: b.logoUrl,
+    }));
+  }
+
+  async getBrandBySlug(slug: string): Promise<GameBrandDetail> {
+    const brand = await prisma.gameBrand.findUnique({
+      where: { slug },
+      include: {
+        products: {
+          where: { status: "ACTIVE", deletedAt: null },
+          include: { translations: true, category: true, variants: { where: { isActive: true }, orderBy: { sortOrder: "asc" } } },
+        },
+      },
+    });
+
+    if (!brand || !brand.isActive) {
+      throw new NotFoundException("Game brand not found");
+    }
+
+    return {
+      slug: brand.slug,
+      nameAr: brand.nameAr,
+      nameEn: brand.nameEn,
+      logoUrl: brand.logoUrl,
+      bannerUrl: brand.bannerUrl,
+      descriptionAr: brand.descriptionAr ?? "",
+      descriptionEn: brand.descriptionEn ?? "",
+      identifierHelpAr: brand.identifierHelpAr,
+      identifierHelpEn: brand.identifierHelpEn,
+      products: brand.products.map((product) => this.toProductSummary(product)),
+    };
   }
 
   async listProducts(query: ListProductsQueryDto): Promise<{ items: ProductSummary[]; page: number; pageSize: number; total: number }> {
@@ -64,6 +108,7 @@ export class CatalogService {
       include: {
         translations: true,
         category: true,
+        gameBrand: true,
         variants: { where: { isActive: true }, orderBy: { sortOrder: "asc" } },
         inputDefinitions: { orderBy: { sortOrder: "asc" } },
       },
@@ -107,8 +152,8 @@ export class CatalogService {
       refundEligible: product.refundEligible,
       refundPolicyAr: product.refundPolicyAr ?? "",
       refundPolicyEn: product.refundPolicyEn ?? "",
-      identifierHelpAr: undefined,
-      identifierHelpEn: undefined,
+      identifierHelpAr: product.gameBrand?.identifierHelpAr ?? undefined,
+      identifierHelpEn: product.gameBrand?.identifierHelpEn ?? undefined,
     } satisfies ProductDetail;
   }
 

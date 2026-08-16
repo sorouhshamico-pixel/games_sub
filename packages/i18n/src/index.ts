@@ -23,3 +23,11 @@ export const hreflangByLocale: Record<Locale, string> = {
 export function isLocale(value: string): value is Locale {
   return (locales as readonly string[]).includes(value);
 }
+
+import ar from "./messages/ar.json";
+import en from "./messages/en.json";
+
+// Statically imported (not resolved via a dynamic package subpath) because
+// webpack can't build a context module across a package.json `exports`
+// wildcard for a runtime template-literal import — see chat history.
+export const messagesByLocale = { ar, en } satisfies Record<Locale, unknown>;

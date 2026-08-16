@@ -287,8 +287,96 @@ async function main() {
       isPublished: true,
       translations: {
         create: [
-          { locale: "ar", title: "الأسئلة الشائعة", bodyMarkdown: "## كم يستغرق الشحن؟\nيتم التنفيذ خلال دقائق بعد تأكيد الدفع في أغلب الحالات." },
-          { locale: "en", title: "Frequently Asked Questions", bodyMarkdown: "## How long does delivery take?\nMost orders are fulfilled within minutes of payment confirmation." },
+          {
+            locale: "ar",
+            title: "الأسئلة الشائعة",
+            bodyMarkdown:
+              "## كم يستغرق الشحن؟\nيتم التنفيذ خلال دقائق بعد تأكيد الدفع في أغلب الحالات.\n\n## ماذا لو أدخلت معرف اللاعب بشكل خاطئ؟\nتحقق من صحة المعرف قبل الدفع، فمنتجات الشحن الرقمي غير قابلة للاسترجاع بعد التنفيذ.\n\n## هل يمكنني استرجاع المبلغ؟\nيعتمد ذلك على نوع المنتج، راجع [سياسة الاسترجاع](/pages/refunds).",
+          },
+          {
+            locale: "en",
+            title: "Frequently Asked Questions",
+            bodyMarkdown:
+              "## How long does delivery take?\nMost orders are fulfilled within minutes of payment confirmation.\n\n## What if I entered the wrong Player ID?\nDouble-check your ID before paying — digital top-ups are non-refundable once fulfilled.\n\n## Can I get a refund?\nIt depends on the product type, see our [refund policy](/pages/refunds).",
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.page.upsert({
+    where: { slug: "terms" },
+    update: {},
+    create: {
+      slug: "terms",
+      type: "static",
+      isPublished: true,
+      translations: {
+        create: [
+          {
+            locale: "ar",
+            title: "الشروط والأحكام",
+            bodyMarkdown:
+              "**مسودة تحتاج مراجعة قانونية قبل الإطلاق.**\n\nباستخدامك هذا المتجر فإنك توافق على شراء منتجات رقمية (شحن ألعاب، اشتراكات، بطاقات هدايا) يتم تسليمها إلكترونيًا. يلتزم المتجر بتنفيذ الطلبات بعد تأكيد الدفع، ولا يتحمل مسؤولية إدخال بيانات حساب غير صحيحة من قبل العميل.",
+          },
+          {
+            locale: "en",
+            title: "Terms & Conditions",
+            bodyMarkdown:
+              "**Draft — requires legal review before launch.**\n\nBy using this store you agree to purchase digital products (game top-ups, subscriptions, gift cards) delivered electronically. The store commits to fulfilling orders after payment confirmation and is not liable for incorrect account details entered by the customer.",
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.page.upsert({
+    where: { slug: "privacy" },
+    update: {},
+    create: {
+      slug: "privacy",
+      type: "static",
+      isPublished: true,
+      translations: {
+        create: [
+          {
+            locale: "ar",
+            title: "سياسة الخصوصية",
+            bodyMarkdown:
+              "**مسودة تحتاج مراجعة قانونية قبل الإطلاق.**\n\nنجمع فقط البيانات اللازمة لتنفيذ طلبك (رقم الجوال أو البريد، ومعرف اللاعب المطلوب للمنتج). لا نطلب أبدًا كلمة مرور حسابك في اللعبة. راجع نظام حماية البيانات الشخصية السعودي لتفاصيل الاحتفاظ والحذف.",
+          },
+          {
+            locale: "en",
+            title: "Privacy Policy",
+            bodyMarkdown:
+              "**Draft — requires legal review before launch.**\n\nWe only collect the data required to fulfill your order (phone/email, and the in-game identifiers a product needs). We never ask for your in-game account password. See the Saudi Personal Data Protection Law for retention and deletion details.",
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.page.upsert({
+    where: { slug: "refunds" },
+    update: {},
+    create: {
+      slug: "refunds",
+      type: "static",
+      isPublished: true,
+      translations: {
+        create: [
+          {
+            locale: "ar",
+            title: "سياسة الاسترجاع",
+            bodyMarkdown:
+              "**مسودة تحتاج مراجعة قانونية قبل الإطلاق.**\n\nمنتجات الشحن الرقمي وبطاقات الهدايا والاشتراكات غير قابلة للاسترجاع بعد نجاح التنفيذ. في حال فشل التنفيذ من طرف المتجر أو المورد، يُعاد المبلغ كاملًا خلال أيام العمل. راجع سياسة كل منتج على صفحته.",
+          },
+          {
+            locale: "en",
+            title: "Refund Policy",
+            bodyMarkdown:
+              "**Draft — requires legal review before launch.**\n\nDigital top-ups, gift cards, and subscriptions are non-refundable once fulfillment succeeds. If fulfillment fails on the store's or provider's side, the full amount is refunded within business days. See each product's page for its specific policy.",
+          },
         ],
       },
     },

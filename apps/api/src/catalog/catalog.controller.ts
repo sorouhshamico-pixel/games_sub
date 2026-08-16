@@ -22,4 +22,14 @@ export class CatalogController {
   getProduct(@Param("slug") slug: string) {
     return this.catalogService.getProductBySlug(slug);
   }
+
+  @Get("brands")
+  listBrands() {
+    return this.catalogService.listBrands();
+  }
+
+  @Get("brands/:slug")
+  getBrand(@Param("slug") slug: string) {
+    return this.catalogService.getBrandBySlug(slug);
+  }
 }
