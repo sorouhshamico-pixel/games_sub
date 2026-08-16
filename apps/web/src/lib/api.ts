@@ -79,6 +79,30 @@ async function apiPost<T>(path: string, body?: unknown, options: RequestOptions 
   return (await response.json()) as T;
 }
 
+async function apiMutate<T>(method: "PATCH" | "DELETE", path: string, body?: unknown, options: RequestOptions = {}): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      method,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.cookieHeader ? { Cookie: options.cookieHeader } : {}),
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch {
+    throw new ApiError("network_error", 0);
+  }
+
+  if (!response.ok) {
+    const details = await response.json().catch(() => null);
+    throw new ApiError(details?.error?.message ?? `request_failed_${response.status}`, response.status);
+  }
+
+  return (await response.json()) as T;
+}
+
 export interface CategorySummary {
   slug: string;
   name: string;
@@ -190,4 +214,131 @@ export function getAdminOrders(
   if (params.page) query.set("page", String(params.page));
   const qs = query.toString();
   return apiFetch(`/admin/orders${qs ? `?${qs}` : ""}`, options);
+}
+
+// --- Admin catalog ---------------------------------------------------------
+
+export interface AdminCategory {
+  id: string;
+  slug: string;
+  nameAr: string;
+  nameEn: string;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+export function getAdminCategories(options: RequestOptions = {}): Promise<AdminCategory[]> {
+  return apiFetch("/admin/catalog/categories", options);
+}
+
+export function createAdminCategory(input: { slug: string; nameAr: string; nameEn: string; sortOrder?: number }): Promise<AdminCategory> {
+  return apiPost("/admin/catalog/categories", input);
+}
+
+export interface AdminProductVariant {
+  id: string;
+  sku: string;
+  nameAr: string;
+  nameEn: string;
+  currency: SupportedCurrency;
+  baseCostMinorUnits: number;
+  marginBasisPoints: number;
+  discountMinorUnits: number;
+  taxRateBasisPoints: number;
+  isActive: boolean;
+  minQuantityPerOrder: number;
+  maxQuantityPerOrder: number;
+}
+
+export interface AdminProductTranslation {
+  locale: "ar" | "en";
+  name: string;
+  description: string;
+}
+
+export interface AdminProductSummary {
+  id: string;
+  slug: string;
+  type: string;
+  status: string;
+  categoryId: string;
+  category: { nameAr: string; nameEn: string };
+  translations: AdminProductTranslation[];
+  variants: AdminProductVariant[];
+  createdAt: string;
+}
+
+export interface AdminProductDetail extends AdminProductSummary {
+  imageUrl: string | null;
+  refundEligible: boolean;
+  refundPolicyAr: string | null;
+  refundPolicyEn: string | null;
+  fulfillmentEtaMinutes: number | null;
+  inputDefinitions: Array<{
+    id: string;
+    key: string;
+    labelAr: string;
+    labelEn: string;
+    fieldType: string;
+    required: boolean;
+    regex: string | null;
+    normalize: string;
+  }>;
+}
+
+export function getAdminProducts(
+  params: { status?: string; page?: number } = {},
+  options: RequestOptions = {},
+): Promise<{ items: AdminProductSummary[]; page: number; pageSize: number; total: number }> {
+  const query = new URLSearchParams();
+  if (params.status) query.set("status", params.status);
+  if (params.page) query.set("page", String(params.page));
+  const qs = query.toString();
+  return apiFetch(`/admin/catalog/products${qs ? `?${qs}` : ""}`, options);
+}
+
+export function getAdminProduct(id: string, options: RequestOptions = {}): Promise<AdminProductDetail> {
+  return apiFetch(`/admin/catalog/products/${id}`, options);
+}
+
+export interface CreateAdminProductInput {
+  slug: string;
+  type: string;
+  categoryId: string;
+  refundEligible?: boolean;
+  translations: AdminProductTranslation[];
+  variants: Array<{
+    sku: string;
+    nameAr: string;
+    nameEn: string;
+    currency: SupportedCurrency;
+    baseCostMinorUnits: number;
+    marginBasisPoints?: number;
+    taxRateBasisPoints?: number;
+  }>;
+  inputDefinitions?: Array<{
+    key: string;
+    labelAr: string;
+    labelEn: string;
+    fieldType: "text" | "number" | "select" | "email";
+    required?: boolean;
+    regex?: string;
+    normalize?: "trim" | "trimAndUppercase" | "digitsOnly";
+  }>;
+}
+
+export function createAdminProduct(input: CreateAdminProductInput): Promise<AdminProductDetail> {
+  return apiPost("/admin/catalog/products", input);
+}
+
+export function updateAdminProductStatus(id: string, status: string): Promise<AdminProductDetail> {
+  return apiMutate("PATCH", `/admin/catalog/products/${id}`, { status });
+}
+
+export function deleteAdminProduct(id: string): Promise<AdminProductDetail> {
+  return apiMutate("DELETE", `/admin/catalog/products/${id}`);
+}
+
+export function deactivateAdminVariant(variantId: string): Promise<AdminProductVariant> {
+  return apiMutate("DELETE", `/admin/catalog/variants/${variantId}`);
 }
