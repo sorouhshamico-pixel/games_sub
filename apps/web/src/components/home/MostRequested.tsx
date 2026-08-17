@@ -1,23 +1,16 @@
-import { Dices, Flame, Crosshair, Tv } from "lucide-react";
-import { SiPlaystation, SiNetflix } from "react-icons/si";
+import Image from "next/image";
 import type { Locale } from "@gcc-store/i18n";
 import { Link } from "@/i18n/navigation";
 import { Reveal, StaggerContainer, StaggerItem, HoverCard } from "@/components/motion";
 import { SectionHeading } from "./SectionHeading";
 
-// PlayStation and Netflix use their real Simple Icons brand marks. Yalla
-// Ludo / Free Fire / PUBG Mobile / Shahid have no entry in any general
-// icon library (they're game/regional-service specific, not broad tech
-// brands), so — per prior direction to keep original icons rather than
-// reproduce trademarked game art we don't have rights to — they get a
-// generic, thematically-fitting icon instead.
 const platforms = [
-  { Icon: Dices, ar: "بلا لودو", en: "Yalla Ludo", brand: false },
-  { Icon: Flame, ar: "فري فاير", en: "Free Fire", brand: false },
-  { Icon: Crosshair, ar: "ببجي موبايل", en: "PUBG Mobile", brand: false },
-  { Icon: SiPlaystation, ar: "بلايستيشن", en: "PlayStation", brand: true },
-  { Icon: SiNetflix, ar: "نتفليكس", en: "Netflix", brand: true },
-  { Icon: Tv, ar: "شاهد", en: "Shahid", brand: false },
+  { imgSrc: "/images/most-requested/yalla-ludo.png", ar: "بلا لودو", en: "Yalla Ludo" },
+  { imgSrc: "/images/most-requested/free-fire.png", ar: "فري فاير", en: "Free Fire" },
+  { imgSrc: "/images/most-requested/pubg-mobile.png", ar: "ببجي موبايل", en: "PUBG Mobile" },
+  { imgSrc: "/images/most-requested/playstation.png", ar: "بلايستيشن", en: "PlayStation" },
+  { imgSrc: "/images/most-requested/netflix.png", ar: "نتفليكس", en: "Netflix" },
+  { imgSrc: "/images/most-requested/shahid.png", ar: "شاهد", en: "Shahid" },
 ];
 
 /**
@@ -34,20 +27,15 @@ export function MostRequested({ locale }: { locale: Locale }) {
       <section aria-label={locale === "ar" ? "الأكثر طلبًا" : "Most requested"}>
         <SectionHeading title={locale === "ar" ? "الأكثر طلبًا" : "Most requested"} />
         <StaggerContainer className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-          {platforms.map(({ Icon, ar, en, brand }) => (
+          {platforms.map(({ imgSrc, ar, en }) => (
             <StaggerItem key={en}>
               <HoverCard className="h-full">
                 <Link
                   href="/games"
-                  className="flex h-full flex-col items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-center transition-colors hover:border-brand-primary/50"
+                  className="flex h-full flex-col items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-center transition-colors hover:border-brand-primary/50"
                 >
-                  <span
-                    aria-hidden
-                    className={`flex h-11 w-11 items-center justify-center rounded-xl ${
-                      brand ? "bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)]" : "bg-brand-primary/15 text-brand-primary"
-                    }`}
-                  >
-                    <Icon className="h-6 w-6" />
+                  <span className="relative aspect-square w-full overflow-hidden rounded-xl bg-[var(--color-surface-elevated)]">
+                    <Image src={imgSrc} alt="" fill sizes="120px" className="object-cover" />
                   </span>
                   <span className="text-xs font-medium text-[var(--color-text-primary)]">{locale === "ar" ? ar : en}</span>
                 </Link>
