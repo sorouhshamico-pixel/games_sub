@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { useLocale } from "next-intl";
 import { motion, useScroll, useTransform } from "motion/react";
+import { Zap } from "lucide-react";
 import { buttonBaseClasses, buttonSizeClasses, buttonVariantClasses, cn } from "@gcc-store/ui";
 import { Link } from "@/i18n/navigation";
 import { duration, easing, spring, staggerGap } from "@/lib/motion/tokens";
@@ -19,11 +20,13 @@ const heroItem = {
 
 export function HomeHero({
   title,
+  titleHighlight,
   subtitle,
   ctaLabel,
   trustItems,
 }: {
   title: string;
+  titleHighlight: string;
   subtitle: string;
   ctaLabel: string;
   trustItems: Array<{ icon: React.ReactNode; label: string }>;
@@ -55,7 +58,9 @@ export function HomeHero({
       <div className="relative grid items-center gap-10 lg:grid-cols-2">
         <motion.div initial="hidden" animate="visible" variants={heroContainer}>
           <motion.h1 variants={heroItem} className="max-w-2xl text-4xl font-bold leading-tight text-[var(--color-text-primary)] sm:text-5xl">
-            {title}
+            {title}{" "}
+            <span className="text-brand-secondary">{titleHighlight}</span>{" "}
+            <Zap aria-hidden className="inline-block h-8 w-8 -translate-y-1 fill-brand-secondary text-brand-secondary sm:h-10 sm:w-10" />
           </motion.h1>
           <motion.p variants={heroItem} className="mt-4 max-w-xl text-lg text-[var(--color-text-muted)]">
             {subtitle}

@@ -1,9 +1,17 @@
 import { useLocale, useTranslations } from "next-intl";
+import { SiVisa, SiMastercard, SiApplepay } from "react-icons/si";
 import { ShahnooIcon } from "@gcc-store/ui";
 import { Link } from "@/i18n/navigation";
 import { AppleIcon, PlayStoreIcon } from "./home/icons";
 
-const paymentBadges = ["Visa", "Mastercard", "mada", "Apple Pay"];
+// mada has no Simple Icons entry (Saudi-specific network) — kept as a
+// text-only chip alongside the icon-bearing brands.
+const paymentBadges: Array<{ name: string; Icon?: typeof SiVisa }> = [
+  { name: "Visa", Icon: SiVisa },
+  { name: "Mastercard", Icon: SiMastercard },
+  { name: "mada" },
+  { name: "Apple Pay", Icon: SiApplepay },
+];
 
 export function SiteFooter() {
   const t = useTranslations();
@@ -61,12 +69,13 @@ export function SiteFooter() {
             <span className="me-1 text-xs font-medium text-[var(--color-text-muted)]">
               {locale === "ar" ? "طرق الدفع" : "Payment methods"}
             </span>
-            {paymentBadges.map((brand) => (
+            {paymentBadges.map(({ name, Icon }) => (
               <span
-                key={brand}
-                className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text-primary)]"
+                key={name}
+                className="flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text-primary)]"
               >
-                {brand}
+                {Icon ? <Icon className="h-3.5 w-3.5" aria-hidden /> : null}
+                {name}
               </span>
             ))}
           </div>

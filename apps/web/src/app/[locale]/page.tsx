@@ -10,6 +10,7 @@ import { ProcessSteps } from "@/components/home/ProcessSteps";
 import { StatStrip } from "@/components/home/StatStrip";
 import { FaqPreview } from "@/components/home/FaqPreview";
 import { LimitedOffers } from "@/components/home/LimitedOffers";
+import { MostRequested } from "@/components/home/MostRequested";
 import { Testimonials } from "@/components/home/Testimonials";
 import { NewsletterSignup } from "@/components/home/NewsletterSignup";
 import { BoltIcon, ShieldIcon, HeadsetIcon } from "@/components/home/icons";
@@ -55,7 +56,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </div>
 
       <div className="mx-auto flex max-w-7xl flex-col gap-16 px-4 py-10">
-        <HomeHero title={t("home.heroTitle")} subtitle={t("home.heroSubtitle")} ctaLabel={t("home.heroCta")} trustItems={trustItems} />
+        <HomeHero
+          title={t("home.heroTitle")}
+          titleHighlight={t("home.heroTitleHighlight")}
+          subtitle={t("home.heroSubtitle")}
+          ctaLabel={t("home.heroCta")}
+          trustItems={trustItems}
+        />
 
         {categories.length > 0 ? (
           <Reveal>
@@ -81,6 +88,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </section>
           </Reveal>
         ) : null}
+
+        <MostRequested locale={typedLocale} />
 
         {popularProducts && popularProducts.items.length > 0 ? (
           <LimitedOffers products={popularProducts.items.slice(0, 4)} locale={typedLocale} />

@@ -15,7 +15,8 @@
     "help": "Help"
   },
   "home": {
-    "heroTitle": "Charge up your games and subscriptions in seconds",
+    "heroTitle": "Charge up your games and subscriptions in",
+    "heroTitleHighlight": "seconds",
     "heroSubtitle": "A trusted platform for game top-ups and digital subscription activation across Saudi Arabia and the Gulf",
     "heroCta": "Browse games",
     "popularGames": "Popular games",
