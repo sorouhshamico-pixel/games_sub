@@ -40,9 +40,7 @@ export async function generateMetadata({
   return {
     title: { default: t("name"), template: `%s | ${t("name")}` },
     description: t("tagline"),
-    // Placeholder mark (apps/web/public/favicon.svg) — swap for the real
-    // brand icon before launch.
-    icons: { icon: "/favicon.svg" },
+    icons: { icon: "/logo/shahnoo-icon.png" },
   };
 }
 

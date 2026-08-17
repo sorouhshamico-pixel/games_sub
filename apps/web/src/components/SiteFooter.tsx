@@ -1,5 +1,4 @@
 import { useTranslations } from "next-intl";
-import { LogoMark } from "@gcc-store/ui";
 import { Link } from "@/i18n/navigation";
 
 export function SiteFooter() {
@@ -11,7 +10,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-3">
         <div>
           <div className="mb-3 flex items-center gap-2">
-            <LogoMark className="h-6 w-6" />
+            <img src="/logo/shahnoo-icon.png" alt="" className="h-6 w-6" />
             <span className="font-semibold text-[var(--color-text-primary)]">{t("brand.name")}</span>
           </div>
           <p className="text-sm text-[var(--color-text-muted)]">{t("brand.tagline")}</p>
