@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import { ShahnooIcon, cn } from "@gcc-store/ui";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -12,6 +12,7 @@ const SCROLL_THRESHOLD = 24;
 
 export function SiteHeader() {
   const t = useTranslations();
+  const locale = useLocale();
   const router = useRouter();
   const [searchValue, setSearchValue] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
@@ -47,7 +48,15 @@ export function SiteHeader() {
       >
         <Link href="/" className="flex shrink-0 items-center gap-2">
           <ShahnooIcon className="h-8 w-8" />
-          <span className="text-lg font-bold tracking-tight text-[var(--color-text-primary)]">{t("brand.name")}</span>
+          <span className="flex flex-col leading-none">
+            <span className="text-lg font-bold tracking-tight text-[var(--color-text-primary)]">{t("brand.name")}</span>
+            {/* The approved lockup pairs the Arabic wordmark with a small Latin
+                "SHAHNOO" subtitle — only shown in the Arabic locale, since the
+                English locale's brand name already reads "Shahnoo". */}
+            {locale === "ar" ? (
+              <span className="text-[9px] font-semibold tracking-[0.2em] text-brand-secondary">SHAHNOO</span>
+            ) : null}
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-5 text-sm font-medium md:flex" aria-label="primary">

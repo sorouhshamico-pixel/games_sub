@@ -1,9 +1,10 @@
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ShahnooIcon } from "@gcc-store/ui";
 import { Link } from "@/i18n/navigation";
 
 export function SiteFooter() {
   const t = useTranslations();
+  const locale = useLocale();
   const year = new Date().getFullYear();
 
   return (
@@ -13,6 +14,9 @@ export function SiteFooter() {
           <div className="mb-3 flex items-center gap-2">
             <ShahnooIcon className="h-6 w-6" />
             <span className="font-semibold text-[var(--color-text-primary)]">{t("brand.name")}</span>
+            {locale === "ar" ? (
+              <span className="text-[9px] font-semibold tracking-[0.2em] text-brand-secondary">SHAHNOO</span>
+            ) : null}
           </div>
           <p className="text-sm text-[var(--color-text-muted)]">{t("brand.tagline")}</p>
         </div>
