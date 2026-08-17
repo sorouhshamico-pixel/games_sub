@@ -1,5 +1,9 @@
+"use client";
+
+import { useState } from "react";
 import { useLocale } from "next-intl";
-import { formatMoney } from "@gcc-store/ui";
+import { Heart } from "lucide-react";
+import { formatMoney, cn } from "@gcc-store/ui";
 import type { ProductSummary } from "@gcc-store/contracts";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@gcc-store/i18n";
@@ -9,9 +13,25 @@ import { HoverCard } from "./motion";
 export function ProductCard({ product }: { product: ProductSummary }) {
   const locale = useLocale() as Locale;
   const name = locale === "ar" ? product.nameAr : product.nameEn;
+  // Local-only wishlist toggle — there's no wishlist backend yet, so this
+  // doesn't persist across reloads. It's a real, working UI interaction
+  // (not a dead button), just not backed by an account-level feature yet.
+  const [wishlisted, setWishlisted] = useState(false);
 
   return (
-    <HoverCard className="h-full">
+    <HoverCard className="relative h-full">
+      <button
+        type="button"
+        onClick={(event) => {
+          event.preventDefault();
+          setWishlisted((prev) => !prev);
+        }}
+        aria-pressed={wishlisted}
+        aria-label={locale === "ar" ? "أضف للمفضلة" : "Add to wishlist"}
+        className="absolute top-2 end-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70"
+      >
+        <Heart className={cn("h-3.5 w-3.5", wishlisted && "fill-danger text-danger")} aria-hidden />
+      </button>
       <Link
         href={`/products/${product.slug}`}
         className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-black/0 transition-[border-color,box-shadow] duration-300 hover:border-brand-primary/60 hover:shadow-xl hover:shadow-brand-primary/10"

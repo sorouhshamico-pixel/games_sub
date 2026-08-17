@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useLocale } from "next-intl";
 import { motion, useScroll, useTransform } from "motion/react";
-import { Zap } from "lucide-react";
+import { Zap, Tag, ShieldCheck, Headset } from "lucide-react";
 import { buttonBaseClasses, buttonSizeClasses, buttonVariantClasses, cn } from "@gcc-store/ui";
 import { Link } from "@/i18n/navigation";
 import { duration, easing, spring, staggerGap } from "@/lib/motion/tokens";
@@ -18,18 +18,23 @@ const heroItem = {
   visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: duration.hero * 0.6, ease: easing } },
 };
 
+const featureStrip = [
+  { Icon: Headset, colorClass: "bg-brand-secondary/15 text-brand-secondary", ar: { title: "دعم 24/7", sub: "نحن هنا لمساعدتك" }, en: { title: "24/7 support", sub: "We're here to help" } },
+  { Icon: Tag, colorClass: "bg-brand-primary/15 text-brand-primary", ar: { title: "أفضل الأسعار", sub: "عروض وخصومات حصرية" }, en: { title: "Best prices", sub: "Exclusive offers & discounts" } },
+  { Icon: ShieldCheck, colorClass: "bg-brand-primary/15 text-brand-primary", ar: { title: "أمن وموثوق", sub: "تشفير وحماية كاملة" }, en: { title: "Safe & trusted", sub: "Full encryption & protection" } },
+  { Icon: Zap, colorClass: "bg-brand-accent/15 text-brand-accent", ar: { title: "تسليم فوري", sub: "خلال ثوانٍ" }, en: { title: "Instant delivery", sub: "Within seconds" } },
+];
+
 export function HomeHero({
   title,
   titleHighlight,
   subtitle,
   ctaLabel,
-  trustItems,
 }: {
   title: string;
   titleHighlight: string;
   subtitle: string;
   ctaLabel: string;
-  trustItems: Array<{ icon: React.ReactNode; label: string }>;
 }) {
   const locale = useLocale();
   const sectionRef = useRef<HTMLElement>(null);
@@ -109,13 +114,21 @@ export function HomeHero({
             </motion.span>
           </motion.div>
 
-          <motion.div variants={heroItem} className="mt-10 flex flex-wrap gap-x-8 gap-y-3">
-            {trustItems.map((item, index) => (
-              <div key={index} className="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
-                <span className="text-brand-accent">{item.icon}</span>
-                {item.label}
-              </div>
-            ))}
+          <motion.div variants={heroItem} className="mt-10 grid grid-cols-2 gap-x-6 gap-y-4 sm:flex sm:flex-wrap sm:items-center">
+            {featureStrip.map(({ Icon, colorClass, ar, en }, index) => {
+              const copy = locale === "ar" ? ar : en;
+              return (
+                <div key={index} className="flex items-center gap-2.5">
+                  <span aria-hidden className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", colorClass)}>
+                    <Icon className="h-4.5 w-4.5" />
+                  </span>
+                  <div className="text-sm">
+                    <p className="font-semibold text-[var(--color-text-primary)]">{copy.title}</p>
+                    <p className="text-xs text-[var(--color-text-muted)]">{copy.sub}</p>
+                  </div>
+                </div>
+              );
+            })}
           </motion.div>
         </motion.div>
 

@@ -13,7 +13,6 @@ import { LimitedOffers } from "@/components/home/LimitedOffers";
 import { MostRequested } from "@/components/home/MostRequested";
 import { Testimonials } from "@/components/home/Testimonials";
 import { NewsletterSignup } from "@/components/home/NewsletterSignup";
-import { BoltIcon, ShieldIcon, HeadsetIcon } from "@/components/home/icons";
 import { Reveal, StaggerContainer, StaggerItem } from "@/components/motion";
 import type { Locale } from "@gcc-store/i18n";
 
@@ -40,12 +39,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     loadError = error instanceof ApiError;
   }
 
-  const trustItems = [
-    { icon: <BoltIcon />, label: t("home.trustDelivery") },
-    { icon: <ShieldIcon />, label: t("home.trustSecurity") },
-    { icon: <HeadsetIcon />, label: t("home.trustSupport") },
-  ];
-
   return (
     <div className="relative">
       {/* Decorative, non-interactive background glow — purely visual, capped
@@ -61,14 +54,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           titleHighlight={t("home.heroTitleHighlight")}
           subtitle={t("home.heroSubtitle")}
           ctaLabel={t("home.heroCta")}
-          trustItems={trustItems}
         />
 
         {categories.length > 0 ? (
           <Reveal>
             <section aria-label={locale === "ar" ? "تصفح حسب الفئة" : "Browse by category"}>
               <SectionHeading title={locale === "ar" ? "تصفح حسب الفئة" : "Browse by category"} />
-              <CategoryTiles categories={categories} />
+              <CategoryTiles categories={categories} locale={typedLocale} />
             </section>
           </Reveal>
         ) : null}
@@ -114,12 +106,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
         <ProcessSteps locale={typedLocale} />
 
-        <StatStrip
-          locale={typedLocale}
-          productCount={popularProducts?.total ?? 0}
-          brandCount={brands.length}
-          categoryCount={categories.length}
-        />
+        <StatStrip locale={typedLocale} />
 
         <Testimonials locale={typedLocale} />
 

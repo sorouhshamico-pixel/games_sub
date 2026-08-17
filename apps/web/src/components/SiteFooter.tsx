@@ -1,5 +1,5 @@
 import { useLocale, useTranslations } from "next-intl";
-import { SiVisa, SiMastercard, SiApplepay } from "react-icons/si";
+import { SiVisa, SiMastercard, SiApplepay, SiTiktok, SiInstagram, SiX, SiYoutube } from "react-icons/si";
 import { ShahnooIcon } from "@gcc-store/ui";
 import { Link } from "@/i18n/navigation";
 import { AppleIcon, PlayStoreIcon } from "./home/icons";
@@ -7,21 +7,41 @@ import { AppleIcon, PlayStoreIcon } from "./home/icons";
 // mada has no Simple Icons entry (Saudi-specific network) — kept as a
 // text-only chip alongside the icon-bearing brands.
 const paymentBadges: Array<{ name: string; Icon?: typeof SiVisa }> = [
+  { name: "mada" },
   { name: "Visa", Icon: SiVisa },
   { name: "Mastercard", Icon: SiMastercard },
-  { name: "mada" },
   { name: "Apple Pay", Icon: SiApplepay },
 ];
+
+// Decorative only — no real Shahnoo social accounts exist yet, so these are
+// non-interactive marks (not <Link>s) rather than links to nowhere.
+const socialIcons = [SiTiktok, SiInstagram, SiX, SiYoutube];
 
 export function SiteFooter() {
   const t = useTranslations();
   const locale = useLocale();
   const year = new Date().getFullYear();
 
+  const quickLinks = [
+    { href: "/" as const, ar: "الرئيسية", en: "Home" },
+    { href: { pathname: "/games", query: { category: "game-topups" } }, ar: "شحن الألعاب", en: "Game top-ups" },
+    { href: { pathname: "/games", query: { category: "subscriptions" } }, ar: "الاشتراكات الرقمية", en: "Digital subscriptions" },
+    { href: { pathname: "/games", query: { category: "gift-cards" } }, ar: "بطاقات الهدايا", en: "Gift cards" },
+    { href: "/#limited-offers" as const, ar: "العروض", en: "Offers" },
+  ];
+
+  const supportLinks = [
+    { href: "/pages/faq" as const, ar: "تواصل معنا", en: "Contact us" },
+    { href: "/pages/faq" as const, ar: "الأسئلة الشائعة", en: "FAQ" },
+    { href: "/pages/refunds" as const, ar: "سياسة الاسترجاع", en: "Refund policy" },
+    { href: "/pages/privacy" as const, ar: "سياسة الخصوصية", en: "Privacy policy" },
+    { href: "/pages/terms" as const, ar: "الشروط والأحكام", en: "Terms & conditions" },
+  ];
+
   return (
     <footer className="mt-16 border-t border-[var(--color-border)] bg-[var(--color-surface)]">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-3">
-        <div>
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="lg:col-span-1">
           <div className="mb-3 flex items-center gap-2">
             <ShahnooIcon className="h-6 w-6" />
             <span className="font-semibold text-[var(--color-text-primary)]">{t("brand.name")}</span>
@@ -30,45 +50,44 @@ export function SiteFooter() {
             ) : null}
           </div>
           <p className="text-sm text-[var(--color-text-muted)]">{t("brand.tagline")}</p>
+          <div className="mt-4 flex items-center gap-3 text-[var(--color-text-muted)]">
+            {socialIcons.map((Icon, index) => (
+              <span key={index} aria-hidden className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-surface-elevated)]">
+                <Icon className="h-3.5 w-3.5" />
+              </span>
+            ))}
+          </div>
         </div>
-        <div>
-          <p className="mb-3 font-semibold text-[var(--color-text-primary)]">{t("footer.legalTitle")}</p>
-          <ul className="flex flex-col gap-2 text-sm">
-            <li>
-              <Link href="/pages/terms" className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
-                {t("footer.terms")}
-              </Link>
-            </li>
-            <li>
-              <Link href="/pages/privacy" className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
-                {t("footer.privacy")}
-              </Link>
-            </li>
-            <li>
-              <Link href="/pages/refunds" className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
-                {t("footer.refunds")}
-              </Link>
-            </li>
-          </ul>
-        </div>
-        <div>
-          <p className="mb-3 font-semibold text-[var(--color-text-primary)]">{t("footer.contactTitle")}</p>
-          <ul className="flex flex-col gap-2 text-sm">
-            <li>
-              <Link href="/pages/faq" className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
-                {t("nav.help")}
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </div>
 
-      <div className="border-t border-[var(--color-border)] px-4 py-6">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-6">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="me-1 text-xs font-medium text-[var(--color-text-muted)]">
-              {locale === "ar" ? "طرق الدفع" : "Payment methods"}
-            </span>
+        <div>
+          <p className="mb-3 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "روابط سريعة" : "Quick links"}</p>
+          <ul className="flex flex-col gap-2 text-sm">
+            {quickLinks.map((link, index) => (
+              <li key={index}>
+                <Link href={link.href} className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
+                  {locale === "ar" ? link.ar : link.en}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <p className="mb-3 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "دعم العملاء" : "Customer support"}</p>
+          <ul className="flex flex-col gap-2 text-sm">
+            {supportLinks.map((link, index) => (
+              <li key={index}>
+                <Link href={link.href} className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
+                  {locale === "ar" ? link.ar : link.en}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <p className="mb-3 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "طرق الدفع" : "Payment methods"}</p>
+          <div className="flex flex-wrap gap-2">
             {paymentBadges.map(({ name, Icon }) => (
               <span
                 key={name}
@@ -79,25 +98,29 @@ export function SiteFooter() {
               </span>
             ))}
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="me-1 text-xs font-medium text-[var(--color-text-muted)]">
-              {locale === "ar" ? "قريبًا" : "Coming soon"}
+          <p className="mt-3 text-[11px] text-[var(--color-text-muted)]">
+            {locale === "ar"
+              ? "بوابة الدفع النشطة حاليًا للتجربة فقط"
+              : "The live payment gateway is for testing only"}
+          </p>
+        </div>
+
+        <div>
+          <p className="mb-3 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "حمل التطبيق" : "Get the app"}</p>
+          <p className="mb-3 text-sm text-[var(--color-text-muted)]">
+            {locale === "ar" ? "تجربة أسرع وأكثر سهولة" : "A faster, easier experience"}
+          </p>
+          <div className="flex flex-col gap-2">
+            <span className="flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--color-text-muted)]">
+              <AppleIcon className="h-3.5 w-3.5" aria-hidden />
+              App Store — {locale === "ar" ? "قريبًا" : "Coming soon"}
             </span>
             <span className="flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--color-text-muted)]">
-              <AppleIcon className="h-3.5 w-3.5" />
-              App Store
-            </span>
-            <span className="flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--color-text-muted)]">
-              <PlayStoreIcon className="h-3.5 w-3.5" />
-              Google Play
+              <PlayStoreIcon className="h-3.5 w-3.5" aria-hidden />
+              Google Play — {locale === "ar" ? "قريبًا" : "Coming soon"}
             </span>
           </div>
         </div>
-        <p className="mx-auto mt-4 max-w-7xl text-center text-[11px] text-[var(--color-text-muted)]">
-          {locale === "ar"
-            ? "بوابة الدفع النشطة حاليًا للتجربة فقط — طرق الدفع أعلاه توضيحية للعرض"
-            : "The live payment gateway is for testing only — payment methods above are illustrative"}
-        </p>
       </div>
 
       <div className="border-t border-[var(--color-border)] px-4 py-4 text-center text-xs text-[var(--color-text-muted)]">
