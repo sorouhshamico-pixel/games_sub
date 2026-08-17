@@ -1,4 +1,6 @@
 import type {
+  BlogPostDetail,
+  BlogPostSummary,
   CheckoutRequest,
   CheckoutResponse,
   GameBrandDetail,
@@ -145,6 +147,28 @@ export function getBrandBySlug(slug: string): Promise<GameBrandDetail> {
 
 export function getPage(slug: string, locale: "ar" | "en"): Promise<PageContent> {
   return apiFetch(`/content/pages/${slug}?locale=${locale}`);
+}
+
+export interface ListBlogPostsResult {
+  items: BlogPostSummary[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
+export function listBlogPosts(
+  params: { category?: string; page?: number; locale?: "ar" | "en" } = {},
+): Promise<ListBlogPostsResult> {
+  const query = new URLSearchParams();
+  if (params.category) query.set("category", params.category);
+  if (params.page) query.set("page", String(params.page));
+  if (params.locale) query.set("locale", params.locale);
+  const qs = query.toString();
+  return apiFetch(`/content/blog${qs ? `?${qs}` : ""}`);
+}
+
+export function getBlogPost(slug: string, locale: "ar" | "en"): Promise<BlogPostDetail> {
+  return apiFetch(`/content/blog/${slug}?locale=${locale}`);
 }
 
 export function checkout(request: CheckoutRequest): Promise<CheckoutResponse> {

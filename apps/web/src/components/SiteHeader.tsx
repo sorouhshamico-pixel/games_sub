@@ -82,6 +82,9 @@ export function SiteHeader() {
           >
             {t("nav.giftCards")}
           </Link>
+          <Link href="/blog" className="text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]">
+            {locale === "ar" ? "المدونة" : "Blog"}
+          </Link>
           <Link href="/pages/faq" className="text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]">
             {t("nav.help")}
           </Link>

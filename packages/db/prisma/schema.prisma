@@ -793,11 +793,13 @@ model PageTranslation {
 }
 
 model BlogPost {
-  id          String   @id @default(uuid())
-  slug        String   @unique
-  isPublished Boolean  @default(false)
-  publishAt   DateTime?
-  createdAt   DateTime @default(now())
+  id             String   @id @default(uuid())
+  slug           String   @unique
+  categorySlug   String   @default("guides")
+  readingMinutes Int      @default(4)
+  isPublished    Boolean  @default(false)
+  publishAt      DateTime?
+  createdAt      DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   translations BlogPostTranslation[]

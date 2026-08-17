@@ -872,6 +872,181 @@ async function main() {
     },
   });
 
+  const blogPosts: Array<{
+    slug: string;
+    categorySlug: string;
+    readingMinutes: number;
+    daysAgo: number;
+    ar: { title: string; excerpt: string; bodyMarkdown: string };
+    en: { title: string; excerpt: string; bodyMarkdown: string };
+  }> = [
+    {
+      slug: "safe-fast-top-up-guide",
+      categorySlug: "guides",
+      readingMinutes: 6,
+      daysAgo: 1,
+      ar: {
+        title: "الدليل الكامل لشحن الألعاب بأمان وسرعة",
+        excerpt: "تعرف على أفضل الطرق لشحن الألعاب بطريقة آمنة وسريعة، واختيار وسيلة الدفع المناسبة لك داخل متجر شحنو.",
+        bodyMarkdown:
+          "## قبل أن تبدأ\nتأكد دائمًا من نسخ معرف اللاعب (Player ID) بدقة من داخل اللعبة نفسها قبل إتمام عملية الشحن — أغلب مشاكل الشحن تحدث بسبب خطأ بسيط في نسخ المعرف.\n\n## اختيار الفئة الصحيحة\nكل منتج يعرض الفئات المتاحة (مثل عدد العملات أو مدة الاشتراك) مع السعر الفعلي لكل فئة — اختر ما يناسب استخدامك الفعلي بدل الشراء بكميات أكبر من حاجتك.\n\n## إتمام الدفع\nبعد اختيار الفئة وإدخال البيانات المطلوبة، ستتم مطالبتك بإتمام الدفع. بعد تأكيد الدفع، يتم تنفيذ الطلب خلال دقائق في أغلب الحالات.\n\n## بعد الشحن\nإذا واجهت أي مشكلة بعد الدفع، راجع صفحة تتبع الطلب المرسلة إليك، أو تواصل مع الدعم الفني عبر صفحة المساعدة.",
+      },
+      en: {
+        title: "The Complete Guide to Safe, Fast Game Top-Ups",
+        excerpt: "Learn the best ways to top up your games safely and quickly, and how to pick the right payment method on Shahnoo.",
+        bodyMarkdown:
+          "## Before you start\nAlways double-check your in-game Player ID before completing a top-up — most top-up issues come from a simple copy-paste mistake.\n\n## Choosing the right tier\nEvery product lists its available tiers (like coin amounts or subscription length) with the real price for each — pick what matches your actual usage instead of over-buying.\n\n## Completing payment\nAfter selecting a tier and entering the required details, you'll be asked to complete payment. Once confirmed, most orders fulfill within minutes.\n\n## After topping up\nIf anything goes wrong after payment, check the order tracking page sent to you, or reach out via the help page.",
+      },
+    },
+    {
+      slug: "protect-your-account-while-topping-up",
+      categorySlug: "account-protection",
+      readingMinutes: 4,
+      daysAgo: 2,
+      ar: {
+        title: "كيف تحمي حسابك أثناء الشحن؟",
+        excerpt: "خطوات بسيطة تحميك من أخطاء الشحن الشائعة وتحافظ على أمان حسابك وبياناتك أثناء عمليات الدفع الإلكتروني.",
+        bodyMarkdown:
+          "## لا تشارك كلمة مرور حسابك أبدًا\nأي متجر شحن حقيقي لا يحتاج أبدًا كلمة مرور حساب اللعبة الخاص بك — يكفي فقط معرف اللاعب (ID) الظاهر داخل اللعبة.\n\n## تحقق من المعرف مرتين\nمنتجات الشحن الرقمي غير قابلة للاسترجاع بعد التنفيذ، لذا تحقق من صحة المعرف ونوع الخادم (Server) إن وجد قبل الدفع.\n\n## استخدم وسيلة دفع تعرفها\nتجنب مشاركة بيانات بطاقتك في أي موقع لا تثق به، واحرص أن تكون صفحة الدفع مشفّرة (HTTPS).\n\n## احتفظ برقم الطلب\nبعد إتمام الشحن، احتفظ برقم الطلب ورابط التتبع المرسل لك — ستحتاجه لأي متابعة مع الدعم الفني.",
+      },
+      en: {
+        title: "How to Protect Your Account While Topping Up",
+        excerpt: "Simple steps that protect you from common top-up mistakes and keep your account and payment data safe.",
+        bodyMarkdown:
+          "## Never share your account password\nA legitimate top-up store never needs your game account password — only the in-game Player ID.\n\n## Double-check your ID\nDigital top-ups are non-refundable once fulfilled, so verify your ID and server (if applicable) before paying.\n\n## Use a payment method you trust\nAvoid entering card details on sites you don't trust, and make sure the checkout page is encrypted (HTTPS).\n\n## Keep your order number\nAfter checkout, save your order number and tracking link — you'll need them for any follow-up with support.",
+      },
+    },
+    {
+      slug: "choosing-digital-subscriptions-for-family",
+      categorySlug: "subscriptions",
+      readingMinutes: 5,
+      daysAgo: 4,
+      ar: {
+        title: "أفضل الاشتراكات الرقمية للعائلة: كيف تختار؟",
+        excerpt: "مقارنة عملية بين خطط الاشتراكات الفردية والعائلية لمساعدتك على اختيار الأنسب لاستخدامك.",
+        bodyMarkdown:
+          "## هل تحتاج خطة فردية أم عائلية؟\nإذا كان الاشتراك سيُستخدم من أكثر من جهاز أو شخص في نفس الوقت، فالخطة العائلية غالبًا أوفر من عدة اشتراكات فردية منفصلة.\n\n## مدة الاشتراك\nمعظم المنصات الرقمية تقدم خيارات شهرية وسنوية — الاشتراك السنوي عادة أقل تكلفة شهريًا لكنه يتطلب دفعة أكبر مقدمًا.\n\n## التفعيل والتسليم\nبعد الشراء يصلك رمز أو رابط تفعيل، ويختلف وقت التفعيل حسب نوع الاشتراك — راجع تفاصيل كل منتج قبل الشراء.",
+      },
+      en: {
+        title: "Choosing the Best Digital Subscriptions for Your Family",
+        excerpt: "A practical comparison between individual and family subscription plans to help you pick what fits.",
+        bodyMarkdown:
+          "## Individual or family plan?\nIf the subscription will be used across multiple devices or people at once, a family plan is usually cheaper than several individual ones.\n\n## Subscription length\nMost digital platforms offer monthly and yearly options — yearly is usually cheaper per month but needs a bigger upfront payment.\n\n## Activation & delivery\nAfter purchase you'll receive an activation code or link; activation time varies by subscription type — check each product's details before buying.",
+      },
+    },
+    {
+      slug: "everything-about-gift-cards",
+      categorySlug: "guides",
+      readingMinutes: 4,
+      daysAgo: 6,
+      ar: {
+        title: "كل ما تحتاج معرفته عن بطاقات الهدايا",
+        excerpt: "دليل مختصر لفهم بطاقات الهدايا الرقمية، طريقة استخدامها، وكيفية اختيار البطاقة المناسبة كهدية.",
+        bodyMarkdown:
+          "## ما هي بطاقة الهدايا الرقمية؟\nهي رمز رقمي يمكن استبداله برصيد داخل متجر أو منصة معينة — تصلك مباشرة بعد الدفع دون الحاجة لبطاقة فعلية.\n\n## كيف تختار البطاقة المناسبة؟\nتأكد من أن البطاقة متوافقة مع المنطقة/المتجر الذي يستخدمه الشخص الذي تُهديه البطاقة، فبعض البطاقات مقيدة بمنطقة معينة.\n\n## بعد الشراء\nاحتفظ برمز البطاقة في مكان آمن، فهو يعادل قيمة مالية فعلية بمجرد استبداله.",
+      },
+      en: {
+        title: "Everything You Need to Know About Gift Cards",
+        excerpt: "A short guide to understanding digital gift cards, how to use them, and how to pick the right one as a gift.",
+        bodyMarkdown:
+          "## What's a digital gift card?\nA digital code redeemable for balance on a specific store or platform — delivered right after payment, no physical card needed.\n\n## Picking the right one\nMake sure the card matches the region/store the recipient actually uses — some gift cards are region-locked.\n\n## After purchase\nKeep the code somewhere safe — it's worth real money the moment it's redeemed.",
+      },
+    },
+    {
+      slug: "top-up-your-favorite-game-in-minutes",
+      categorySlug: "guides",
+      readingMinutes: 3,
+      daysAgo: 7,
+      ar: {
+        title: "طريقة شحن رصيد لعبتك المفضلة بخطوات بسيطة",
+        excerpt: "أربع خطوات سريعة توضح لك كيفية إتمام أي عملية شحن داخل شحنو من البداية للنهاية.",
+        bodyMarkdown:
+          "## 1. اختر اللعبة أو الخدمة\nابحث عن اللعبة أو الخدمة التي تريدها من الصفحة الرئيسية أو صفحة الألعاب.\n\n## 2. اختر الفئة\nحدد الفئة المناسبة (كمية العملات، مدة الاشتراك، أو قيمة البطاقة).\n\n## 3. أدخل بياناتك\nأدخل معرف اللاعب أو البيانات المطلوبة بدقة.\n\n## 4. ادفع واستلم\nأكمل الدفع، وسيتم تنفيذ طلبك خلال دقائق في أغلب الحالات.",
+      },
+      en: {
+        title: "How to Top Up Your Favorite Game in a Few Simple Steps",
+        excerpt: "Four quick steps showing exactly how a top-up on Shahnoo works from start to finish.",
+        bodyMarkdown:
+          "## 1. Pick the game or service\nFind what you want from the homepage or the games page.\n\n## 2. Pick a tier\nChoose the right tier (coin amount, subscription length, or card value).\n\n## 3. Enter your details\nEnter your Player ID or the required details accurately.\n\n## 4. Pay and receive\nComplete payment — most orders fulfill within minutes.",
+      },
+    },
+    {
+      slug: "protect-your-payment-details",
+      categorySlug: "account-protection",
+      readingMinutes: 4,
+      daysAgo: 9,
+      ar: {
+        title: "نصائح لحماية بياناتك المالية عند الدفع الإلكتروني",
+        excerpt: "إرشادات عملية تحافظ على أمان بطاقتك ومعلوماتك المالية عند التسوق والدفع عبر الإنترنت.",
+        bodyMarkdown:
+          "## تأكد من تشفير الموقع\nابحث عن رمز القفل بجانب رابط الموقع قبل إدخال أي بيانات دفع.\n\n## لا تحفظ بياناتك في أجهزة مشتركة\nتجنب حفظ بيانات بطاقتك في متصفح جهاز يستخدمه أشخاص آخرون.\n\n## راقب كشف حسابك البنكي\nراجع كشف حسابك بانتظام للتأكد من عدم وجود عمليات غير معروفة.\n\n## فعّل التنبيهات الفورية\nمعظم البنوك توفر تنبيهات فورية عبر الرسائل عند كل عملية شراء — فعّلها لتكتشف أي نشاط غير معتاد بسرعة.",
+      },
+      en: {
+        title: "Tips for Protecting Your Payment Details Online",
+        excerpt: "Practical guidance to keep your card and financial information safe while shopping and paying online.",
+        bodyMarkdown:
+          "## Check for encryption\nLook for the lock icon next to the site's URL before entering any payment details.\n\n## Don't save details on shared devices\nAvoid saving your card details in a browser used by other people.\n\n## Watch your bank statement\nReview it regularly to catch any unfamiliar charges.\n\n## Turn on instant alerts\nMost banks offer instant SMS alerts for every purchase — enable them to spot unusual activity fast.",
+      },
+    },
+    {
+      slug: "comparing-subscription-plans",
+      categorySlug: "comparisons",
+      readingMinutes: 5,
+      daysAgo: 11,
+      ar: {
+        title: "مقارنة بين باقات الاشتراكات الرقمية: أيها يناسبك؟",
+        excerpt: "نقارن بين خيارات الاشتراك الشائعة من حيث المدة والسعر والمزايا لمساعدتك على اتخاذ القرار الأنسب.",
+        bodyMarkdown:
+          "## الاشتراك الشهري\nمرن ومناسب لمن يريد تجربة الخدمة أولاً، لكنه غالبًا أعلى تكلفة على المدى الطويل.\n\n## الاشتراك السنوي\nأوفر على المدى الطويل، ومناسب إذا كنت متأكدًا من استخدامك المستمر للخدمة.\n\n## الخطط متعددة الأجهزة\nإذا كانت الخدمة ستُستخدم من أكثر من جهاز أو شخص، تحقق دائمًا من عدد الأجهزة المسموح بها في كل خطة قبل الشراء.",
+      },
+      en: {
+        title: "Comparing Digital Subscription Plans: Which Fits You?",
+        excerpt: "A comparison of common subscription options by length, price, and perks to help you decide.",
+        bodyMarkdown:
+          "## Monthly plans\nFlexible and good for trying a service first, but usually costs more over time.\n\n## Yearly plans\nCheaper long-term, and a good fit if you're sure you'll keep using the service.\n\n## Multi-device plans\nIf more than one device or person will use it, always check the allowed device count per plan before buying.",
+      },
+    },
+    {
+      slug: "how-coupon-codes-work",
+      categorySlug: "offers",
+      readingMinutes: 3,
+      daysAgo: 13,
+      ar: {
+        title: "كيف تستخدم أكواد الخصم عند الدفع؟",
+        excerpt: "شرح مبسّط لكيفية إدخال كود الخصم أثناء إتمام الطلب والتأكد من تطبيقه بشكل صحيح.",
+        bodyMarkdown:
+          "## أين أُدخل الكود؟\nفي صفحة الدفع، ستجد حقلاً مخصصًا لكود الخصم — أدخل الكود ثم أكمل باقي بيانات الطلب.\n\n## متى يُطبّق الخصم؟\nيتم التحقق من الكود وتطبيق الخصم عند إتمام الدفع، وستظهر لك قيمة الخصم والإجمالي الجديد بوضوح قبل الدفع النهائي.\n\n## ملاحظة مهمة\nكل كود له شروط خاصة (كحد أدنى للطلب أو عدد مرات استخدام)، فإذا لم يُطبّق الكود تحقق من صلاحيته أولًا.",
+      },
+      en: {
+        title: "How to Use Coupon Codes at Checkout",
+        excerpt: "A simple explanation of how to enter a coupon code during checkout and confirm it applied correctly.",
+        bodyMarkdown:
+          "## Where do I enter the code?\nOn the checkout page, you'll find a dedicated coupon field — enter the code, then complete the rest of your order details.\n\n## When does the discount apply?\nThe code is validated and the discount applied when you complete payment; you'll clearly see the discount amount and new total before final payment.\n\n## A quick note\nEvery code has its own conditions (like a minimum order or usage limit) — if it doesn't apply, check that it's still valid first.",
+      },
+    },
+  ];
+
+  for (const post of blogPosts) {
+    const publishAt = new Date(Date.now() - post.daysAgo * 24 * 60 * 60 * 1000);
+    await prisma.blogPost.upsert({
+      where: { slug: post.slug },
+      update: {},
+      create: {
+        slug: post.slug,
+        categorySlug: post.categorySlug,
+        readingMinutes: post.readingMinutes,
+        isPublished: true,
+        publishAt,
+        translations: {
+          create: [
+            { locale: "ar", title: post.ar.title, excerpt: post.ar.excerpt, bodyMarkdown: post.ar.bodyMarkdown },
+            { locale: "en", title: post.en.title, excerpt: post.en.excerpt, bodyMarkdown: post.en.bodyMarkdown },
+          ],
+        },
+      },
+    });
+  }
+
   await prisma.featureFlag.upsert({
     where: { key: "payments.moyasar.enabled" },
     update: {},

@@ -28,6 +28,7 @@ export function SiteFooter() {
     { href: { pathname: "/games", query: { category: "subscriptions" } }, ar: "الاشتراكات الرقمية", en: "Digital subscriptions" },
     { href: { pathname: "/games", query: { category: "gift-cards" } }, ar: "بطاقات الهدايا", en: "Gift cards" },
     { href: "/#limited-offers" as const, ar: "العروض", en: "Offers" },
+    { href: "/blog" as const, ar: "المدونة", en: "Blog" },
   ];
 
   const supportLinks = [
