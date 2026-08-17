@@ -9,6 +9,8 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { BottomNav } from "@/components/BottomNav";
 import { CartProvider } from "@/components/CartProvider";
+import { CartDrawer } from "@/components/CartDrawer";
+import { MotionProvider, PageTransition } from "@/components/motion";
 import "../globals.css";
 
 const arabicFont = Alexandria({
@@ -62,12 +64,17 @@ export default async function LocaleLayout({
     <html lang={locale} dir={localeDirection[locale]} className={`${arabicFont.variable} ${latinFont.variable}`}>
       <body className="flex min-h-screen flex-col bg-[var(--color-background)] text-[var(--color-text-primary)] antialiased">
         <NextIntlClientProvider>
-          <CartProvider>
-            <SiteHeader />
-            <main className="flex-1 pb-20 md:pb-0">{children}</main>
-            <SiteFooter />
-            <BottomNav />
-          </CartProvider>
+          <MotionProvider>
+            <CartProvider>
+              <SiteHeader />
+              <main className="flex-1 pb-20 md:pb-0">
+                <PageTransition>{children}</PageTransition>
+              </main>
+              <SiteFooter />
+              <BottomNav />
+              <CartDrawer />
+            </CartProvider>
+          </MotionProvider>
         </NextIntlClientProvider>
       </body>
     </html>

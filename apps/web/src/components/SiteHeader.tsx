@@ -2,15 +2,27 @@
 
 import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
-import { ShahnooIcon } from "@gcc-store/ui";
+import { useMotionValueEvent, useScroll } from "motion/react";
+import { ShahnooIcon, cn } from "@gcc-store/ui";
 import { Link, useRouter } from "@/i18n/navigation";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { CartIcon } from "./CartIcon";
+
+const SCROLL_THRESHOLD = 24;
 
 export function SiteHeader() {
   const t = useTranslations();
   const router = useRouter();
   const [searchValue, setSearchValue] = useState("");
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // useMotionValueEvent only re-renders React when the boolean actually
+  // flips (not on every scroll pixel) — scrollY itself updates via
+  // requestAnimationFrame outside React's render cycle.
+  const { scrollY } = useScroll();
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setIsScrolled(latest > SCROLL_THRESHOLD);
+  });
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -19,8 +31,20 @@ export function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-lg">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3">
+    <header
+      className={cn(
+        "sticky top-0 z-40 border-b backdrop-blur-lg transition-[background-color,box-shadow,border-color] duration-300",
+        isScrolled
+          ? "border-[var(--color-border)] bg-[var(--color-surface)]/90 shadow-[0_1px_0_0_rgba(5,199,242,0.18),0_12px_24px_-16px_rgba(5,199,242,0.25)]"
+          : "border-transparent bg-[var(--color-surface)]/50 shadow-none",
+      )}
+    >
+      <div
+        className={cn(
+          "mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 transition-[padding] duration-300",
+          isScrolled ? "py-2" : "py-3",
+        )}
+      >
         <Link href="/" className="flex shrink-0 items-center gap-2">
           <ShahnooIcon className="h-8 w-8" />
           <span className="text-lg font-bold tracking-tight text-[var(--color-text-primary)]">{t("brand.name")}</span>
@@ -57,7 +81,7 @@ export function SiteHeader() {
               value={searchValue}
               onChange={(event) => setSearchValue(event.target.value)}
               placeholder={t("nav.search")}
-              className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] py-2 ps-10 pe-4 text-sm text-[var(--color-text-primary)] transition-colors placeholder:text-[var(--color-text-muted)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-primary"
+              className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] py-2 ps-10 pe-4 text-sm text-[var(--color-text-primary)] transition-[color,background-color,border-color,box-shadow] duration-200 placeholder:text-[var(--color-text-muted)] focus:outline-none focus-visible:border-brand-primary/60 focus-visible:shadow-[0_0_0_3px_rgba(124,58,237,0.2)]"
             />
           </div>
         </form>

@@ -9,6 +9,9 @@ interface CartContextValue {
   removeItem: (key: string) => void;
   setQuantity: (key: string, quantity: number) => void;
   clear: () => void;
+  isDrawerOpen: boolean;
+  openDrawer: () => void;
+  closeDrawer: () => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -16,6 +19,9 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const openDrawer = useCallback(() => setIsDrawerOpen(true), []);
+  const closeDrawer = useCallback(() => setIsDrawerOpen(false), []);
 
   // Cart lives in localStorage only (no backend cart yet) — read once on
   // mount to avoid a server/client markup mismatch.
@@ -48,7 +54,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clear = useCallback(() => setItems([]), []);
 
-  const value = useMemo(() => ({ items, addItem, removeItem, setQuantity, clear }), [items, addItem, removeItem, setQuantity, clear]);
+  const value = useMemo(
+    () => ({ items, addItem, removeItem, setQuantity, clear, isDrawerOpen, openDrawer, closeDrawer }),
+    [items, addItem, removeItem, setQuantity, clear, isDrawerOpen, openDrawer, closeDrawer],
+  );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

@@ -11,16 +11,16 @@
   --font-sans-en: "Inter", "IBM Plex Sans", sans-serif;
 
   --color-brand-primary: #7c3aed;
-  --color-brand-secondary: #06b6d4;
-  --color-brand-accent: #f5b942;
-  --color-success: #22c55e;
+  --color-brand-secondary: #05c7f2;
+  --color-brand-accent: #f6b73c;
+  --color-success: #16c784;
   --color-danger: #ef4444;
 }
 
 :root {
-  --color-background: #070b14;
-  --color-surface: #0f172a;
-  --color-surface-elevated: #162033;
+  --color-background: #050914;
+  --color-surface: #0d1730;
+  --color-surface-elevated: #142140;
   --color-text-primary: #f8fafc;
   --color-text-muted: #94a3b8;
   --color-border: #1e293b;

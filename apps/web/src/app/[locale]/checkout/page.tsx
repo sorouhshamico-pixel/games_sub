@@ -1,15 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatMoney } from "@gcc-store/ui";
 import type { Locale } from "@gcc-store/i18n";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useCart } from "@/components/CartProvider";
+import { SuccessCheck } from "@/components/motion";
+import { duration, easing } from "@/lib/motion/tokens";
 import { cartTotal } from "@/lib/cart";
 import { ApiError, checkout, confirmMockPayment } from "@/lib/api";
 
-type Step = "form" | "confirming" | "confirm-mock";
+type Step = "form" | "confirming" | "confirm-mock" | "success";
+
+const stepMotion = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0, transition: { duration: duration.medium, ease: easing } },
+  exit: { opacity: 0, y: -6, transition: { duration: duration.fast, ease: easing } },
+};
 
 export default function CheckoutPage() {
   const locale = useLocale() as Locale;
@@ -90,7 +99,12 @@ export default function CheckoutPage() {
     try {
       await confirmMockPayment(pendingPayment.paymentId);
       clear();
-      router.push(`/orders/${pendingPayment.orderNumber}?token=${pendingPayment.trackingToken}`);
+      setStep("success");
+      // Let the success state actually be seen before leaving the page —
+      // otherwise the checkmark animation would never finish rendering.
+      window.setTimeout(() => {
+        router.push(`/orders/${pendingPayment.orderNumber}?token=${pendingPayment.trackingToken}`);
+      }, 1400);
     } catch {
       setError(locale === "ar" ? "تعذر تأكيد الدفع" : "Could not confirm payment");
     }
@@ -100,26 +114,43 @@ export default function CheckoutPage() {
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-10">
       <h1 className="text-3xl font-bold text-[var(--color-text-primary)]">{locale === "ar" ? "الدفع" : "Checkout"}</h1>
 
-      <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-        <h2 className="mb-3 font-bold text-[var(--color-text-primary)]">{locale === "ar" ? "ملخص الطلب" : "Order summary"}</h2>
-        <ul className="flex flex-col gap-2 text-sm">
-          {items.map((item) => (
-            <li key={item.key} className="flex items-center justify-between text-[var(--color-text-muted)]">
-              <span>
-                {locale === "ar" ? item.nameAr : item.nameEn} × {item.quantity}
-              </span>
-              <span>{formatMoney(item.unitPriceMinorUnits * item.quantity, item.currency, locale)}</span>
-            </li>
-          ))}
-        </ul>
-        <div className="mt-4 flex items-center justify-between border-t border-[var(--color-border)] pt-3">
-          <span className="font-medium text-[var(--color-text-primary)]">{locale === "ar" ? "الإجمالي" : "Total"}</span>
-          <span className="text-lg font-bold text-brand-accent">{formatMoney(total, currency, locale)}</span>
-        </div>
-      </section>
+      {step !== "success" ? (
+        <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+          <h2 className="mb-3 font-bold text-[var(--color-text-primary)]">{locale === "ar" ? "ملخص الطلب" : "Order summary"}</h2>
+          <ul className="flex flex-col gap-2 text-sm">
+            {items.map((item) => (
+              <li key={item.key} className="flex items-center justify-between text-[var(--color-text-muted)]">
+                <span>
+                  {locale === "ar" ? item.nameAr : item.nameEn} × {item.quantity}
+                </span>
+                <span>{formatMoney(item.unitPriceMinorUnits * item.quantity, item.currency, locale)}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 flex items-center justify-between border-t border-[var(--color-border)] pt-3">
+            <span className="font-medium text-[var(--color-text-primary)]">{locale === "ar" ? "الإجمالي" : "Total"}</span>
+            <span className="text-lg font-bold text-brand-accent">{formatMoney(total, currency, locale)}</span>
+          </div>
+        </section>
+      ) : null}
 
-      {step !== "confirm-mock" ? (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <AnimatePresence mode="wait" initial={false}>
+      {step === "success" ? (
+        <motion.section key="success" {...stepMotion} className="flex flex-col items-center gap-4 py-10 text-center">
+          <SuccessCheck size={72} />
+          <motion.p
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1, transition: { duration: duration.normal, ease: easing, delay: 0.3 } }}
+            className="text-xl font-bold text-[var(--color-text-primary)]"
+          >
+            {locale === "ar" ? "تم استلام طلبك" : "Your order was received"}
+          </motion.p>
+          <p className="text-sm text-[var(--color-text-muted)]">
+            {locale === "ar" ? "جارٍ تحويلك لصفحة الطلب..." : "Redirecting you to your order..."}
+          </p>
+        </motion.section>
+      ) : step !== "confirm-mock" ? (
+        <motion.form key="form" {...stepMotion} onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label htmlFor="phone" className="mb-1 block text-sm font-medium text-[var(--color-text-primary)]">
               {locale === "ar" ? "رقم الجوال" : "Phone number"}
@@ -177,9 +208,9 @@ export default function CheckoutPage() {
           >
             {step === "confirming" ? t("common.loading") : locale === "ar" ? "متابعة الدفع" : "Continue to payment"}
           </button>
-        </form>
+        </motion.form>
       ) : (
-        <section className="flex flex-col gap-4">
+        <motion.section key="confirm-mock" {...stepMotion} className="flex flex-col gap-4">
           {appliedCoupon ? (
             <div className="rounded-2xl border border-success/40 bg-success/5 p-4 text-sm text-[var(--color-text-primary)]">
               <p className="font-medium">
@@ -211,8 +242,9 @@ export default function CheckoutPage() {
           >
             {locale === "ar" ? "محاكاة نجاح الدفع" : "Simulate successful payment"}
           </button>
-        </section>
+        </motion.section>
       )}
+      </AnimatePresence>
     </div>
   );
 }

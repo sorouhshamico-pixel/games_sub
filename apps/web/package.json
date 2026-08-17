@@ -13,6 +13,7 @@
     "@gcc-store/contracts": "workspace:*",
     "@gcc-store/i18n": "workspace:*",
     "@gcc-store/ui": "workspace:*",
+    "motion": "^13.1.0",
     "next": "^15.1.4",
     "next-intl": "^4.13.6",
     "react": "^19.0.0",
