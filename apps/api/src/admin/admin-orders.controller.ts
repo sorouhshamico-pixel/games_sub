@@ -4,6 +4,7 @@ import { prisma, UserRole } from "@gcc-store/db";
 import { SessionAuthGuard } from "../auth/guards/session-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
+import { InvoicingService } from "../invoicing/invoicing.service";
 import { ListOrdersQueryDto } from "./dto/list-orders.dto";
 
 @ApiTags("admin")
@@ -11,6 +12,8 @@ import { ListOrdersQueryDto } from "./dto/list-orders.dto";
 @UseGuards(SessionAuthGuard, RolesGuard)
 @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.FINANCE, UserRole.SUPPORT, UserRole.READ_ONLY_ANALYST)
 export class AdminOrdersController {
+  constructor(private readonly invoicingService: InvoicingService) {}
+
   @Get()
   async list(@Query() query: ListOrdersQueryDto) {
     const where = query.status ? { status: query.status } : {};
@@ -46,6 +49,7 @@ export class AdminOrdersController {
         payments: { include: { attempts: true } },
         statusEvents: { orderBy: { createdAt: "asc" } },
         refunds: true,
+        invoice: true,
       },
     });
 
@@ -60,6 +64,8 @@ export class AdminOrdersController {
       orderBy: { createdAt: "asc" },
     });
 
-    return { ...order, notifications };
+    const invoiceQrCodeDataUri = order.invoice ? await this.invoicingService.buildQrImageDataUri(order.invoice, order) : null;
+
+    return { ...order, notifications, invoiceQrCodeDataUri };
   }
 }

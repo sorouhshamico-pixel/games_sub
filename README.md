@@ -18,18 +18,21 @@ In short:
   (categories/products/price-tiers — create, edit, activate/deactivate, soft delete),
   full/partial refunds with their own admin UI, order-level coupons (percentage/fixed,
   redemption limits, minimum order amount, date windows) with their own admin UI, a mock
-  notification log recorded on order-confirmed/completed/failed and refund events, secure
-  headers + dependency audit, and all three Docker images. All of this is proven in
-  [CI](.github/workflows/ci.yml) — full pipeline green: lint, typecheck, migrations, seed,
-  unit/integration/e2e tests against real Postgres and Redis, and all three Docker builds.
+  notification log recorded on order-confirmed/completed/failed and refund events, ZATCA
+  Phase 1 simplified tax invoices (sequential numbering, QR code, shown to both admin and
+  customer) generated automatically on payment capture, secure headers + dependency audit,
+  and all three Docker images. All of this is proven in [CI](.github/workflows/ci.yml) —
+  full pipeline green: lint, typecheck, migrations, seed, unit/integration/e2e tests against
+  real Postgres and Redis, and all three Docker builds.
 - **Built but not enabled**: a Moyasar payment adapter and the real-provider shape of
   fulfillment — both exist as code but were written against public API docs, not tested
   against a live sandbox, and are feature-flagged off by default.
 - **Not built yet**: real email/SMS/WhatsApp delivery (notifications are recorded, not sent —
-  see `docs/NOTIFICATIONS.md`), per-product/category price rules (the `PriceRule` model
-  exists in the schema but nothing reads it yet — coupons are the only discount mechanism
-  wired up), provider management UI, CMS, content moderation, ZATCA invoicing, MFA, password
-  reset, CSP, a second real fulfillment provider.
+  see `docs/NOTIFICATIONS.md`), ZATCA Phase 2 clearance/reporting (real API integration,
+  cryptographic stamping — see `docs/ZATCA_INTEGRATION.md`), per-product/category price
+  rules (the `PriceRule` model exists in the schema but nothing reads it yet — coupons are
+  the only discount mechanism wired up), provider management UI, CMS, content moderation,
+  MFA, password reset, CSP, a second real fulfillment provider.
 
 ## Stack
 
@@ -136,13 +139,15 @@ them for a real deployment.
   redemption-limit concurrency, known simplifications
 - [`docs/NOTIFICATIONS.md`](docs/NOTIFICATIONS.md) — the mock notification log, call
   sites, and the guest-checkout addressing gap
+- [`docs/ZATCA_INTEGRATION.md`](docs/ZATCA_INTEGRATION.md) — Phase 1 simplified invoice
+  QR generation, what Phase 2 would need, known gaps
 - [`docs/PROVIDER_INTEGRATION.md`](docs/PROVIDER_INTEGRATION.md) — fulfillment
   provider interface, the Mock provider's test scenarios, queue plumbing
 - [`docs/AUTH.md`](docs/AUTH.md) — sessions, RBAC, what's verified, what's missing
   (MFA, OTP, password reset)
 
 Files the master prompt asks for that don't exist yet: `docs/ARCHITECTURE.md`,
-`docs/SECURITY.md`, `docs/SEO.md`, `docs/ZATCA_INTEGRATION.md`, `docs/RUNBOOK.md`.
+`docs/SECURITY.md`, `docs/SEO.md`, `docs/RUNBOOK.md`.
 
 ## Project data placeholders
 

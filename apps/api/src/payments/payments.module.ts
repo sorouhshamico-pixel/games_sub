@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { OrderStateMachine } from "@gcc-store/db";
+import { InvoicingModule } from "../invoicing/invoicing.module";
 import { PaymentsController } from "./payments.controller";
 import { PaymentsService } from "./payments.service";
 import { MockPaymentGateway } from "./mock-payment.gateway";
@@ -8,7 +9,7 @@ import { MoyasarPaymentGateway } from "./moyasar-payment.gateway";
 import { PAYMENT_GATEWAY } from "./payment-gateway.interface";
 
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, InvoicingModule],
   controllers: [PaymentsController],
   providers: [
     PaymentsService,

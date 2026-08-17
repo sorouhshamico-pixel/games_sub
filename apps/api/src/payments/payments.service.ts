@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { BadRequestException, Inject, Injectable, Logger } from "@nestjs/common";
 import { prisma, OrderStatus, PaymentStatus, FulfillmentStatus, Prisma, OrderStateMachine, recordNotification } from "@gcc-store/db";
+import { InvoicingService } from "../invoicing/invoicing.service";
 import { PAYMENT_GATEWAY, type PaymentGateway, type ParsedWebhookEvent } from "./payment-gateway.interface";
 
 @Injectable()
@@ -10,6 +11,7 @@ export class PaymentsService {
   constructor(
     @Inject(PAYMENT_GATEWAY) private readonly gateway: PaymentGateway,
     private readonly orderStateMachine: OrderStateMachine,
+    private readonly invoicingService: InvoicingService,
   ) {}
 
   async handleWebhook(rawBody: string, headers: Record<string, string | string[] | undefined>): Promise<void> {
@@ -140,6 +142,8 @@ export class PaymentsService {
           templateKey: "order_confirmed",
           payload: { orderId: order.id, orderNumber: order.orderNumber, recipientEmail: order.guestEmail },
         });
+
+        await this.invoicingService.issueInvoice(tx, order);
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {

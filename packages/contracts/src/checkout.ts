@@ -38,6 +38,12 @@ export const orderTrackingViewSchema = z.object({
     }),
   ),
   timeline: z.array(orderStatusEventSchema),
+  invoice: z
+    .object({
+      invoiceNumber: z.string(),
+      qrCodeDataUri: z.string(),
+    })
+    .nullable(),
 });
 export type OrderTrackingView = z.infer<typeof orderTrackingViewSchema>;
 

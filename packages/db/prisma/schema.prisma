@@ -673,7 +673,14 @@ model Invoice {
   buyerTaxNumber String?
   buyerLegalName String?
   pdfUrl       String?
-  zatcaStatus  String?  // null until ZATCA integration is enabled
+  zatcaStatus  String?  // null until ZATCA Phase 2 clearance/reporting is enabled — see docs/ZATCA_INTEGRATION.md
+  // Seller identity used to build the ZATCA QR at issuance time, snapshotted
+  // rather than re-read from current config — a later change to the seller's
+  // registered name/VAT number must never alter what an already-issued
+  // invoice's QR encodes. Same historical-snapshot principle as
+  // OrderItem.priceSnapshotJson.
+  sellerNameSnapshot     String
+  sellerVatNumberSnapshot String
   issuedAt     DateTime @default(now())
 
   @@map("invoices")

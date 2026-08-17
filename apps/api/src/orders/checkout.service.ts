@@ -8,6 +8,7 @@ import {
   type SupportedCurrency,
 } from "@gcc-store/contracts";
 import { PAYMENT_GATEWAY, type PaymentGateway } from "../payments/payment-gateway.interface";
+import { InvoicingService } from "../invoicing/invoicing.service";
 import { generateOrderNumber, generateTrackingToken } from "../common/tokens";
 import type { CheckoutRequestDto } from "./dto/checkout-request.dto";
 import { CouponService } from "./coupon.service";
@@ -18,6 +19,7 @@ export class CheckoutService {
     @Inject(PAYMENT_GATEWAY) private readonly gateway: PaymentGateway,
     private readonly orderStateMachine: OrderStateMachine,
     private readonly couponService: CouponService,
+    private readonly invoicingService: InvoicingService,
   ) {}
 
   async checkout(request: CheckoutRequestDto, correlationId: string) {
@@ -185,12 +187,20 @@ export class CheckoutService {
       include: {
         items: { include: { variant: { include: { product: { include: { translations: true } } } }, fulfillments: true } },
         statusEvents: { orderBy: { createdAt: "asc" } },
+        invoice: true,
       },
     });
 
     if (!order || order.trackingToken !== token) {
       throw new NotFoundException("Order not found");
     }
+
+    const invoice = order.invoice
+      ? {
+          invoiceNumber: order.invoice.invoiceNumber,
+          qrCodeDataUri: await this.invoicingService.buildQrImageDataUri(order.invoice, order),
+        }
+      : null;
 
     return {
       orderNumber: order.orderNumber,
@@ -211,6 +221,7 @@ export class CheckoutService {
         reason: event.reason,
         createdAt: event.createdAt.toISOString(),
       })),
+      invoice,
     };
   }
 }

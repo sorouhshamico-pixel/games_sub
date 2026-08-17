@@ -101,6 +101,18 @@ export default async function OrderTrackingPage({
         </div>
       </section>
 
+      {order.invoice ? (
+        <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+          <h2 className="mb-3 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "الفاتورة الضريبية" : "Tax invoice"}</h2>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-[var(--color-text-muted)]">
+              {locale === "ar" ? "رقم الفاتورة" : "Invoice number"}: <span className="font-mono text-[var(--color-text-primary)]">{order.invoice.invoiceNumber}</span>
+            </p>
+            <img src={order.invoice.qrCodeDataUri} alt={locale === "ar" ? "رمز الفاتورة" : "Invoice QR code"} className="h-24 w-24 rounded-lg bg-white p-1.5" />
+          </div>
+        </section>
+      ) : null}
+
       <section>
         <h2 className="mb-3 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "سجل الطلب" : "Order timeline"}</h2>
         <ol className="flex flex-col gap-3 border-s-2 border-[var(--color-border)] ps-4">

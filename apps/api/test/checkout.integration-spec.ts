@@ -4,6 +4,7 @@ import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { prisma } from "@gcc-store/db";
 import { createTestApp } from "./test-app";
+import { buildZatcaQrPayloadBase64, decodeZatcaQrPayloadBase64 } from "../src/invoicing/zatca-qr";
 
 // Needs a live, migrated, seeded Postgres (packages/db/prisma/seed.ts) —
 // unavailable in this sandbox (no Docker, no Windows Redis), so this is
@@ -65,6 +66,30 @@ describe.skipIf(!process.env["DATABASE_URL"])("Checkout (integration)", () => {
     const notifications = await prisma.notification.findMany({ where: { payloadJson: { path: ["orderId"], equals: orderRow.id } } });
     expect(notifications.map((n) => n.templateKey)).toEqual(["order_confirmed"]);
     expect(notifications[0]?.status).toBe("sent");
+
+    // ZATCA Phase 1 simplified invoice — see docs/ZATCA_INTEGRATION.md.
+    const invoice = await prisma.invoice.findUniqueOrThrow({ where: { orderId: orderRow.id } });
+    expect(invoice.invoiceNumber).toMatch(/^INV-\d{6}$/);
+    expect(invoice.type).toBe("b2c_simplified");
+    expect(invoice.zatcaStatus).toBeNull(); // Phase 2 clearance not implemented
+
+    expect(trackRes.body.invoice.invoiceNumber).toBe(invoice.invoiceNumber);
+    expect(trackRes.body.invoice.qrCodeDataUri).toMatch(/^data:image\/png;base64,/);
+
+    // The tracking endpoint's QR is a rendered image, not directly
+    // decodable — rebuild the same TLV payload from the persisted
+    // invoice + order fields and decode *that* to prove it round-trips
+    // to the order's real totals, not just that a QR-shaped image exists.
+    const payload = buildZatcaQrPayloadBase64({
+      sellerName: invoice.sellerNameSnapshot,
+      vatRegistrationNumber: invoice.sellerVatNumberSnapshot,
+      invoiceTimestamp: invoice.issuedAt.toISOString(),
+      invoiceTotalWithVat: (orderRow.totalMinorUnits / 100).toFixed(2),
+      vatTotal: (orderRow.taxMinorUnits / 100).toFixed(2),
+    });
+    const decoded = decodeZatcaQrPayloadBase64(payload);
+    expect(decoded.invoiceTotalWithVat).toBe((orderRow.totalMinorUnits / 100).toFixed(2));
+    expect(decoded.vatTotal).toBe((orderRow.taxMinorUnits / 100).toFixed(2));
   });
 
   it("is idempotent when the same mock payment is confirmed twice", async () => {

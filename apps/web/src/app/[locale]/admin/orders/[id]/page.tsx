@@ -112,6 +112,28 @@ export default async function AdminOrderDetailPage({
 
       {canRefund ? <RefundForm orderId={order.id} refundableMinorUnits={refundableMinorUnits} currency={order.currency} /> : null}
 
+      {order.invoice ? (
+        <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+          <h2 className="mb-3 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "الفاتورة الضريبية" : "Tax invoice"}</h2>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-[var(--color-text-muted)]">
+              <p>
+                {locale === "ar" ? "رقم الفاتورة" : "Invoice number"}: <span className="font-mono text-[var(--color-text-primary)]">{order.invoice.invoiceNumber}</span>
+              </p>
+              <p>{new Date(order.invoice.issuedAt).toLocaleString(locale === "ar" ? "ar-SA" : "en-US")}</p>
+              <p className="mt-2 max-w-sm text-xs">
+                {locale === "ar"
+                  ? "فاتورة ضريبية مبسطة (المرحلة الأولى من زاتكا) — رمز QR فقط، بدون تخليص إلكتروني حقيقي بعد."
+                  : "ZATCA Phase 1 simplified tax invoice — QR only, no real electronic clearance yet."}
+              </p>
+            </div>
+            {order.invoiceQrCodeDataUri ? (
+              <img src={order.invoiceQrCodeDataUri} alt={locale === "ar" ? "رمز الفاتورة" : "Invoice QR code"} className="h-32 w-32 rounded-lg bg-white p-2" />
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
       {order.notifications.length > 0 ? (
         <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
           <h2 className="mb-3 font-semibold text-[var(--color-text-primary)]">
