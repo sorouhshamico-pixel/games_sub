@@ -3,6 +3,7 @@ import { ApiError, getPage } from "@/lib/api";
 import { parseFaqMarkdown } from "@/lib/faq";
 import { Link } from "@/i18n/navigation";
 import { Reveal, MotionAccordion, type MotionAccordionItem } from "@/components/motion";
+import { WhatsAppIcon } from "./icons";
 import type { Locale } from "@gcc-store/i18n";
 
 export async function FaqPreview({ locale }: { locale: Locale }) {
@@ -41,17 +42,24 @@ export async function FaqPreview({ locale }: { locale: Locale }) {
           </Link>
         </div>
         <div className="flex flex-col justify-center gap-3 rounded-2xl border border-[var(--color-border)] bg-gradient-to-br from-brand-primary/10 to-brand-secondary/10 p-6 text-center sm:col-span-2 sm:p-8">
+          <span aria-hidden className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#25D366]/15 text-[#25D366]">
+            <WhatsAppIcon className="h-7 w-7" />
+          </span>
           <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
             {locale === "ar" ? "تحتاج مساعدة؟" : "Need help?"}
           </h3>
           <p className="text-sm text-[var(--color-text-muted)]">
             {locale === "ar" ? "فريقنا جاهز للإجابة على استفساراتك" : "Our team is ready to answer your questions"}
           </p>
+          {/* Styled as a WhatsApp-style contact CTA — routed to the real help
+              center rather than a fabricated phone number, since a wrong or
+              placeholder wa.me number would message a real, unrelated person. */}
           <Link
             href="/pages/faq"
-            className="mt-2 inline-flex items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-3 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:border-brand-primary/60"
+            className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:brightness-110"
           >
-            {locale === "ar" ? "مركز المساعدة" : "Help center"} →
+            <WhatsAppIcon className="h-4 w-4" />
+            {locale === "ar" ? "تواصل معنا" : "Contact us"}
           </Link>
         </div>
       </section>

@@ -1,6 +1,9 @@
 import { useLocale, useTranslations } from "next-intl";
 import { ShahnooIcon } from "@gcc-store/ui";
 import { Link } from "@/i18n/navigation";
+import { AppleIcon, PlayStoreIcon } from "./home/icons";
+
+const paymentBadges = ["Visa", "Mastercard", "mada", "Apple Pay"];
 
 export function SiteFooter() {
   const t = useTranslations();
@@ -51,6 +54,43 @@ export function SiteFooter() {
           </ul>
         </div>
       </div>
+
+      <div className="border-t border-[var(--color-border)] px-4 py-6">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-6">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="me-1 text-xs font-medium text-[var(--color-text-muted)]">
+              {locale === "ar" ? "طرق الدفع" : "Payment methods"}
+            </span>
+            {paymentBadges.map((brand) => (
+              <span
+                key={brand}
+                className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text-primary)]"
+              >
+                {brand}
+              </span>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="me-1 text-xs font-medium text-[var(--color-text-muted)]">
+              {locale === "ar" ? "قريبًا" : "Coming soon"}
+            </span>
+            <span className="flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--color-text-muted)]">
+              <AppleIcon className="h-3.5 w-3.5" />
+              App Store
+            </span>
+            <span className="flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--color-text-muted)]">
+              <PlayStoreIcon className="h-3.5 w-3.5" />
+              Google Play
+            </span>
+          </div>
+        </div>
+        <p className="mx-auto mt-4 max-w-7xl text-center text-[11px] text-[var(--color-text-muted)]">
+          {locale === "ar"
+            ? "بوابة الدفع النشطة حاليًا للتجربة فقط — طرق الدفع أعلاه توضيحية للعرض"
+            : "The live payment gateway is for testing only — payment methods above are illustrative"}
+        </p>
+      </div>
+
       <div className="border-t border-[var(--color-border)] px-4 py-4 text-center text-xs text-[var(--color-text-muted)]">
         {t("brand.name")} © {year} — {t("footer.rightsReserved")}
       </div>

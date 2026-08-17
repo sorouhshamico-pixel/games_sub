@@ -9,6 +9,9 @@ import { BrandTiles } from "@/components/home/BrandTiles";
 import { ProcessSteps } from "@/components/home/ProcessSteps";
 import { StatStrip } from "@/components/home/StatStrip";
 import { FaqPreview } from "@/components/home/FaqPreview";
+import { LimitedOffers } from "@/components/home/LimitedOffers";
+import { Testimonials } from "@/components/home/Testimonials";
+import { NewsletterSignup } from "@/components/home/NewsletterSignup";
 import { BoltIcon, ShieldIcon, HeadsetIcon } from "@/components/home/icons";
 import { Reveal, StaggerContainer, StaggerItem } from "@/components/motion";
 import type { Locale } from "@gcc-store/i18n";
@@ -79,7 +82,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </Reveal>
         ) : null}
 
-        <ProcessSteps locale={typedLocale} />
+        {popularProducts && popularProducts.items.length > 0 ? (
+          <LimitedOffers products={popularProducts.items.slice(0, 4)} locale={typedLocale} />
+        ) : null}
 
         <section>
           <SectionHeading title={t("home.popularGames")} viewAllHref="/games" viewAllLabel={t("nav.games")} />
@@ -98,6 +103,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           )}
         </section>
 
+        <ProcessSteps locale={typedLocale} />
+
         <StatStrip
           locale={typedLocale}
           productCount={popularProducts?.total ?? 0}
@@ -105,7 +112,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           categoryCount={categories.length}
         />
 
+        <Testimonials locale={typedLocale} />
+
         <FaqPreview locale={typedLocale} />
+
+        <NewsletterSignup locale={typedLocale} />
       </div>
     </div>
   );
