@@ -40,7 +40,7 @@ export async function generateMetadata({
   return {
     title: { default: t("name"), template: `%s | ${t("name")}` },
     description: t("tagline"),
-    icons: { icon: "/logo/shahnoo-icon.png" },
+    icons: { icon: "/favicon.svg" },
   };
 }
 

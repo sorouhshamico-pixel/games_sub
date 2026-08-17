@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
+import { ShahnooIcon } from "@gcc-store/ui";
 import { Link, useRouter } from "@/i18n/navigation";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { CartIcon } from "./CartIcon";
@@ -21,7 +22,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-lg">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3">
         <Link href="/" className="flex shrink-0 items-center gap-2">
-          <img src="/logo/shahnoo-icon.png" alt="" className="h-8 w-8" />
+          <ShahnooIcon className="h-8 w-8" />
           <span className="text-lg font-bold tracking-tight text-[var(--color-text-primary)]">{t("brand.name")}</span>
         </Link>
 
