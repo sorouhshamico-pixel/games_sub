@@ -45,7 +45,11 @@ export function LimitedOffers({ products, locale }: { products: ProductSummary[]
 
   return (
     <Reveal>
-      <section aria-label={locale === "ar" ? "عروض لفترة محدودة" : "Limited time offers"}>
+      <section
+        id="limited-offers"
+        className="scroll-mt-28"
+        aria-label={locale === "ar" ? "عروض لفترة محدودة" : "Limited time offers"}
+      >
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <h2 className="flex items-center gap-2 text-xl font-bold text-[var(--color-text-primary)] sm:text-2xl">
             <span aria-hidden className="flex h-7 w-7 items-center justify-center rounded-lg bg-danger/15 text-danger">

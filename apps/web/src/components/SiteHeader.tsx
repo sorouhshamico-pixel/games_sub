@@ -60,8 +60,27 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-5 text-sm font-medium md:flex" aria-label="primary">
-          <Link href="/games" className="text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]">
+          {/* The three real seeded catalog categories — mirrors the
+              CategoryTiles section's data, just surfaced as top nav
+              shortcuts too. Not fetched here to avoid an extra API round
+              trip on every page render; these slugs are stable seed data. */}
+          <Link
+            href={{ pathname: "/games", query: { category: "game-topups" } }}
+            className="text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]"
+          >
             {t("nav.games")}
+          </Link>
+          <Link
+            href={{ pathname: "/games", query: { category: "subscriptions" } }}
+            className="text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]"
+          >
+            {t("nav.subscriptions")}
+          </Link>
+          <Link
+            href={{ pathname: "/games", query: { category: "gift-cards" } }}
+            className="text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]"
+          >
+            {t("nav.giftCards")}
           </Link>
           <Link href="/pages/faq" className="text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]">
             {t("nav.help")}

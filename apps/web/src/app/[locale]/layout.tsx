@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { locales, localeDirection, type Locale } from "@gcc-store/i18n";
 import { routing } from "@/i18n/routing";
+import { PromoBar } from "@/components/PromoBar";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { BottomNav } from "@/components/BottomNav";
@@ -66,6 +67,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider>
           <MotionProvider>
             <CartProvider>
+              <PromoBar />
               <SiteHeader />
               <main className="flex-1 pb-20 md:pb-0">
                 <PageTransition>{children}</PageTransition>
