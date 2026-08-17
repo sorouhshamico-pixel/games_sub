@@ -1,11 +1,12 @@
 "use client";
 
 import { useRef } from "react";
+import { useLocale } from "next-intl";
 import { motion, useScroll, useTransform } from "motion/react";
 import { buttonBaseClasses, buttonSizeClasses, buttonVariantClasses, cn } from "@gcc-store/ui";
 import { Link } from "@/i18n/navigation";
 import { duration, easing, spring, staggerGap } from "@/lib/motion/tokens";
-import { HeroIllustration } from "./HeroIllustration";
+import { HeroIllustrationCarousel } from "./HeroIllustrationCarousel";
 
 const heroContainer = {
   hidden: {},
@@ -27,6 +28,7 @@ export function HomeHero({
   ctaLabel: string;
   trustItems: Array<{ icon: React.ReactNode; label: string }>;
 }) {
+  const locale = useLocale();
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end start"] });
   // Capped well within the 10-16px parallax ceiling from spec.
@@ -59,16 +61,34 @@ export function HomeHero({
             {subtitle}
           </motion.p>
 
-          <motion.div variants={heroItem} className="relative mt-8 inline-block">
-            <motion.span
-              aria-hidden
-              className="absolute inset-0 -z-10 rounded-xl bg-brand-primary/50 blur-xl"
-              animate={{ opacity: [0.5, 0.8, 0.5] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            />
-            {/* A motion.span wrapper (not a motion.button) drives the hover/press
-                feel here — Link already renders an <a>, and nesting a <button>
-                inside it would be invalid HTML. */}
+          <motion.div variants={heroItem} className="mt-8 flex flex-wrap items-center gap-3">
+            {/* Primary CTA first in DOM order so it lands on the reading-start
+                side (right, in RTL) to match the reference layout. */}
+            <div className="relative inline-block">
+              <motion.span
+                aria-hidden
+                className="absolute inset-0 -z-10 rounded-xl bg-brand-primary/50 blur-xl"
+                animate={{ opacity: [0.5, 0.8, 0.5] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              />
+              {/* A motion.span wrapper (not a motion.button) drives the hover/press
+                  feel here — Link already renders an <a>, and nesting a <button>
+                  inside it would be invalid HTML. */}
+              <motion.span
+                className="inline-block"
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.985, y: 0 }}
+                transition={{ type: "spring", ...spring }}
+              >
+                <Link
+                  href="/games"
+                  className={cn(buttonBaseClasses, buttonVariantClasses.primary, buttonSizeClasses.lg, "shadow-lg shadow-brand-primary/30")}
+                >
+                  {ctaLabel}
+                </Link>
+              </motion.span>
+            </div>
+
             <motion.span
               className="inline-block"
               whileHover={{ y: -2 }}
@@ -76,10 +96,10 @@ export function HomeHero({
               transition={{ type: "spring", ...spring }}
             >
               <Link
-                href="/games"
-                className={cn(buttonBaseClasses, buttonVariantClasses.primary, buttonSizeClasses.lg, "shadow-lg shadow-brand-primary/30")}
+                href="/#limited-offers"
+                className={cn(buttonBaseClasses, buttonSizeClasses.lg, "border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-brand-primary/50")}
               >
-                {ctaLabel}
+                {locale === "ar" ? "استكشف العروض" : "Explore offers"}
               </Link>
             </motion.span>
           </motion.div>
@@ -100,7 +120,7 @@ export function HomeHero({
           animate={{ opacity: 1, scale: 1, transition: { duration: duration.hero, ease: easing, delay: 0.2 } }}
           className="mx-auto w-full max-w-xs sm:max-w-sm lg:max-w-none"
         >
-          <HeroIllustration className="mx-auto w-full max-w-sm" />
+          <HeroIllustrationCarousel className="mx-auto w-full max-w-sm" />
         </motion.div>
       </div>
     </section>
