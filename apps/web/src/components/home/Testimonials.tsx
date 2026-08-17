@@ -3,6 +3,16 @@ import { Reveal, StaggerContainer, StaggerItem, HoverCard } from "@/components/m
 import { SectionHeading } from "./SectionHeading";
 import { StarIcon } from "./icons";
 
+// Cycled gradient rings so avatars read as distinct, colorful placeholders
+// rather than a flat single-letter tile — deliberately not real photos of
+// people, since a stock headshot next to a fabricated quote would falsely
+// imply a specific real customer said it.
+const avatarGradients = [
+  "from-brand-primary to-brand-secondary",
+  "from-brand-secondary to-brand-accent",
+  "from-brand-accent to-brand-primary",
+];
+
 const reviews: Array<{ ar: { name: string; quote: string }; en: { name: string; quote: string } }> = [
   {
     ar: { name: "فيصل", quote: "شحن سريع جدًا ووصل الرصيد خلال دقائق من إتمام الدفع." },
@@ -38,8 +48,10 @@ export function Testimonials({ locale }: { locale: Locale }) {
                       ))}
                     </div>
                     <p className="grow text-sm leading-relaxed text-[var(--color-text-muted)]">“{quote}”</p>
-                    <div className="flex items-center gap-2 border-t border-[var(--color-border)] pt-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-primary/15 text-xs font-bold text-brand-primary">
+                    <div className="flex items-center gap-2.5 border-t border-[var(--color-border)] pt-3">
+                      <span
+                        className={`flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br text-sm font-bold text-white ${avatarGradients[index % avatarGradients.length]}`}
+                      >
                         {name.slice(0, 1)}
                       </span>
                       <span className="text-sm font-medium text-[var(--color-text-primary)]">{name}</span>

@@ -1,15 +1,20 @@
 import { useLocale, useTranslations } from "next-intl";
-import { SiVisa, SiMastercard, SiApplepay, SiTiktok, SiInstagram, SiX, SiYoutube } from "react-icons/si";
+import { SiApplepay, SiTiktok, SiInstagram, SiX, SiYoutube } from "react-icons/si";
 import { ShahnooIcon } from "@gcc-store/ui";
 import { Link } from "@/i18n/navigation";
 import { AppleIcon, PlayStoreIcon } from "./home/icons";
 
-// mada has no Simple Icons entry (Saudi-specific network) — kept as a
-// text-only chip alongside the icon-bearing brands.
-const paymentBadges: Array<{ name: string; Icon?: typeof SiVisa }> = [
+// Visa/Mastercard use real full-color logo artwork (see
+// public/images/payment/NOTICE.md for licensing) — their brand marks
+// genuinely need multiple colors (Mastercard's two overlapping circles
+// especially), which a single-color icon component can't represent well.
+// mada has no available logo asset (Saudi-specific network), kept as a
+// text-only chip. Apple Pay's mark is inherently monochrome, so the icon
+// library version already looks correct.
+const paymentBadges: Array<{ name: string; imgSrc?: string; Icon?: typeof SiApplepay }> = [
   { name: "mada" },
-  { name: "Visa", Icon: SiVisa },
-  { name: "Mastercard", Icon: SiMastercard },
+  { name: "Visa", imgSrc: "/images/payment/visa.svg" },
+  { name: "Mastercard", imgSrc: "/images/payment/mastercard.svg" },
   { name: "Apple Pay", Icon: SiApplepay },
 ];
 
@@ -89,13 +94,17 @@ export function SiteFooter() {
         <div>
           <p className="mb-3 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "طرق الدفع" : "Payment methods"}</p>
           <div className="flex flex-wrap gap-2">
-            {paymentBadges.map(({ name, Icon }) => (
+            {paymentBadges.map(({ name, imgSrc, Icon }) => (
               <span
                 key={name}
-                className="flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text-primary)]"
+                className="flex h-9 items-center gap-1.5 rounded-lg bg-white px-3 text-[11px] font-semibold text-slate-900"
               >
-                {Icon ? <Icon className="h-3.5 w-3.5" aria-hidden /> : null}
-                {name}
+                {imgSrc ? (
+                  <img src={imgSrc} alt="" aria-hidden className="h-4 w-auto" />
+                ) : Icon ? (
+                  <Icon className="h-3.5 w-3.5" aria-hidden />
+                ) : null}
+                {imgSrc ? null : name}
               </span>
             ))}
           </div>

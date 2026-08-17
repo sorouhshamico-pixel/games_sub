@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Clock, User } from "lucide-react";
@@ -76,6 +77,14 @@ export default async function BlogPostPage({
             {locale === "ar" ? "المدونة" : "Blog"}
           </Link>
         </nav>
+
+        {meta ? (
+          <Reveal>
+            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl">
+              <Image src={meta.coverImage} alt="" fill priority sizes="(min-width: 1024px) 768px, 100vw" className="object-cover" />
+            </div>
+          </Reveal>
+        ) : null}
 
         <Reveal>
           <div>
