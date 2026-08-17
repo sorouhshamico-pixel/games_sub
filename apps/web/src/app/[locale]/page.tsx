@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { EmptyState, ErrorState } from "@gcc-store/ui";
 import { ProductCard } from "@/components/ProductCard";
-import { ApiError, getBrands, getCategories, listProducts } from "@/lib/api";
+import { ApiError, getCategories, listProducts } from "@/lib/api";
 import { HomeHero } from "@/components/home/HomeHero";
 import { SectionHeading } from "@/components/home/SectionHeading";
 import { CategoryTiles } from "@/components/home/CategoryTiles";
@@ -26,15 +26,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   let popularProducts: Awaited<ReturnType<typeof listProducts>> | null = null;
   let categories: Awaited<ReturnType<typeof getCategories>> = [];
-  let brands: Awaited<ReturnType<typeof getBrands>> = [];
   let loadError = false;
 
   try {
-    [popularProducts, categories, brands] = await Promise.all([
-      listProducts({ page: 1 }),
-      getCategories(typedLocale),
-      getBrands(),
-    ]);
+    [popularProducts, categories] = await Promise.all([listProducts({ page: 1 }), getCategories(typedLocale)]);
   } catch (error) {
     loadError = error instanceof ApiError;
   }
@@ -65,21 +60,19 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </Reveal>
         ) : null}
 
-        {brands.length > 0 ? (
-          <Reveal>
-            <section aria-label={locale === "ar" ? "الألعاب المتوفرة" : "Available games"}>
-              <SectionHeading
-                title={locale === "ar" ? "الألعاب المتوفرة" : "Available games"}
-                viewAllHref="/games"
-                viewAllLabel={t("nav.games")}
-              />
-              {/* Native horizontal scroll (not a JS drag library) — cheapest
-                  possible way to get real touch-drag momentum, mouse-wheel,
-                  and keyboard scrolling all at once, with snap points. */}
-              <BrandTiles brands={brands} locale={typedLocale} />
-            </section>
-          </Reveal>
-        ) : null}
+        <Reveal>
+          <section aria-label={locale === "ar" ? "الألعاب المتوفرة" : "Available games"}>
+            <SectionHeading
+              title={locale === "ar" ? "الألعاب المتوفرة" : "Available games"}
+              viewAllHref="/games"
+              viewAllLabel={t("nav.games")}
+            />
+            {/* Native horizontal scroll (not a JS drag library) — cheapest
+                possible way to get real touch-drag momentum, mouse-wheel,
+                and keyboard scrolling all at once, with snap points. */}
+            <BrandTiles locale={typedLocale} />
+          </section>
+        </Reveal>
 
         <MostRequested locale={typedLocale} />
 

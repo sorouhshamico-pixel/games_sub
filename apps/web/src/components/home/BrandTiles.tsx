@@ -1,40 +1,43 @@
-import type { GameBrandSummary } from "@gcc-store/contracts";
+import { Wrench, Spade, Video, Swords } from "lucide-react";
 import type { Locale } from "@gcc-store/i18n";
 import { Link } from "@/i18n/navigation";
 import { HoverCard } from "@/components/motion";
-import { categoryIconCycle } from "./icons";
 
-// Cycled per-tile so a row of brands without a real uploaded logoUrl still
-// reads as colorful and distinct, instead of a wall of identical tiles.
-const gradientCycle = [
-  "from-brand-primary/70 to-brand-secondary/70",
-  "from-brand-secondary/70 to-brand-accent/70",
-  "from-brand-accent/70 to-brand-primary/70",
-  "from-brand-primary/70 to-brand-accent/70",
+// Curated per user request — a mix of real supplied artwork (see
+// public/images/most-requested/, reused here since several items overlap
+// with that section) and generic icons for the items without an available
+// logo asset yet. Not driven by the real catalog (which only has demo
+// brands), so tiles link to the general browse page rather than a
+// filtered URL that would come back empty.
+const games: Array<{ imgSrc?: string; Icon?: typeof Wrench; ar: string; en: string }> = [
+  { imgSrc: "/images/most-requested/pubg-mobile.png", ar: "ببجي", en: "PUBG" },
+  { imgSrc: "/images/most-requested/yalla-ludo.png", ar: "يلا لودو", en: "Yalla Ludo" },
+  { Icon: Wrench, ar: "صيانة الرومات", en: "ROM maintenance" },
+  { Icon: Spade, ar: "جواكر", en: "Jawaker" },
+  { Icon: Video, ar: "بيقو لايف", en: "Bigo Live" },
+  { imgSrc: "/images/most-requested/playstation.png", ar: "بلايستيشن", en: "PlayStation" },
+  { Icon: Swords, ar: "مارفل رايفلز", en: "Marvel Rivals" },
+  { imgSrc: "/images/most-requested/free-fire.png", ar: "فري فاير", en: "Free Fire" },
 ];
 
-export function BrandTiles({ brands, locale }: { brands: GameBrandSummary[]; locale: Locale }) {
+export function BrandTiles({ locale }: { locale: Locale }) {
   return (
     <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      {brands.map((brand, index) => {
-        const name = locale === "ar" ? brand.nameAr : brand.nameEn;
-        const Icon = categoryIconCycle[index % categoryIconCycle.length]!;
+      {games.map((game) => {
+        const name = locale === "ar" ? game.ar : game.en;
+        const Icon = game.Icon;
         return (
-          <HoverCard key={brand.slug} className="shrink-0 snap-start">
+          <HoverCard key={name} className="shrink-0 snap-start">
             <Link
-              href={`/games/${brand.slug}`}
+              href="/games"
               className="flex w-24 flex-col items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-center transition-colors hover:border-brand-primary/50"
             >
-              <span
-                className={`flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl text-white ${
-                  brand.logoUrl ? "" : `bg-gradient-to-br ${gradientCycle[index % gradientCycle.length]}`
-                }`}
-              >
-                {brand.logoUrl ? (
-                  <img src={brand.logoUrl} alt="" aria-hidden className="h-full w-full object-cover" loading="lazy" />
-                ) : (
-                  <Icon className="h-5 w-5" />
-                )}
+              <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-[var(--color-surface-elevated)] text-brand-primary">
+                {game.imgSrc ? (
+                  <img src={game.imgSrc} alt="" aria-hidden className="h-full w-full object-cover" loading="lazy" />
+                ) : Icon ? (
+                  <Icon className="h-5 w-5" aria-hidden />
+                ) : null}
               </span>
               <span className="w-full truncate text-xs font-medium text-[var(--color-text-primary)]">{name}</span>
             </Link>
