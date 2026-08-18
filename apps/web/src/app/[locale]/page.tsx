@@ -13,6 +13,7 @@ import { LimitedOffers } from "@/components/home/LimitedOffers";
 import { MostRequested } from "@/components/home/MostRequested";
 import { Testimonials } from "@/components/home/Testimonials";
 import { NewsletterSignup } from "@/components/home/NewsletterSignup";
+import { PageAtmosphere } from "@/components/home/PageAtmosphere";
 import { Reveal, StaggerContainer, StaggerItem } from "@/components/motion";
 import type { Locale } from "@gcc-store/i18n";
 
@@ -36,12 +37,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <div className="relative">
-      {/* Decorative, non-interactive background glow — purely visual, capped
-          opacity so it never competes with content or hurts text contrast. */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 start-1/4 h-96 w-96 rounded-full bg-brand-primary/10 blur-3xl" />
-        <div className="absolute top-1/3 end-0 h-80 w-80 rounded-full bg-brand-secondary/10 blur-3xl" />
-      </div>
+      <PageAtmosphere />
 
       <div className="mx-auto flex max-w-7xl flex-col gap-16 px-4 py-10">
         <HomeHero
@@ -80,22 +76,25 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <LimitedOffers products={popularProducts.items.slice(0, 4)} locale={typedLocale} />
         ) : null}
 
-        <section>
-          <SectionHeading title={t("home.popularGames")} viewAllHref="/games" viewAllLabel={t("nav.games")} />
-          {loadError ? (
-            <ErrorState title={t("common.errorGeneric")} />
-          ) : popularProducts && popularProducts.items.length > 0 ? (
-            <StaggerContainer className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-              {popularProducts.items.map((product) => (
-                <StaggerItem key={product.id}>
-                  <ProductCard product={product} />
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          ) : (
-            <EmptyState title={t("common.empty")} />
-          )}
-        </section>
+        <Reveal>
+          <section className="relative">
+            <div aria-hidden className="pointer-events-none absolute -top-10 start-1/2 -z-10 h-64 w-[80%] -translate-x-1/2 rounded-full bg-brand-primary/5 blur-3xl" />
+            <SectionHeading title={t("home.popularGames")} viewAllHref="/games" viewAllLabel={t("nav.games")} />
+            {loadError ? (
+              <ErrorState title={t("common.errorGeneric")} />
+            ) : popularProducts && popularProducts.items.length > 0 ? (
+              <StaggerContainer className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+                {popularProducts.items.map((product) => (
+                  <StaggerItem key={product.id}>
+                    <ProductCard product={product} />
+                  </StaggerItem>
+                ))}
+              </StaggerContainer>
+            ) : (
+              <EmptyState title={t("common.empty")} />
+            )}
+          </section>
+        </Reveal>
 
         <ProcessSteps locale={typedLocale} />
 
