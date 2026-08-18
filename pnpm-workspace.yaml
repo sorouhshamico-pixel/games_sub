@@ -9,6 +9,7 @@ overrides:
   "js-yaml@>=4.0.0 <4.3.1": ">=4.3.1"
   "sharp@<0.35.0": ">=0.35.0"
   "postcss@<=8.5.17": ">=8.5.18"
+  "deepmerge-ts@<8.0.0": ">=8.0.0"
 allowBuilds:
   '@parcel/watcher': true
   '@prisma/client': true
