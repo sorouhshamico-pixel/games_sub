@@ -20,23 +20,23 @@ const games: Array<{ imgSrc: string; ar: string; en: string }> = [
 
 export function BrandTiles({ locale }: { locale: Locale }) {
   return (
-    <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      {games.map((game) => {
-        const name = locale === "ar" ? game.ar : game.en;
-        return (
-          <HoverCard key={name} className="shrink-0 snap-start">
-            <Link
-              href="/games"
-              className="flex w-24 flex-col items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-center transition-colors hover:border-brand-primary/50"
-            >
-              <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-[var(--color-surface-elevated)]">
-                <img src={game.imgSrc} alt="" aria-hidden className="h-full w-full object-cover" loading="lazy" />
-              </span>
-              <span className="w-full truncate text-xs font-medium text-[var(--color-text-primary)]">{name}</span>
-            </Link>
-          </HoverCard>
-        );
-      })}
+    <div className="rounded-3xl border border-[var(--color-border)] bg-gradient-to-br from-brand-primary/5 via-[var(--color-surface)] to-brand-secondary/5 p-4 sm:p-6">
+      <div className="-mx-2 flex snap-x snap-mandatory gap-5 overflow-x-auto px-2 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {games.map((game) => {
+          const name = locale === "ar" ? game.ar : game.en;
+          return (
+            <HoverCard key={name} className="shrink-0 snap-start">
+              <Link href="/games" className="group flex w-24 flex-col items-center gap-2.5 sm:w-28">
+                <span className="relative block aspect-square w-full overflow-hidden rounded-2xl shadow-lg shadow-black/30 ring-1 ring-white/10 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-brand-primary/25 group-hover:ring-2 group-hover:ring-brand-primary/60">
+                  <img src={game.imgSrc} alt="" aria-hidden className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+                  <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                </span>
+                <span className="w-full truncate text-center text-sm font-semibold text-[var(--color-text-primary)]">{name}</span>
+              </Link>
+            </HoverCard>
+          );
+        })}
+      </div>
     </div>
   );
 }
