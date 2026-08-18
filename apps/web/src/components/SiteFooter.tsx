@@ -5,7 +5,6 @@ import { SiTiktok, SiInstagram, SiX, SiYoutube } from "react-icons/si";
 import { Link } from "@/i18n/navigation";
 import { Reveal, StaggerContainer, StaggerItem, HoverCard } from "@/components/motion";
 import { BrandLockup } from "./BrandLockup";
-import { AppleIcon, PlayStoreIcon } from "./home/icons";
 
 // Real supplied artwork for every payment mark now (see
 // public/images/payment/NOTICE.md) — no more text-only chips or mixed
@@ -15,6 +14,12 @@ const paymentBadges = [
   { name: "Visa", imgSrc: "/images/payment/visa.png" },
   { name: "Mastercard", imgSrc: "/images/payment/mastercard.png" },
   { name: "Apple Pay", imgSrc: "/images/payment/apple-pay.png" },
+];
+
+// Same real-artwork treatment for the app store badges.
+const appBadges = [
+  { name: "App Store", imgSrc: "/images/app/app-store.png" },
+  { name: "Google Play", imgSrc: "/images/app/google-play.png" },
 ];
 
 // Decorative only — no real Shahnoo social accounts exist yet, so these are
@@ -132,15 +137,23 @@ export function SiteFooter() {
             <p className="mb-3 text-sm text-[var(--color-text-muted)]">
               {locale === "ar" ? "تجربة أسرع وأكثر سهولة" : "A faster, easier experience"}
             </p>
-            <div className="flex flex-col gap-2">
-              {[
-                { Icon: AppleIcon, label: "App Store" },
-                { Icon: PlayStoreIcon, label: "Google Play" },
-              ].map(({ Icon, label }) => (
-                <HoverCard key={label}>
-                  <span className="flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--color-text-muted)] transition-colors hover:border-brand-primary/40">
-                    <Icon className="h-3.5 w-3.5" aria-hidden />
-                    {label} — {locale === "ar" ? "قريبًا" : "Coming soon"}
+            <div className="flex flex-col gap-2.5">
+              {appBadges.map((badge) => (
+                <HoverCard key={badge.name}>
+                  {/* Same treatment as the payment badges — no frame of
+                      ours, the card's own glowing border is the only
+                      boundary — with a small "Coming soon" ribbon since
+                      there's no real app yet to link to. */}
+                  <span className="relative block overflow-hidden rounded-lg">
+                    <img
+                      src={badge.imgSrc}
+                      alt={badge.name}
+                      loading="lazy"
+                      className="aspect-[3/2] w-full rounded-lg object-cover transition-[filter] duration-300 hover:brightness-110"
+                    />
+                    <span className="absolute bottom-1.5 end-1.5 rounded-full bg-black/70 px-2 py-0.5 text-[9px] font-semibold text-white backdrop-blur-sm">
+                      {locale === "ar" ? "قريبًا" : "Coming soon"}
+                    </span>
                   </span>
                 </HoverCard>
               ))}
