@@ -6,6 +6,7 @@ import { motion, useScroll, useTransform } from "motion/react";
 import { Zap, Tag, ShieldCheck, Headset } from "lucide-react";
 import { buttonBaseClasses, buttonSizeClasses, buttonVariantClasses, cn } from "@gcc-store/ui";
 import { Link } from "@/i18n/navigation";
+import { Magnetic } from "@/components/motion";
 import { duration, easing, spring, staggerGap } from "@/lib/motion/tokens";
 import { HeroIllustrationCarousel } from "./HeroIllustrationCarousel";
 
@@ -16,6 +17,18 @@ const heroContainer = {
 const heroItem = {
   hidden: { opacity: 0, y: 16, filter: "blur(6px)" },
   visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: duration.hero * 0.6, ease: easing } },
+};
+
+// Nested inside the h1 — words cascade in quickly on their own tighter
+// stagger, still triggered by the same parent "visible" state via variant
+// propagation (no separate initial/animate needed here).
+const titleContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.05, delayChildren: 0.15 } },
+};
+const titleWord = {
+  hidden: { opacity: 0, y: 14, filter: "blur(4px)" },
+  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: duration.medium, ease: easing } },
 };
 
 const featureStrip = [
@@ -37,11 +50,13 @@ export function HomeHero({
   ctaLabel: string;
 }) {
   const locale = useLocale();
+  const words = title.split(" ").filter(Boolean);
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end start"] });
   // Capped well within the 10-16px parallax ceiling from spec.
   const blobOneY = useTransform(scrollYProgress, [0, 1], [0, 14]);
   const blobTwoY = useTransform(scrollYProgress, [0, 1], [0, -12]);
+  const blobThreeY = useTransform(scrollYProgress, [0, 1], [0, 10]);
 
   return (
     <section
@@ -49,23 +64,52 @@ export function HomeHero({
       className="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8 sm:p-12 lg:p-16"
     >
       <div aria-hidden className="absolute inset-0 bg-gradient-to-br from-[var(--color-surface)] via-[var(--color-surface)] to-brand-primary/10" />
+
+      {/* Aurora background — three blurred blobs, each drifting slowly and
+          continuously (idle motion) on top of the existing scroll parallax.
+          Purely decorative transform/opacity work, capped subtle amplitude,
+          automatically frozen for prefers-reduced-motion via MotionProvider's
+          global reducedMotion="user" config. */}
       <motion.div
         aria-hidden
         style={{ y: blobOneY }}
+        animate={{ x: [0, 24, -10, 0], scale: [1, 1.08, 0.97, 1] }}
+        transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
         className="pointer-events-none absolute -top-24 start-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-brand-primary/30 blur-3xl"
       />
       <motion.div
         aria-hidden
         style={{ y: blobTwoY }}
+        animate={{ x: [0, -20, 14, 0], scale: [1, 0.95, 1.06, 1] }}
+        transition={{ duration: 19, repeat: Infinity, ease: "easeInOut", delay: 1 }}
         className="pointer-events-none absolute -bottom-32 end-0 h-80 w-80 rounded-full bg-brand-secondary/20 blur-3xl"
+      />
+      <motion.div
+        aria-hidden
+        style={{ y: blobThreeY }}
+        animate={{ x: [0, 16, -16, 0], opacity: [0.5, 0.8, 0.5] }}
+        transition={{ duration: 13, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+        className="pointer-events-none absolute top-1/3 start-0 h-40 w-40 rounded-full bg-brand-accent/20 blur-3xl"
       />
 
       <div className="relative grid items-center gap-10 lg:grid-cols-2">
         <motion.div initial="hidden" animate="visible" variants={heroContainer}>
-          <motion.h1 variants={heroItem} className="max-w-2xl text-4xl font-bold leading-tight text-[var(--color-text-primary)] sm:text-5xl">
-            {title}{" "}
-            <span className="text-brand-secondary">{titleHighlight}</span>{" "}
-            <Zap aria-hidden className="inline-block h-8 w-8 -translate-y-1 fill-brand-secondary text-brand-secondary sm:h-10 sm:w-10" />
+          <motion.h1
+            variants={titleContainer}
+            className="max-w-2xl text-4xl font-bold leading-tight text-[var(--color-text-primary)] sm:text-5xl"
+          >
+            {words.map((word, index) => (
+              <motion.span key={index} variants={titleWord} className="inline-block">
+                {word}
+                {index < words.length - 1 ? " " : ""}
+              </motion.span>
+            ))}{" "}
+            <motion.span variants={titleWord} className="inline-block text-brand-secondary">
+              {titleHighlight}
+            </motion.span>{" "}
+            <motion.span variants={titleWord} className="inline-block">
+              <Zap aria-hidden className="inline-block h-8 w-8 -translate-y-1 fill-brand-secondary text-brand-secondary sm:h-10 sm:w-10" />
+            </motion.span>
           </motion.h1>
           <motion.p variants={heroItem} className="mt-4 max-w-xl text-lg text-[var(--color-text-muted)]">
             {subtitle}
@@ -81,22 +125,21 @@ export function HomeHero({
                 animate={{ opacity: [0.5, 0.8, 0.5] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               />
-              {/* A motion.span wrapper (not a motion.button) drives the hover/press
-                  feel here — Link already renders an <a>, and nesting a <button>
-                  inside it would be invalid HTML. */}
-              <motion.span
-                className="inline-block"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.985, y: 0 }}
-                transition={{ type: "spring", ...spring }}
-              >
-                <Link
-                  href="/games"
-                  className={cn(buttonBaseClasses, buttonVariantClasses.primary, buttonSizeClasses.lg, "shadow-lg shadow-brand-primary/30")}
+              <Magnetic strength={0.3}>
+                <motion.span
+                  className="inline-block"
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.985, y: 0 }}
+                  transition={{ type: "spring", ...spring }}
                 >
-                  {ctaLabel}
-                </Link>
-              </motion.span>
+                  <Link
+                    href="/games"
+                    className={cn(buttonBaseClasses, buttonVariantClasses.primary, buttonSizeClasses.lg, "shadow-lg shadow-brand-primary/30")}
+                  >
+                    {ctaLabel}
+                  </Link>
+                </motion.span>
+              </Magnetic>
             </div>
 
             <motion.span

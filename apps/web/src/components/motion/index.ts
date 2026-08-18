@@ -12,3 +12,4 @@ export * from "./MotionAccordion";
 export * from "./MotionTabs";
 export * from "./SuccessCheck";
 export * from "./LoadingSkeleton";
+export * from "./Magnetic";

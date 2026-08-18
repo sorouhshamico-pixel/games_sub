@@ -48,6 +48,13 @@ export function ProductCard({ product }: { product: ProductSummary }) {
             <ProductImagePlaceholder label={name.slice(0, 1)} />
           )}
 
+          {/* Diagonal light sweep on hover — pure CSS transform/opacity,
+              no JS, one pass per hover-enter. */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -translate-x-full skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full"
+          />
+
           {product.isDemoData ? (
             <span
               data-demo-badge
