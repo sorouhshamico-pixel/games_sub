@@ -1,12 +1,9 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { motion } from "motion/react";
-import { ArrowUp } from "lucide-react";
 import { SiTiktok, SiInstagram, SiX, SiYoutube } from "react-icons/si";
 import { Link } from "@/i18n/navigation";
 import { Reveal, StaggerContainer, StaggerItem, HoverCard } from "@/components/motion";
-import { duration, easing } from "@/lib/motion/tokens";
 import { BrandLockup } from "./BrandLockup";
 import { AppleIcon, PlayStoreIcon } from "./home/icons";
 
@@ -153,21 +150,10 @@ export function SiteFooter() {
       </Reveal>
 
       <div className="relative border-t border-[var(--color-border)] px-4 py-4">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
+        <div className="mx-auto max-w-7xl text-center">
           <p className="text-xs text-[var(--color-text-muted)]">
             {t("brand.name")} © {year} — {t("footer.rightsReserved")}
           </p>
-          <motion.button
-            type="button"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            whileHover={{ y: -3 }}
-            whileTap={{ scale: 0.92 }}
-            transition={{ duration: duration.fast, ease: easing }}
-            aria-label={locale === "ar" ? "العودة للأعلى" : "Back to top"}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] text-[var(--color-text-muted)] transition-colors hover:border-brand-primary/50 hover:text-brand-primary"
-          >
-            <ArrowUp className="h-4 w-4" aria-hidden />
-          </motion.button>
         </div>
       </div>
     </footer>

@@ -11,6 +11,8 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { BottomNav } from "@/components/BottomNav";
 import { CartProvider } from "@/components/CartProvider";
 import { CartDrawer } from "@/components/CartDrawer";
+import { FloatingBackToTop } from "@/components/FloatingBackToTop";
+import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { MotionProvider, PageTransition } from "@/components/motion";
 import "../globals.css";
 
@@ -75,6 +77,8 @@ export default async function LocaleLayout({
               <SiteFooter />
               <BottomNav />
               <CartDrawer />
+              <FloatingBackToTop />
+              <FloatingWhatsApp />
             </CartProvider>
           </MotionProvider>
         </NextIntlClientProvider>

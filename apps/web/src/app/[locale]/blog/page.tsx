@@ -1,6 +1,7 @@
+import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { EmptyState, ErrorState } from "@gcc-store/ui";
-import { Clock, Search as SearchIcon } from "lucide-react";
+import { BookOpen, Clock, Search as SearchIcon } from "lucide-react";
 import { ApiError, listBlogPosts } from "@/lib/api";
 import { Link } from "@/i18n/navigation";
 import { BlogPostCard } from "@/components/blog/BlogPostCard";
@@ -8,7 +9,7 @@ import { CategoryFilter } from "@/components/blog/CategoryFilter";
 import { WhatsAppIcon } from "@/components/home/icons";
 import { NewsletterSignup } from "@/components/home/NewsletterSignup";
 import { SectionHeading } from "@/components/home/SectionHeading";
-import { Reveal, StaggerContainer, StaggerItem, HoverCard } from "@/components/motion";
+import { AnimatedCounter, Reveal, StaggerContainer, StaggerItem, HoverCard } from "@/components/motion";
 import type { Locale } from "@gcc-store/i18n";
 
 export const dynamic = "force-dynamic";
@@ -18,18 +19,19 @@ export default async function BlogPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; page?: string }>;
 }) {
   const { locale } = await params;
   const typedLocale = locale as Locale;
   setRequestLocale(typedLocale);
   const t = await getTranslations();
-  const { category } = await searchParams;
+  const { category, page: pageParam } = await searchParams;
+  const page = Math.max(1, Number(pageParam) || 1);
 
   let posts: Awaited<ReturnType<typeof listBlogPosts>> | null = null;
   let loadError = false;
   try {
-    posts = await listBlogPosts({ category, locale: typedLocale });
+    posts = await listBlogPosts({ category, page, locale: typedLocale });
   } catch (error) {
     loadError = error instanceof ApiError;
   }
@@ -38,6 +40,7 @@ export default async function BlogPage({
   const featured = items.slice(0, 2);
   const mostRead = items.slice(0, 4);
   const latest = items.slice(2);
+  const hasMore = posts ? page * posts.pageSize < posts.total : false;
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-14 px-4 py-10">
@@ -50,22 +53,47 @@ export default async function BlogPage({
       </nav>
 
       <Reveal>
-        <section className="rounded-3xl border border-[var(--color-border)] bg-gradient-to-br from-brand-primary/10 via-[var(--color-surface)] to-brand-secondary/10 p-8 sm:p-12">
-          <h1 className="text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">
-            {locale === "ar" ? "مدونة شحنو" : "The Shahnoo Blog"}
-          </h1>
-          <p className="mt-3 max-w-xl text-[var(--color-text-muted)]">
-            {locale === "ar"
-              ? "أدلة ونصائح وعروض تساعدك على شحن ألعابك واختيار اشتراكاتك بثقة"
-              : "Guides, tips, and offers to help you top up your games and pick subscriptions with confidence"}
-          </p>
-          <div className="relative mt-6 max-w-md">
-            <SearchIcon aria-hidden className="pointer-events-none absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
-            <input
-              type="search"
-              placeholder={locale === "ar" ? "ابحث عن دليل أو نصيحة أو اشتراك" : "Search for a guide, tip, or subscription"}
-              className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] py-2.5 ps-10 pe-4 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus-visible:border-brand-primary/60"
-            />
+        <section className="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-gradient-to-br from-brand-primary/10 via-[var(--color-surface)] to-brand-secondary/10 p-8 sm:p-12">
+          <div className="relative grid items-center gap-10 lg:grid-cols-2">
+            <div>
+              <h1 className="text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">
+                {locale === "ar" ? "مدونة شحنو" : "The Shahnoo Blog"}
+              </h1>
+              <p className="mt-3 max-w-xl text-[var(--color-text-muted)]">
+                {locale === "ar"
+                  ? "أدلة ونصائح وعروض تساعدك على شحن ألعابك واختيار اشتراكاتك بثقة"
+                  : "Guides, tips, and offers to help you top up your games and pick subscriptions with confidence"}
+              </p>
+              <div className="relative mt-6 max-w-md">
+                <SearchIcon aria-hidden className="pointer-events-none absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
+                <input
+                  type="search"
+                  placeholder={locale === "ar" ? "ابحث عن دليل أو نصيحة أو اشتراك" : "Search for a guide, tip, or subscription"}
+                  className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] py-2.5 ps-10 pe-4 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus-visible:border-brand-primary/60"
+                />
+              </div>
+              {posts && posts.total > 0 ? (
+                <p className="mt-6 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+                  <BookOpen className="h-4 w-4 text-brand-secondary" aria-hidden />
+                  <AnimatedCounter value={posts.total} className="text-lg font-bold text-brand-primary" />
+                  {locale === "ar" ? "مقالة ودليل متاح الآن" : "articles and guides available now"}
+                </p>
+              ) : null}
+            </div>
+
+            {/* Staggered real-photo collage — reuses the blog category
+                cover set rather than needing dedicated hero-only assets. */}
+            <div className="relative mx-auto hidden h-64 w-full max-w-sm sm:block">
+              <div className="absolute start-0 top-0 h-40 w-48 -rotate-3 overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/40">
+                <Image src="/images/blog/mobile-gaming.jpg" alt="" fill sizes="200px" className="object-cover" priority />
+              </div>
+              <div className="absolute bottom-0 end-0 h-40 w-48 rotate-3 overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/40">
+                <Image src="/images/blog/laptop-relaxing.jpg" alt="" fill sizes="200px" className="object-cover" />
+              </div>
+              <div className="absolute end-8 top-6 h-24 w-24 rotate-6 overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/40">
+                <Image src="/images/blog/security-shield.jpg" alt="" fill sizes="100px" className="object-cover" />
+              </div>
+            </div>
           </div>
         </section>
       </Reveal>
@@ -96,22 +124,10 @@ export default async function BlogPage({
           </Reveal>
 
           <Reveal>
+            {/* "Most read" first in DOM so it lands on the reading-start
+                side (right, in RTL) per direction; "Latest articles"
+                (the wider column) second so it lands on the left. */}
             <section className="grid gap-8 lg:grid-cols-3">
-              <div className="lg:col-span-2">
-                <SectionHeading title={locale === "ar" ? "أحدث المقالات" : "Latest articles"} />
-                {latest.length > 0 ? (
-                  <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {latest.map((post) => (
-                      <StaggerItem key={post.slug}>
-                        <BlogPostCard post={post} locale={typedLocale} />
-                      </StaggerItem>
-                    ))}
-                  </StaggerContainer>
-                ) : (
-                  <p className="text-sm text-[var(--color-text-muted)]">{t("common.empty")}</p>
-                )}
-              </div>
-
               <div>
                 <h2 className="mb-4 text-lg font-bold text-[var(--color-text-primary)]">
                   {locale === "ar" ? "الأكثر قراءة" : "Most read"}
@@ -139,6 +155,31 @@ export default async function BlogPage({
                     </StaggerItem>
                   ))}
                 </StaggerContainer>
+              </div>
+
+              <div className="lg:col-span-2">
+                <SectionHeading title={locale === "ar" ? "أحدث المقالات" : "Latest articles"} />
+                {latest.length > 0 ? (
+                  <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {latest.map((post) => (
+                      <StaggerItem key={post.slug}>
+                        <BlogPostCard post={post} locale={typedLocale} />
+                      </StaggerItem>
+                    ))}
+                  </StaggerContainer>
+                ) : (
+                  <p className="text-sm text-[var(--color-text-muted)]">{t("common.empty")}</p>
+                )}
+                {hasMore ? (
+                  <div className="mt-6 flex justify-center">
+                    <Link
+                      href={{ pathname: "/blog", query: { ...(category ? { category } : {}), page: page + 1 } }}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-3 text-sm font-medium text-[var(--color-text-primary)] transition-all hover:-translate-y-0.5 hover:border-brand-primary/50"
+                    >
+                      {locale === "ar" ? "اقرأ المزيد" : "Read more"} →
+                    </Link>
+                  </div>
+                ) : null}
               </div>
             </section>
           </Reveal>
