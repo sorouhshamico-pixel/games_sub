@@ -1,3 +1,3 @@
-Visa and Mastercard logo SVGs in this folder are from
-[aaronfagan/svg-credit-card-payment-icons](https://github.com/aaronfagan/svg-credit-card-payment-icons),
-licensed under the Apache License 2.0.
+visa.png, mada.png, mastercard.png, and apple-pay.png were supplied
+directly by the project owner (styled illustrative renders of each
+brand mark), not sourced from a third-party asset library.
