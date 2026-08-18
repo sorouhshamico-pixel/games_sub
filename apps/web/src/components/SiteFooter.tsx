@@ -108,24 +108,18 @@ export function SiteFooter() {
 
           <div>
             <p className="mb-3 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "طرق الدفع" : "Payment methods"}</p>
-            <StaggerContainer className="grid grid-cols-2 gap-1">
+            <StaggerContainer className="grid grid-cols-2 gap-2.5">
               {paymentBadges.map((badge) => (
                 <StaggerItem key={badge.name}>
                   <HoverCard>
-                    {/* No frame/border of our own — only the glowing edge
-                        already baked into each image should read as a
-                        boundary. A radial mask fades the image's own hard
-                        rectangle into the footer background so it melts in
-                        rather than sitting in a visible box. */}
+                    {/* No frame/ring/shadow of ours — the card's own baked-in
+                        glowing border is the only boundary. Shown crisp at
+                        full opacity, just a gentle brightness lift on hover. */}
                     <img
                       src={badge.imgSrc}
                       alt={badge.name}
                       loading="lazy"
-                      className="aspect-[3/2] w-full object-cover opacity-90 transition-opacity duration-300 hover:opacity-100"
-                      style={{
-                        maskImage: "radial-gradient(ellipse at center, black 55%, transparent 100%)",
-                        WebkitMaskImage: "radial-gradient(ellipse at center, black 55%, transparent 100%)",
-                      }}
+                      className="aspect-[3/2] w-full rounded-lg object-cover brightness-100 transition-[filter] duration-300 hover:brightness-110"
                     />
                   </HoverCard>
                 </StaggerItem>
