@@ -4,10 +4,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { ArrowUp } from "lucide-react";
 import { SiTiktok, SiInstagram, SiX, SiYoutube } from "react-icons/si";
-import { ShahnooIcon } from "@gcc-store/ui";
 import { Link } from "@/i18n/navigation";
 import { Reveal, StaggerContainer, StaggerItem, HoverCard } from "@/components/motion";
 import { duration, easing } from "@/lib/motion/tokens";
+import { BrandLockup } from "./BrandLockup";
 import { AppleIcon, PlayStoreIcon } from "./home/icons";
 
 // Real supplied artwork for every payment mark now (see
@@ -66,12 +66,8 @@ export function SiteFooter() {
       <Reveal>
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-1">
-            <div className="mb-3 flex items-center gap-2">
-              <ShahnooIcon className="h-6 w-6" />
-              <span className="font-semibold text-[var(--color-text-primary)]">{t("brand.name")}</span>
-              {locale === "ar" ? (
-                <span className="text-[9px] font-semibold tracking-[0.2em] text-brand-secondary">SHAHNOO</span>
-              ) : null}
+            <div className="mb-3">
+              <BrandLockup variant="footer" />
             </div>
             <p className="text-sm text-[var(--color-text-muted)]">{t("brand.tagline")}</p>
             <div className="mt-4 flex items-center gap-3">
@@ -112,13 +108,25 @@ export function SiteFooter() {
 
           <div>
             <p className="mb-3 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "طرق الدفع" : "Payment methods"}</p>
-            <StaggerContainer className="grid grid-cols-2 gap-2.5">
+            <StaggerContainer className="grid grid-cols-2 gap-1">
               {paymentBadges.map((badge) => (
                 <StaggerItem key={badge.name}>
                   <HoverCard>
-                    <span className="block overflow-hidden rounded-xl shadow-lg shadow-black/20 ring-1 ring-white/10 transition-shadow duration-300 hover:shadow-brand-primary/20 hover:ring-brand-primary/40">
-                      <img src={badge.imgSrc} alt={badge.name} className="aspect-[3/2] w-full object-cover" loading="lazy" />
-                    </span>
+                    {/* No frame/border of our own — only the glowing edge
+                        already baked into each image should read as a
+                        boundary. A radial mask fades the image's own hard
+                        rectangle into the footer background so it melts in
+                        rather than sitting in a visible box. */}
+                    <img
+                      src={badge.imgSrc}
+                      alt={badge.name}
+                      loading="lazy"
+                      className="aspect-[3/2] w-full object-cover opacity-90 transition-opacity duration-300 hover:opacity-100"
+                      style={{
+                        maskImage: "radial-gradient(ellipse at center, black 55%, transparent 100%)",
+                        WebkitMaskImage: "radial-gradient(ellipse at center, black 55%, transparent 100%)",
+                      }}
+                    />
                   </HoverCard>
                 </StaggerItem>
               ))}

@@ -3,8 +3,9 @@
 import { useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMotionValueEvent, useScroll } from "motion/react";
-import { ShahnooIcon, cn } from "@gcc-store/ui";
+import { cn } from "@gcc-store/ui";
 import { Link, useRouter } from "@/i18n/navigation";
+import { BrandLockup } from "./BrandLockup";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { CartIcon } from "./CartIcon";
 
@@ -46,18 +47,7 @@ export function SiteHeader() {
           isScrolled ? "py-2" : "py-3",
         )}
       >
-        <Link href="/" className="flex shrink-0 items-center gap-2">
-          <ShahnooIcon className="h-8 w-8" />
-          <span className="flex flex-col leading-none">
-            <span className="text-lg font-bold tracking-tight text-[var(--color-text-primary)]">{t("brand.name")}</span>
-            {/* The approved lockup pairs the Arabic wordmark with a small Latin
-                "SHAHNOO" subtitle — only shown in the Arabic locale, since the
-                English locale's brand name already reads "Shahnoo". */}
-            {locale === "ar" ? (
-              <span className="text-[9px] font-semibold tracking-[0.2em] text-brand-secondary">SHAHNOO</span>
-            ) : null}
-          </span>
-        </Link>
+        <BrandLockup variant="header" />
 
         <nav className="hidden items-center gap-5 text-sm font-medium md:flex" aria-label="primary">
           {/* The three real seeded catalog categories — mirrors the
