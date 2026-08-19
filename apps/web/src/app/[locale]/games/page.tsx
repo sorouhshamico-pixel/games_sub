@@ -1,11 +1,13 @@
+import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { EmptyState, ErrorState } from "@gcc-store/ui";
 import { Gamepad2, Sparkles } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { ProductCard } from "@/components/ProductCard";
 import { GameCategoryFilter } from "@/components/games/GameCategoryFilter";
+import { BrandSlider } from "@/components/games/BrandSlider";
 import { ApiError, getBrands, getCategories, listProducts } from "@/lib/api";
-import { AnimatedCounter, Reveal, StaggerContainer, StaggerItem, HoverCard } from "@/components/motion";
+import { AnimatedCounter, Reveal, StaggerContainer, StaggerItem } from "@/components/motion";
 import type { Locale } from "@gcc-store/i18n";
 
 export const dynamic = "force-dynamic";
@@ -45,33 +47,55 @@ export default async function GamesPage({
           <div aria-hidden className="pointer-events-none absolute -top-16 end-0 h-56 w-56 rounded-full bg-brand-secondary/15 blur-3xl" />
           <div aria-hidden className="pointer-events-none absolute -bottom-20 start-1/4 h-48 w-48 rounded-full bg-brand-primary/15 blur-3xl" />
 
-          <span aria-hidden className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary/15 text-brand-primary">
-            <Gamepad2 className="h-6 w-6" />
-          </span>
-          <h1 className="relative text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">{t("nav.games")}</h1>
+          <div className="relative grid items-center gap-10 lg:grid-cols-2">
+            <div>
+              <span aria-hidden className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary/15 text-brand-primary">
+                <Gamepad2 className="h-6 w-6" />
+              </span>
+              <h1 className="text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">{t("nav.games")}</h1>
 
-          {search ? (
-            <p className="relative mt-2 text-sm text-[var(--color-text-muted)]">
-              {locale === "ar" ? `نتائج البحث عن "${search}"` : `Search results for "${search}"`}{" "}
-              <Link href="/games" className="font-medium text-brand-secondary hover:underline">
-                {locale === "ar" ? "مسح" : "clear"}
-              </Link>
-            </p>
-          ) : (
-            <p className="relative mt-2 max-w-xl text-[var(--color-text-muted)]">
-              {locale === "ar"
-                ? "تصفح كل الألعاب والاشتراكات وبطاقات الهدايا في مكان واحد"
-                : "Browse every game, subscription, and gift card in one place"}
-            </p>
-          )}
+              {search ? (
+                <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                  {locale === "ar" ? `نتائج البحث عن "${search}"` : `Search results for "${search}"`}{" "}
+                  <Link href="/games" className="font-medium text-brand-secondary hover:underline">
+                    {locale === "ar" ? "مسح" : "clear"}
+                  </Link>
+                </p>
+              ) : (
+                <p className="mt-2 max-w-xl text-[var(--color-text-muted)]">
+                  {locale === "ar"
+                    ? "تصفح كل الألعاب والاشتراكات وبطاقات الهدايا في مكان واحد"
+                    : "Browse every game, subscription, and gift card in one place"}
+                </p>
+              )}
 
-          {products && products.total > 0 ? (
-            <p className="relative mt-4 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
-              <Sparkles className="h-4 w-4 text-brand-accent" aria-hidden />
-              <AnimatedCounter value={products.total} className="text-lg font-bold text-brand-primary" />
-              {locale === "ar" ? "منتج متاح الآن" : "products available now"}
-            </p>
-          ) : null}
+              {products && products.total > 0 ? (
+                <p className="mt-4 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+                  <Sparkles className="h-4 w-4 text-brand-accent" aria-hidden />
+                  <AnimatedCounter value={products.total} className="text-lg font-bold text-brand-primary" />
+                  {locale === "ar" ? "منتج متاح الآن" : "products available now"}
+                </p>
+              ) : null}
+            </div>
+
+            {/* Second in DOM order so it lands physically on the left,
+                as requested — independent of RTL/LTR direction. Reuses
+                the three real hero illustrations (one per catalog
+                category) in a staggered collage, echoing the blog hero's
+                proven layout and directly illustrating "every game,
+                subscription, and gift card in one place". */}
+            <div className="relative mx-auto hidden h-64 w-full max-w-sm sm:block">
+              <div className="absolute start-0 top-0 h-40 w-48 -rotate-3 overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/40">
+                <Image src="/images/hero/game-top-up-illustration.png" alt="" fill sizes="200px" className="object-cover" priority />
+              </div>
+              <div className="absolute bottom-0 end-0 h-40 w-48 rotate-3 overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/40">
+                <Image src="/images/hero/digital-subscriptions-illustration.png" alt="" fill sizes="200px" className="object-cover" />
+              </div>
+              <div className="absolute end-8 top-6 h-24 w-24 rotate-6 overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/40">
+                <Image src="/images/hero/gift-cards-illustration.png" alt="" fill sizes="100px" className="object-cover" />
+              </div>
+            </div>
+          </div>
         </section>
       </Reveal>
 
@@ -84,33 +108,7 @@ export default async function GamesPage({
               <Gamepad2 className="h-5 w-5 text-brand-secondary" aria-hidden />
               {locale === "ar" ? "الألعاب" : "Games"}
             </h2>
-            <StaggerContainer className="flex flex-wrap gap-3">
-              {brands.map((brand) => {
-                const name = locale === "ar" ? brand.nameAr : brand.nameEn;
-                return (
-                  <StaggerItem key={brand.slug}>
-                    <HoverCard>
-                      <Link
-                        href={`/games/${brand.slug}`}
-                        className="group flex items-center gap-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:border-brand-primary/60 hover:bg-brand-primary/5"
-                      >
-                        {brand.logoUrl ? (
-                          <img src={brand.logoUrl} alt="" className="h-6 w-6 shrink-0 rounded-md object-cover" loading="lazy" />
-                        ) : (
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-brand-primary/15 text-[10px] font-bold text-brand-primary">
-                            {name.slice(0, 1)}
-                          </span>
-                        )}
-                        {name}
-                        <span aria-hidden className="text-brand-secondary opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                          {locale === "ar" ? "←" : "→"}
-                        </span>
-                      </Link>
-                    </HoverCard>
-                  </StaggerItem>
-                );
-              })}
-            </StaggerContainer>
+            <BrandSlider brands={brands} locale={typedLocale} />
           </section>
         </Reveal>
       ) : null}
