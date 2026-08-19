@@ -20,12 +20,13 @@ import { duration, easing, spring } from "@/lib/motion/tokens";
 type QuickAddState = "idle" | "loading" | "added";
 
 // Same investor-demo pattern already used by LimitedOffers: a decorative
-// "-X%" ribbon, deterministic per product (not random, so it doesn't
-// flicker between renders) rather than fabricating a struck-through
-// "original price" — the real price shown below never changes, and
-// checkout always charges exactly that. The section this card renders in
-// carries the actual "demo data" disclosure, same as LimitedOffers/
-// MostRequested already do for their own cards.
+// "-X%", deterministic per product (not random, so it doesn't flicker
+// between renders). The struck-through "original" price below is derived
+// FROM the real price (original = real / (1 - percent)) rather than the
+// other way around, so the bold "now" price is always exactly what
+// checkout actually charges — only the crossed-out reference price is
+// illustrative. The section this card renders in carries the actual
+// "demo data" disclosure, same as LimitedOffers/MostRequested already do.
 const demoDiscountPercents = [15, 20, 10, 25, 30];
 function demoDiscountFor(id: string): number {
   let sum = 0;
@@ -50,6 +51,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
   const categoryLabel = t(`nav.${categoryNavKey[product.categorySlug] ?? "games"}`);
   const { currency: displayCurrency } = useDisplayCurrency();
   const displayAmount = convertMinorUnits(product.fromPriceMinorUnits, product.currency, displayCurrency);
+  const originalAmount = Math.round(displayAmount / (1 - discountPercent / 100));
   const { addItem } = useCart();
   const router = useRouter();
   // Local-only wishlist toggle — there's no wishlist backend yet, so this
@@ -181,7 +183,23 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         </div>
         <div className="flex items-center justify-between gap-2 p-3.5">
           <div className="min-w-0">
-            <p className="text-xs text-[var(--color-text-muted)]">{locale === "ar" ? "يبدأ من" : "Starting from"}</p>
+            <p className="truncate text-xs text-[var(--color-text-muted)]">
+              <AnimatePresence mode="wait" initial={false}>
+                {/* Plain inline (not inline-block) — text-decoration from a
+                    parent doesn't paint through an inline-block child, so
+                    the strikethrough has to live on this element itself. */}
+                <motion.span
+                  key={displayCurrency}
+                  initial={{ opacity: 0, y: -2 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 2 }}
+                  transition={{ duration: duration.fast, ease: easing }}
+                  className="line-through decoration-danger/70"
+                >
+                  {formatMoney(originalAmount, displayCurrency, locale)}
+                </motion.span>
+              </AnimatePresence>
+            </p>
             <p className="truncate text-base font-bold text-brand-accent">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.span
