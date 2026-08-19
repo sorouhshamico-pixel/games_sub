@@ -22,7 +22,7 @@ export function CartIcon() {
         event.preventDefault();
         openDrawer();
       }}
-      className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)]"
+      className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-surface-elevated)]/70 text-[var(--color-text-primary)] transition-colors hover:bg-brand-primary/15 hover:text-brand-primary"
     >
       <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l2.4 12.4a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20 7H6" />

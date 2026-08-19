@@ -7,7 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { spring } from "@/lib/motion/tokens";
 
 const sizes = {
-  header: { icon: "h-11 w-11 sm:h-12 sm:w-12", name: "text-xl sm:text-2xl", sub: "text-[10px] tracking-[0.25em]", glow: "-inset-2" },
+  header: { icon: "h-12 w-12 sm:h-14 sm:w-14", name: "text-2xl sm:text-3xl", sub: "text-[10px] tracking-[0.25em]", glow: "-inset-2.5" },
   footer: { icon: "h-9 w-9", name: "text-lg", sub: "text-[9px] tracking-[0.2em]", glow: "-inset-1.5" },
 } as const;
 
