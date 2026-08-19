@@ -13,6 +13,7 @@ import { CartProvider } from "@/components/CartProvider";
 import { CartDrawer } from "@/components/CartDrawer";
 import { FloatingBackToTop } from "@/components/FloatingBackToTop";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
+import { SiteAtmosphere } from "@/components/SiteAtmosphere";
 import { MotionProvider, PageTransition } from "@/components/motion";
 import "../globals.css";
 
@@ -69,6 +70,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider>
           <MotionProvider>
             <CartProvider>
+              <SiteAtmosphere />
               <PromoBar />
               <SiteHeader />
               <main className="flex-1 pb-20 md:pb-0">

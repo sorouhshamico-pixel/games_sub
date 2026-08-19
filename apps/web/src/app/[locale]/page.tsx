@@ -13,7 +13,6 @@ import { LimitedOffers } from "@/components/home/LimitedOffers";
 import { MostRequested } from "@/components/home/MostRequested";
 import { Testimonials } from "@/components/home/Testimonials";
 import { NewsletterSignup } from "@/components/home/NewsletterSignup";
-import { PageAtmosphere } from "@/components/home/PageAtmosphere";
 import { Reveal, StaggerContainer, StaggerItem } from "@/components/motion";
 import type { Locale } from "@gcc-store/i18n";
 
@@ -37,8 +36,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <div className="relative">
-      <PageAtmosphere />
-
       <div className="mx-auto flex max-w-7xl flex-col gap-16 px-4 py-10">
         <HomeHero
           title={t("home.heroTitle")}

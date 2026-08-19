@@ -5,6 +5,21 @@ body {
   min-height: 100%;
 }
 
+/* Site-wide smooth scrolling — eases anchor jumps (promo bar offer link,
+   in-page table-of-contents links, "back to top") instead of snapping.
+   Native and free: no scroll-hijacking JS, so it never conflicts with the
+   many components reading real scroll position via motion's useScroll().
+   Turned back to instant for users who've asked the OS for less motion. */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 :root[dir="rtl"] body {
   font-family: var(--font-arabic), var(--font-latin), sans-serif;
 }
