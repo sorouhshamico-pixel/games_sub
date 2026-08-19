@@ -75,7 +75,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
         <Reveal>
           <section className="relative">
-            <div aria-hidden className="pointer-events-none absolute -top-10 start-1/2 -z-10 h-64 w-[80%] -translate-x-1/2 rounded-full bg-brand-primary/5 blur-3xl" />
+            {/* Physical left-1/2 (not logical start-1/2) — centering via a
+                translateX(-50%) counter-shift is a physical operation, so
+                pairing it with a logical inset flips the math in RTL and
+                pushes this off-screen instead of centering it. */}
+            <div aria-hidden className="pointer-events-none absolute -top-10 left-1/2 -z-10 h-64 w-[80%] -translate-x-1/2 rounded-full bg-brand-primary/5 blur-3xl" />
             <SectionHeading title={t("home.popularGames")} viewAllHref="/games" viewAllLabel={t("nav.games")} />
             {loadError ? (
               <ErrorState title={t("common.errorGeneric")} />

@@ -75,7 +75,11 @@ export function HomeHero({
         style={{ y: blobOneY }}
         animate={{ x: [0, 24, -10, 0], scale: [1, 1.08, 0.97, 1] }}
         transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-        className="pointer-events-none absolute -top-24 start-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-brand-primary/30 blur-3xl"
+        // Physical left-1/2 (not logical start-1/2) — the translateX(-50%)
+        // counter-shift that centers this is a physical operation, so
+        // pairing it with a logical inset flips the math in RTL and pushes
+        // the blob off-screen instead of centering it.
+        className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-brand-primary/30 blur-3xl"
       />
       <motion.div
         aria-hidden
