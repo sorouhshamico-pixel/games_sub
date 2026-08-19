@@ -98,6 +98,39 @@ async function main() {
     },
   });
 
+  // Real, currently-live game brands — unlike the fictional "Demo ..."
+  // brands above, these back real purchasable catalog entries (see the
+  // products below) at the user's explicit direction for the investor-
+  // facing build. Still genuine stock photography rather than official
+  // box art/logos for the product images themselves (see note below).
+  const pubgMobileBrand = await prisma.gameBrand.upsert({
+    where: { slug: "pubg-mobile" },
+    update: {},
+    create: {
+      slug: "pubg-mobile",
+      nameAr: "ببجي موبايل",
+      nameEn: "PUBG Mobile",
+      descriptionAr: "شحن UC مباشر لحساب ببجي موبايل الخاص بك.",
+      descriptionEn: "Direct UC top-up to your PUBG Mobile account.",
+      identifierHelpAr: "افتح اللعبة، اذهب للملف الشخصي، وانسخ Character ID الظاهر أسفل اسمك.",
+      identifierHelpEn: "Open the game, go to your profile, and copy the Character ID shown below your name.",
+    },
+  });
+
+  const robloxBrand = await prisma.gameBrand.upsert({
+    where: { slug: "roblox" },
+    update: {},
+    create: {
+      slug: "roblox",
+      nameAr: "روبلوكس",
+      nameEn: "Roblox",
+      descriptionAr: "شحن Robux مباشر لحساب روبلوكس الخاص بك.",
+      descriptionEn: "Direct Robux top-up to your Roblox account.",
+      identifierHelpAr: "أدخل اسم المستخدم (Username) الخاص بحسابك في روبلوكس.",
+      identifierHelpEn: "Enter your Roblox account username.",
+    },
+  });
+
   // Real stock photography (Unsplash License — free for commercial use, no
   // attribution required), not real game screenshots/box art. These are
   // fictional demo products, not real licensed games, so using genuine
@@ -115,6 +148,7 @@ async function main() {
   const DEMO_STYLE_CARD_IMAGE = "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200&auto=format&fit=crop";
   const DEMO_SKYFALL_IMAGE = "https://images.unsplash.com/photo-1560419015-7c427e8ae5ba?q=80&w=1200&auto=format&fit=crop";
   const DEMO_PREMIUM_CARD_IMAGE = "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=1200&auto=format&fit=crop";
+  const SHOPPING_GIFT_CARD_IMAGE = "https://images.unsplash.com/photo-1597463330912-eb868206b68e?q=80&w=1200&auto=format&fit=crop";
 
   const topupProduct = await prisma.product.upsert({
     where: { slug: "demo-battle-arena-diamonds" },
@@ -701,6 +735,269 @@ async function main() {
     },
   });
 
+  // Real, currently-purchasable catalog entries (isDemoData: false — no
+  // "تجريبي/Demo" badge) for the investor-facing build, per explicit
+  // direction. Denominations match real, publicly-known market tiers for
+  // each of these products (Steam wallet KSA amounts, standard Apple gift
+  // card face values, standard PSN/Amazon/noon KSA tiers, real PUBG
+  // Mobile UC and Roblox Robux bundle sizes) — these are fixed by the
+  // platform owners themselves and identical across every reseller, not
+  // anything invented or copied from a specific competitor's listing.
+  // Still using real stock photography rather than official brand
+  // artwork/logos for the same reason as the fictional products above.
+  const steamWalletProduct = await prisma.product.upsert({
+    where: { slug: "steam-wallet-ksa" },
+    update: { imageUrl: DEMO_GIFT_CARD_IMAGE },
+    create: {
+      slug: "steam-wallet-ksa",
+      type: ProductType.GIFT_CARD,
+      categoryId: giftCardsCategory.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_GIFT_CARD_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "بطاقات الهدايا الرقمية غير قابلة للاسترجاع بعد تسليم الكود.",
+      refundPolicyEn: "Digital gift cards are non-refundable once the code is delivered.",
+      fulfillmentEtaMinutes: 2,
+      isDemoData: false,
+      translations: {
+        create: [
+          { locale: "ar", name: "بطاقة ستيم السعودية", description: "بطاقة شحن محفظة Steam للمتجر السعودي، تسليم فوري." },
+          { locale: "en", name: "Steam Wallet Card (KSA)", description: "Steam wallet top-up card for the Saudi store, instant delivery." },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "STEAM-KSA-20", nameAr: "20 ريال", nameEn: "SAR 20", currency: "SAR", baseCostMinorUnits: 2000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 1 },
+          { sku: "STEAM-KSA-50", nameAr: "50 ريال", nameEn: "SAR 50", currency: "SAR", baseCostMinorUnits: 5000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 2 },
+          { sku: "STEAM-KSA-100", nameAr: "100 ريال", nameEn: "SAR 100", currency: "SAR", baseCostMinorUnits: 10000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 3 },
+          { sku: "STEAM-KSA-200", nameAr: "200 ريال", nameEn: "SAR 200", currency: "SAR", baseCostMinorUnits: 20000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 4 },
+          { sku: "STEAM-KSA-400", nameAr: "400 ريال", nameEn: "SAR 400", currency: "SAR", baseCostMinorUnits: 40000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 5 },
+        ],
+      },
+    },
+  });
+
+  const itunesGiftCardProduct = await prisma.product.upsert({
+    where: { slug: "itunes-gift-card-us" },
+    update: { imageUrl: DEMO_GIFT_CARD_IMAGE },
+    create: {
+      slug: "itunes-gift-card-us",
+      type: ProductType.GIFT_CARD,
+      categoryId: giftCardsCategory.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_GIFT_CARD_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "بطاقات الهدايا الرقمية غير قابلة للاسترجاع بعد تسليم الكود.",
+      refundPolicyEn: "Digital gift cards are non-refundable once the code is delivered.",
+      fulfillmentEtaMinutes: 2,
+      isDemoData: false,
+      translations: {
+        create: [
+          { locale: "ar", name: "بطاقة آيتونز أمريكي", description: "بطاقة آيتونز للمتجر الأمريكي، تسليم فوري." },
+          { locale: "en", name: "iTunes Gift Card (US)", description: "iTunes gift card for the US store, instant delivery." },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "ITUNES-US-15", nameAr: "15 دولار", nameEn: "$15", currency: "SAR", baseCostMinorUnits: 6000, marginBasisPoints: 400, taxRateBasisPoints: 1500, sortOrder: 1 },
+          { sku: "ITUNES-US-25", nameAr: "25 دولار", nameEn: "$25", currency: "SAR", baseCostMinorUnits: 9500, marginBasisPoints: 400, taxRateBasisPoints: 1500, sortOrder: 2 },
+          { sku: "ITUNES-US-50", nameAr: "50 دولار", nameEn: "$50", currency: "SAR", baseCostMinorUnits: 19000, marginBasisPoints: 400, taxRateBasisPoints: 1500, sortOrder: 3 },
+        ],
+      },
+    },
+  });
+
+  const playstationStoreProduct = await prisma.product.upsert({
+    where: { slug: "playstation-store-ksa" },
+    update: { imageUrl: DEMO_GIFT_CARD_IMAGE },
+    create: {
+      slug: "playstation-store-ksa",
+      type: ProductType.GIFT_CARD,
+      categoryId: giftCardsCategory.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_GIFT_CARD_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "بطاقات الهدايا الرقمية غير قابلة للاسترجاع بعد تسليم الكود.",
+      refundPolicyEn: "Digital gift cards are non-refundable once the code is delivered.",
+      fulfillmentEtaMinutes: 2,
+      isDemoData: false,
+      translations: {
+        create: [
+          { locale: "ar", name: "بطاقة بلايستيشن السعودية", description: "بطاقة شحن محفظة PlayStation Store للمتجر السعودي، تسليم فوري." },
+          { locale: "en", name: "PlayStation Store Card (KSA)", description: "PlayStation Store wallet top-up card for the Saudi store, instant delivery." },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "PSN-KSA-40", nameAr: "40 ريال", nameEn: "SAR 40", currency: "SAR", baseCostMinorUnits: 4000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 1 },
+          { sku: "PSN-KSA-80", nameAr: "80 ريال", nameEn: "SAR 80", currency: "SAR", baseCostMinorUnits: 8000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 2 },
+          { sku: "PSN-KSA-160", nameAr: "160 ريال", nameEn: "SAR 160", currency: "SAR", baseCostMinorUnits: 16000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 3 },
+          { sku: "PSN-KSA-300", nameAr: "300 ريال", nameEn: "SAR 300", currency: "SAR", baseCostMinorUnits: 30000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 4 },
+        ],
+      },
+    },
+  });
+
+  const amazonGiftCardProduct = await prisma.product.upsert({
+    where: { slug: "amazon-sa-gift-card" },
+    update: { imageUrl: SHOPPING_GIFT_CARD_IMAGE },
+    create: {
+      slug: "amazon-sa-gift-card",
+      type: ProductType.GIFT_CARD,
+      categoryId: giftCardsCategory.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: SHOPPING_GIFT_CARD_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "بطاقات الهدايا الرقمية غير قابلة للاسترجاع بعد تسليم الكود.",
+      refundPolicyEn: "Digital gift cards are non-refundable once the code is delivered.",
+      fulfillmentEtaMinutes: 2,
+      isDemoData: false,
+      translations: {
+        create: [
+          { locale: "ar", name: "بطاقة أمازون السعودية", description: "بطاقة هدايا أمازون السعودية، تسليم فوري." },
+          { locale: "en", name: "Amazon.sa Gift Card", description: "Amazon Saudi Arabia gift card, instant delivery." },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "AMAZON-SA-50", nameAr: "50 ريال", nameEn: "SAR 50", currency: "SAR", baseCostMinorUnits: 5000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 1 },
+          { sku: "AMAZON-SA-100", nameAr: "100 ريال", nameEn: "SAR 100", currency: "SAR", baseCostMinorUnits: 10000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 2 },
+          { sku: "AMAZON-SA-250", nameAr: "250 ريال", nameEn: "SAR 250", currency: "SAR", baseCostMinorUnits: 25000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 3 },
+          { sku: "AMAZON-SA-500", nameAr: "500 ريال", nameEn: "SAR 500", currency: "SAR", baseCostMinorUnits: 50000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 4 },
+        ],
+      },
+    },
+  });
+
+  const noonGiftCardProduct = await prisma.product.upsert({
+    where: { slug: "noon-gift-card" },
+    update: { imageUrl: SHOPPING_GIFT_CARD_IMAGE },
+    create: {
+      slug: "noon-gift-card",
+      type: ProductType.GIFT_CARD,
+      categoryId: giftCardsCategory.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: SHOPPING_GIFT_CARD_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "بطاقات الهدايا الرقمية غير قابلة للاسترجاع بعد تسليم الكود.",
+      refundPolicyEn: "Digital gift cards are non-refundable once the code is delivered.",
+      fulfillmentEtaMinutes: 2,
+      isDemoData: false,
+      translations: {
+        create: [
+          { locale: "ar", name: "بطاقة نون", description: "بطاقة هدايا نون، تسليم فوري." },
+          { locale: "en", name: "noon Gift Card", description: "noon gift card, instant delivery." },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "NOON-50", nameAr: "50 ريال", nameEn: "SAR 50", currency: "SAR", baseCostMinorUnits: 5000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 1 },
+          { sku: "NOON-100", nameAr: "100 ريال", nameEn: "SAR 100", currency: "SAR", baseCostMinorUnits: 10000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 2 },
+          { sku: "NOON-200", nameAr: "200 ريال", nameEn: "SAR 200", currency: "SAR", baseCostMinorUnits: 20000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 3 },
+          { sku: "NOON-500", nameAr: "500 ريال", nameEn: "SAR 500", currency: "SAR", baseCostMinorUnits: 50000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 4 },
+        ],
+      },
+    },
+  });
+
+  const pubgMobileProduct = await prisma.product.upsert({
+    where: { slug: "pubg-mobile-uc" },
+    update: { imageUrl: DEMO_TOPUP_IMAGE },
+    create: {
+      slug: "pubg-mobile-uc",
+      type: ProductType.GAME_TOPUP,
+      categoryId: gamesCategory.id,
+      gameBrandId: pubgMobileBrand.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_TOPUP_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "منتجات الشحن الرقمي غير قابلة للاسترجاع بعد نجاح التنفيذ.",
+      refundPolicyEn: "Digital top-up products are non-refundable once fulfillment succeeds.",
+      fulfillmentEtaMinutes: 5,
+      isDemoData: false,
+      translations: {
+        create: [
+          { locale: "ar", name: "شحن UC ببجي موبايل", description: "شحن UC مباشر إلى حساب ببجي موبايل." },
+          { locale: "en", name: "PUBG Mobile UC", description: "Direct UC top-up to your PUBG Mobile account." },
+        ],
+      },
+      inputDefinitions: {
+        create: [
+          {
+            key: "characterId",
+            labelAr: "معرف الشخصية (Character ID)",
+            labelEn: "Character ID",
+            helpTextAr: "رقم يظهر أسفل اسمك في الملف الشخصي داخل اللعبة.",
+            helpTextEn: "Found below your name on your in-game profile.",
+            fieldType: "text",
+            required: true,
+            regex: "^[0-9]{8,12}$",
+            minLength: 8,
+            maxLength: 12,
+            normalize: "digitsOnly",
+            sortOrder: 1,
+          },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "PUBGM-UC-60", nameAr: "60 UC", nameEn: "60 UC", currency: "SAR", baseCostMinorUnits: 2400, marginBasisPoints: 1500, taxRateBasisPoints: 1500, sortOrder: 1 },
+          { sku: "PUBGM-UC-325", nameAr: "325 UC", nameEn: "325 UC", currency: "SAR", baseCostMinorUnits: 12000, marginBasisPoints: 1500, taxRateBasisPoints: 1500, sortOrder: 2 },
+          { sku: "PUBGM-UC-660", nameAr: "660 UC", nameEn: "660 UC", currency: "SAR", baseCostMinorUnits: 23500, marginBasisPoints: 1500, taxRateBasisPoints: 1500, sortOrder: 3 },
+        ],
+      },
+    },
+  });
+
+  const robloxProduct = await prisma.product.upsert({
+    where: { slug: "roblox-robux" },
+    update: { imageUrl: DEMO_TOPUP_IMAGE },
+    create: {
+      slug: "roblox-robux",
+      type: ProductType.GAME_TOPUP,
+      categoryId: gamesCategory.id,
+      gameBrandId: robloxBrand.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_TOPUP_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "منتجات الشحن الرقمي غير قابلة للاسترجاع بعد نجاح التنفيذ.",
+      refundPolicyEn: "Digital top-up products are non-refundable once fulfillment succeeds.",
+      fulfillmentEtaMinutes: 5,
+      isDemoData: false,
+      translations: {
+        create: [
+          { locale: "ar", name: "شحن Robux روبلوكس", description: "شحن Robux مباشر إلى حساب روبلوكس." },
+          { locale: "en", name: "Roblox Robux", description: "Direct Robux top-up to your Roblox account." },
+        ],
+      },
+      inputDefinitions: {
+        create: [
+          {
+            key: "username",
+            labelAr: "اسم المستخدم (Username)",
+            labelEn: "Username",
+            helpTextAr: "اسم حسابك في روبلوكس كما يظهر في الملف الشخصي.",
+            helpTextEn: "Your Roblox account username, as shown on your profile.",
+            fieldType: "text",
+            required: true,
+            regex: "^[A-Za-z0-9_]{3,20}$",
+            minLength: 3,
+            maxLength: 20,
+            normalize: "trim",
+            sortOrder: 1,
+          },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "ROBLOX-RBX-400", nameAr: "400 Robux", nameEn: "400 Robux", currency: "SAR", baseCostMinorUnits: 2000, marginBasisPoints: 1500, taxRateBasisPoints: 1500, sortOrder: 1 },
+          { sku: "ROBLOX-RBX-800", nameAr: "800 Robux", nameEn: "800 Robux", currency: "SAR", baseCostMinorUnits: 3800, marginBasisPoints: 1500, taxRateBasisPoints: 1500, sortOrder: 2 },
+          { sku: "ROBLOX-RBX-1700", nameAr: "1700 Robux", nameEn: "1700 Robux", currency: "SAR", baseCostMinorUnits: 7500, marginBasisPoints: 1500, taxRateBasisPoints: 1500, sortOrder: 3 },
+        ],
+      },
+    },
+  });
+
   const mockProvider = await prisma.provider.upsert({
     where: { code: "mock" },
     update: {},
@@ -736,6 +1033,32 @@ async function main() {
           "DEMO-SF-CREDITS-3000",
           "DEMO-PREMIUM-75",
           "DEMO-PREMIUM-150",
+          "STEAM-KSA-20",
+          "STEAM-KSA-50",
+          "STEAM-KSA-100",
+          "STEAM-KSA-200",
+          "STEAM-KSA-400",
+          "ITUNES-US-15",
+          "ITUNES-US-25",
+          "ITUNES-US-50",
+          "PSN-KSA-40",
+          "PSN-KSA-80",
+          "PSN-KSA-160",
+          "PSN-KSA-300",
+          "AMAZON-SA-50",
+          "AMAZON-SA-100",
+          "AMAZON-SA-250",
+          "AMAZON-SA-500",
+          "NOON-50",
+          "NOON-100",
+          "NOON-200",
+          "NOON-500",
+          "PUBGM-UC-60",
+          "PUBGM-UC-325",
+          "PUBGM-UC-660",
+          "ROBLOX-RBX-400",
+          "ROBLOX-RBX-800",
+          "ROBLOX-RBX-1700",
         ],
       },
     },
@@ -1088,6 +1411,13 @@ async function main() {
       styleCardProduct.slug,
       skyfallProduct.slug,
       premiumCardProduct.slug,
+      steamWalletProduct.slug,
+      itunesGiftCardProduct.slug,
+      playstationStoreProduct.slug,
+      amazonGiftCardProduct.slug,
+      noonGiftCardProduct.slug,
+      pubgMobileProduct.slug,
+      robloxProduct.slug,
     ],
     provider: mockProvider.code,
   });
