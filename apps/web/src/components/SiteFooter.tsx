@@ -1,9 +1,12 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { motion } from "motion/react";
+import { Heart } from "lucide-react";
 import { SiTiktok, SiInstagram, SiX, SiYoutube } from "react-icons/si";
 import { Link } from "@/i18n/navigation";
 import { Reveal, StaggerContainer, StaggerItem, HoverCard } from "@/components/motion";
+import { duration, easing } from "@/lib/motion/tokens";
 import { BrandLockup } from "./BrandLockup";
 
 // Real supplied artwork for every payment mark now (see
@@ -30,6 +33,25 @@ const socialIcons = [SiTiktok, SiInstagram, SiX, SiYoutube];
 // rather than animating width, so it stays compositor-cheap.
 const linkUnderline =
   "relative w-fit text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)] after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-brand-secondary after:transition-transform after:duration-300 hover:after:scale-x-100";
+
+// Shared column-header treatment — a small draw-in gradient accent under
+// every footer heading, echoing SectionHeading's language used across the
+// rest of the site so the footer reads as the same design system.
+function FooterHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mb-4">
+      <p className="font-semibold text-[var(--color-text-primary)]">{children}</p>
+      <motion.div
+        aria-hidden
+        initial={{ scaleX: 0 }}
+        whileInView={{ scaleX: 1 }}
+        viewport={{ once: true, amount: 1 }}
+        transition={{ duration: duration.slow, ease: easing }}
+        className="mt-1.5 h-[2px] w-8 origin-left rounded-full bg-gradient-to-r from-brand-primary to-brand-secondary"
+      />
+    </div>
+  );
+}
 
 export function SiteFooter() {
   const t = useTranslations();
@@ -66,13 +88,16 @@ export function SiteFooter() {
       </div>
 
       <Reveal>
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="lg:col-span-1">
-            <div className="mb-3">
+        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 sm:py-16 lg:grid-cols-5 lg:gap-8">
+          <div className="sm:col-span-2 lg:col-span-1">
+            <div className="mb-4">
               <BrandLockup variant="footer" />
             </div>
-            <p className="text-sm text-[var(--color-text-muted)]">{t("brand.tagline")}</p>
-            <div className="mt-4 flex items-center gap-3">
+            <p className="max-w-xs text-sm leading-relaxed text-[var(--color-text-muted)]">{t("brand.tagline")}</p>
+            <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+              {locale === "ar" ? "تابعنا" : "Follow us"}
+            </p>
+            <div className="mt-2.5 flex items-center gap-3">
               {socialIcons.map((Icon, index) => (
                 <HoverCard key={index}>
                   <span
@@ -86,30 +111,34 @@ export function SiteFooter() {
             </div>
           </div>
 
-          <StaggerContainer className="flex flex-col gap-2">
-            <p className="mb-1 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "روابط سريعة" : "Quick links"}</p>
-            {quickLinks.map((link, index) => (
-              <StaggerItem key={index}>
-                <Link href={link.href} className={linkUnderline + " text-sm"}>
-                  {locale === "ar" ? link.ar : link.en}
-                </Link>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-
-          <StaggerContainer className="flex flex-col gap-2">
-            <p className="mb-1 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "دعم العملاء" : "Customer support"}</p>
-            {supportLinks.map((link, index) => (
-              <StaggerItem key={index}>
-                <Link href={link.href} className={linkUnderline + " text-sm"}>
-                  {locale === "ar" ? link.ar : link.en}
-                </Link>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
+          <div>
+            <FooterHeading>{locale === "ar" ? "روابط سريعة" : "Quick links"}</FooterHeading>
+            <StaggerContainer className="flex flex-col gap-2">
+              {quickLinks.map((link, index) => (
+                <StaggerItem key={index}>
+                  <Link href={link.href} className={linkUnderline + " text-sm"}>
+                    {locale === "ar" ? link.ar : link.en}
+                  </Link>
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          </div>
 
           <div>
-            <p className="mb-3 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "طرق الدفع" : "Payment methods"}</p>
+            <FooterHeading>{locale === "ar" ? "دعم العملاء" : "Customer support"}</FooterHeading>
+            <StaggerContainer className="flex flex-col gap-2">
+              {supportLinks.map((link, index) => (
+                <StaggerItem key={index}>
+                  <Link href={link.href} className={linkUnderline + " text-sm"}>
+                    {locale === "ar" ? link.ar : link.en}
+                  </Link>
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          </div>
+
+          <div>
+            <FooterHeading>{locale === "ar" ? "طرق الدفع" : "Payment methods"}</FooterHeading>
             <StaggerContainer className="grid grid-cols-2 gap-2.5">
               {paymentBadges.map((badge) => (
                 <StaggerItem key={badge.name}>
@@ -133,39 +162,46 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <p className="mb-3 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "حمل التطبيق" : "Get the app"}</p>
-            <p className="mb-3 text-sm text-[var(--color-text-muted)]">
+            <FooterHeading>{locale === "ar" ? "حمل التطبيق" : "Get the app"}</FooterHeading>
+            <p className="-mt-2 mb-3 text-sm text-[var(--color-text-muted)]">
               {locale === "ar" ? "تجربة أسرع وأكثر سهولة" : "A faster, easier experience"}
             </p>
-            <div className="flex flex-col gap-2.5">
+            <StaggerContainer className="grid grid-cols-2 gap-2.5">
               {appBadges.map((badge) => (
-                <HoverCard key={badge.name}>
-                  {/* Same treatment as the payment badges — no frame of
-                      ours, the card's own glowing border is the only
-                      boundary — with a small "Coming soon" ribbon since
-                      there's no real app yet to link to. */}
-                  <span className="relative block overflow-hidden rounded-lg">
-                    <img
-                      src={badge.imgSrc}
-                      alt={badge.name}
-                      loading="lazy"
-                      className="aspect-[3/2] w-full rounded-lg object-cover transition-[filter] duration-300 hover:brightness-110"
-                    />
-                    <span className="absolute bottom-1.5 end-1.5 rounded-full bg-black/70 px-2 py-0.5 text-[9px] font-semibold text-white backdrop-blur-sm">
-                      {locale === "ar" ? "قريبًا" : "Coming soon"}
+                <StaggerItem key={badge.name}>
+                  <HoverCard>
+                    {/* Same treatment as the payment badges — no frame of
+                        ours, the card's own glowing border is the only
+                        boundary — with a small "Coming soon" ribbon since
+                        there's no real app yet to link to. */}
+                    <span className="relative block overflow-hidden rounded-lg">
+                      <img
+                        src={badge.imgSrc}
+                        alt={badge.name}
+                        loading="lazy"
+                        className="aspect-[3/2] w-full rounded-lg object-cover transition-[filter] duration-300 hover:brightness-110"
+                      />
+                      <span className="absolute bottom-1.5 end-1.5 rounded-full bg-black/70 px-2 py-0.5 text-[9px] font-semibold text-white backdrop-blur-sm">
+                        {locale === "ar" ? "قريبًا" : "Coming soon"}
+                      </span>
                     </span>
-                  </span>
-                </HoverCard>
+                  </HoverCard>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
           </div>
         </div>
       </Reveal>
 
-      <div className="relative border-t border-[var(--color-border)] px-4 py-4">
-        <div className="mx-auto max-w-7xl text-center">
+      <div className="relative px-4 py-5">
+        <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--color-border)] to-transparent" />
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 sm:flex-row">
           <p className="text-xs text-[var(--color-text-muted)]">
             {t("brand.name")} © {year} — {t("footer.rightsReserved")}
+          </p>
+          <p className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)]">
+            {locale === "ar" ? "صُنع بشغف لعشّاق الألعاب في الخليج" : "Made with love for gamers across the Gulf"}
+            <Heart aria-hidden className="h-3 w-3 fill-brand-secondary text-brand-secondary" />
           </p>
         </div>
       </div>

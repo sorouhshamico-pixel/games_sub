@@ -4,48 +4,49 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import { Quote } from "lucide-react";
 import type { Locale } from "@gcc-store/i18n";
-import { Reveal, StaggerContainer, StaggerItem } from "@/components/motion";
+import { Reveal } from "@/components/motion";
 import { duration, easing, spring } from "@/lib/motion/tokens";
 import { SectionHeading } from "./SectionHeading";
 import { StarIcon } from "./icons";
 
-// Cycled gradient rings so avatars read as distinct, colorful placeholders
-// rather than a flat single-letter tile — deliberately not real photos of
-// people, since a stock headshot next to a fabricated quote would falsely
-// imply a specific real customer said it.
-const avatarGradients = [
-  "from-brand-primary to-brand-secondary",
-  "from-brand-secondary to-brand-accent",
-  "from-brand-accent to-brand-primary",
-  "from-brand-primary to-brand-accent",
-  "from-brand-secondary to-brand-primary",
-  "from-brand-accent to-brand-secondary",
-];
+// Real, freely-licensed portrait photography (Unsplash License — free for
+// commercial use) standing in for customer avatars, generic/unnamed
+// subjects rather than any specific identifiable public figure, matching
+// how every other photo on the site was sourced.
+function avatarUrl(photoId: string) {
+  return `https://images.unsplash.com/photo-${photoId}?q=80&w=200&h=200&fit=crop&crop=faces&auto=format`;
+}
 
-const reviews: Array<{ ar: { name: string; quote: string }; en: { name: string; quote: string } }> = [
+const reviews: Array<{ ar: { name: string; quote: string }; en: { name: string; quote: string }; avatarId: string }> = [
   {
     ar: { name: "فيصل", quote: "شحن سريع جدًا ووصل الرصيد خلال دقائق من إتمام الدفع." },
     en: { name: "Faisal", quote: "Super fast — my balance arrived within minutes of paying." },
+    avatarId: "1653198020531-4a15524333e9",
   },
   {
     ar: { name: "نورة", quote: "واجهة بسيطة وواضحة، ولقيت اللعبة اللي أبيها بسهولة." },
     en: { name: "Noura", quote: "Clean, simple interface — found what I needed right away." },
+    avatarId: "1711745818251-19a938e53e27",
   },
   {
     ar: { name: "عبدالله", quote: "الدعم الفني رد علي بسرعة لما واجهت استفسار بسيط." },
     en: { name: "Abdullah", quote: "Support answered quickly when I had a simple question." },
+    avatarId: "1780776489912-aa89b69b8c59",
   },
   {
     ar: { name: "سارة", quote: "أفضل مكان أشتري منه بطاقات الهدايا، الأسعار ممتازة والتسليم فوري." },
     en: { name: "Sarah", quote: "Best place I've found for gift cards — great prices and instant delivery." },
+    avatarId: "1755434613831-1a8cb00bfb2c",
   },
   {
     ar: { name: "خالد", quote: "عملية الدفع سهلة وسريعة، ما احتجت أكثر من دقيقتين لإتمام الطلب." },
     en: { name: "Khalid", quote: "Checkout was quick and easy — took less than two minutes to complete my order." },
+    avatarId: "1542803293-cde7da05c348",
   },
   {
     ar: { name: "منى", quote: "أثق بالمتجر تمامًا، تعاملت معهم أكثر من مرة وكل شيء كان ممتاز." },
     en: { name: "Mona", quote: "I trust this store completely — I've ordered multiple times and it's always been great." },
+    avatarId: "1762095071590-c7a14e5dab1c",
   },
 ];
 
@@ -60,8 +61,9 @@ const starItem = {
   visible: { opacity: 1, scale: 1, rotate: 0, transition: { type: "spring" as const, ...spring } },
 };
 
-/** Investor-demo illustrative reviews — first names only, no photos or
- * ratings tied to real accounts, clearly labeled as demo data. */
+/** Investor-demo illustrative reviews — first names only, not tied to real
+ * accounts, clearly labeled as demo data. A single focused spotlight card:
+ * five-star rating, quote, and avatar photo, with no secondary chrome. */
 export function Testimonials({ locale }: { locale: Locale }) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -133,11 +135,12 @@ export function Testimonials({ locale }: { locale: Locale }) {
               <p className="max-w-lg text-lg leading-relaxed text-[var(--color-text-primary)]">“{current.quote}”</p>
 
               <div className="flex items-center gap-2.5">
-                <span
-                  className={`flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br text-base font-bold text-white ${avatarGradients[active % avatarGradients.length]}`}
-                >
-                  {current.name.slice(0, 1)}
-                </span>
+                <img
+                  src={avatarUrl(reviews[active]!.avatarId)}
+                  alt=""
+                  loading="lazy"
+                  className="h-11 w-11 rounded-full object-cover ring-2 ring-[var(--color-surface)]"
+                />
                 <span className="text-sm font-semibold text-[var(--color-text-primary)]">{current.name}</span>
               </div>
             </motion.div>
@@ -168,30 +171,7 @@ export function Testimonials({ locale }: { locale: Locale }) {
           ))}
         </div>
 
-        <StaggerContainer className="mt-8 hidden gap-3 sm:grid sm:grid-cols-6">
-          {reviews.map((review, index) => {
-            const name = locale === "ar" ? review.ar.name : review.en.name;
-            const isActive = index === active;
-            return (
-              <StaggerItem key={index}>
-                <button
-                  type="button"
-                  onClick={() => setActive(index)}
-                  className={`flex w-full flex-col items-center gap-1.5 rounded-xl p-2 transition-colors ${isActive ? "bg-brand-primary/10" : "hover:bg-[var(--color-surface-elevated)]"}`}
-                >
-                  <span
-                    className={`flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white transition-transform ${avatarGradients[index % avatarGradients.length]} ${isActive ? "scale-110 ring-2 ring-brand-primary ring-offset-2 ring-offset-[var(--color-surface)]" : ""}`}
-                  >
-                    {name.slice(0, 1)}
-                  </span>
-                  <span className="max-w-full truncate text-[11px] font-medium text-[var(--color-text-muted)]">{name}</span>
-                </button>
-              </StaggerItem>
-            );
-          })}
-        </StaggerContainer>
-
-        <p className="mt-4 text-center text-xs text-[var(--color-text-muted)]">
+        <p className="mt-6 text-center text-xs text-[var(--color-text-muted)]">
           {locale === "ar" ? "بيانات تجريبية لأغراض العرض فقط" : "Demo data for display purposes only"}
         </p>
       </section>
