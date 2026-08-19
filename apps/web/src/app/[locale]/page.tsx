@@ -38,7 +38,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     <div className="relative">
       <div className="mx-auto flex max-w-7xl flex-col gap-16 px-4 py-10">
         <HomeHero
-          title={t("home.heroTitle")}
+          titlePrefix={t("home.heroTitlePrefix")}
           titleHighlight={t("home.heroTitleHighlight")}
           subtitle={t("home.heroSubtitle")}
           ctaLabel={t("home.heroCta")}

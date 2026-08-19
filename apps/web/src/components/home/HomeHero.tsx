@@ -1,14 +1,16 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
-import { motion, useScroll, useTransform } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { Zap, Tag, ShieldCheck, Headset } from "lucide-react";
 import { buttonBaseClasses, buttonSizeClasses, buttonVariantClasses, cn } from "@gcc-store/ui";
 import { Link } from "@/i18n/navigation";
 import { Magnetic } from "@/components/motion";
 import { duration, easing, spring, staggerGap } from "@/lib/motion/tokens";
-import { HeroIllustrationCarousel } from "./HeroIllustrationCarousel";
+import { HeroIllustrationCarousel, heroCategories } from "./HeroIllustrationCarousel";
+
+const CATEGORY_ROTATE_MS = 4200;
 
 const heroContainer = {
   hidden: {},
@@ -39,24 +41,36 @@ const featureStrip = [
 ];
 
 export function HomeHero({
-  title,
+  titlePrefix,
   titleHighlight,
   subtitle,
   ctaLabel,
 }: {
-  title: string;
+  titlePrefix: string;
   titleHighlight: string;
   subtitle: string;
   ctaLabel: string;
 }) {
   const locale = useLocale();
-  const words = title.split(" ").filter(Boolean);
+  const words = titlePrefix.split(" ").filter(Boolean);
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end start"] });
   // Capped well within the 10-16px parallax ceiling from spec.
   const blobOneY = useTransform(scrollYProgress, [0, 1], [0, 14]);
   const blobTwoY = useTransform(scrollYProgress, [0, 1], [0, -12]);
   const blobThreeY = useTransform(scrollYProgress, [0, 1], [0, 10]);
+
+  // Drives both the rotating word in the headline and the illustration
+  // carousel from one shared index, so "your ___ in seconds" and the
+  // pictured category always agree instead of running on two timers.
+  const [categoryIndex, setCategoryIndex] = useState(0);
+  const reducedMotion = useReducedMotion();
+  useEffect(() => {
+    if (reducedMotion) return;
+    const id = window.setInterval(() => setCategoryIndex((prev) => (prev + 1) % heroCategories.length), CATEGORY_ROTATE_MS);
+    return () => window.clearInterval(id);
+  }, [reducedMotion]);
+  const activeCategory = heroCategories[categoryIndex]!;
 
   return (
     <section
@@ -108,6 +122,24 @@ export function HomeHero({
                 {index < words.length - 1 ? " " : ""}
               </motion.span>
             ))}{" "}
+            {/* The rotating word — synced to the illustration carousel via
+                categoryIndex, so "your ___" always names whatever category
+                is pictured beside it. AnimatePresence mode="wait" avoids an
+                overlap glitch between differently-sized words. */}
+            <motion.span variants={titleWord} className="relative inline-block align-baseline text-brand-primary">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={categoryIndex}
+                  initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+                  transition={{ duration: duration.medium, ease: easing }}
+                  className="inline-block"
+                >
+                  {locale === "ar" ? activeCategory.wordAr : activeCategory.wordEn}
+                </motion.span>
+              </AnimatePresence>
+            </motion.span>{" "}
             <motion.span variants={titleWord} className="inline-block text-brand-secondary">
               {titleHighlight}
             </motion.span>{" "}
@@ -180,12 +212,28 @@ export function HomeHero({
         </motion.div>
 
         <motion.div
-          aria-hidden
           initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1, transition: { duration: duration.hero, ease: easing, delay: 0.2 } }}
-          className="mx-auto w-full max-w-xs sm:max-w-sm lg:max-w-none"
+          animate={{ opacity: 1, scale: 1, y: [0, -8, 0], transition: { opacity: { duration: duration.hero, ease: easing, delay: 0.2 }, scale: { duration: duration.hero, ease: easing, delay: 0.2 }, y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: duration.hero } } }}
+          className="relative mx-auto w-full max-w-xs sm:max-w-sm lg:max-w-none"
         >
-          <HeroIllustrationCarousel className="mx-auto w-full max-w-sm" />
+          {/* Glowing frame sitting just behind the image, offset so it
+              reads as a halo rather than a flat border. */}
+          <div aria-hidden className="absolute -inset-3 -z-10 rounded-[2rem] bg-gradient-to-br from-brand-primary/30 via-brand-secondary/20 to-brand-accent/20 opacity-60 blur-2xl" />
+
+          <HeroIllustrationCarousel activeIndex={categoryIndex} className="mx-auto w-full max-w-sm" />
+
+          {/* Floating instant-delivery badge — idle bob independent of the
+              parent's own float so the two never sync into something
+              robotic. */}
+          <motion.div
+            aria-hidden
+            animate={{ y: [0, -6, 0], rotate: [0, -3, 0] }}
+            transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
+            className="absolute -top-4 -end-4 flex items-center gap-1.5 rounded-full border border-white/10 bg-[var(--color-surface)]/90 px-3 py-1.5 text-xs font-bold text-brand-accent shadow-xl shadow-black/30 backdrop-blur-md"
+          >
+            <Zap aria-hidden className="h-3.5 w-3.5 fill-brand-accent" />
+            {locale === "ar" ? "فوري 100%" : "100% instant"}
+          </motion.div>
         </motion.div>
       </div>
     </section>

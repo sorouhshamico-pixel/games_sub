@@ -15,8 +15,8 @@
     "help": "المساعدة"
   },
   "home": {
-    "heroTitle": "اشحن رصيدك وفعّل اشتراكاتك في",
-    "heroTitleHighlight": "ثوانٍ",
+    "heroTitlePrefix": "اشحن رصيدك وفعّل",
+    "heroTitleHighlight": "في ثوانٍ",
     "heroSubtitle": "منصة موثوقة لشحن الألعاب وتفعيل الاشتراكات الرقمية في السعودية ودول الخليج",
     "heroCta": "تصفح الألعاب",
     "popularGames": "أشهر الألعاب",

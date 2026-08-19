@@ -3,26 +3,75 @@
 import { useState } from "react";
 import { useLocale } from "next-intl";
 import { AnimatePresence, motion } from "motion/react";
-import { Heart } from "lucide-react";
+import { Heart, Plus, Check, Loader2 } from "lucide-react";
 import { formatMoney, cn } from "@gcc-store/ui";
 import type { ProductSummary } from "@gcc-store/contracts";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import type { Locale } from "@gcc-store/i18n";
+import { getProductBySlug } from "@/lib/api";
+import { cartItemKey } from "@/lib/cart";
 import { ProductImagePlaceholder } from "./ProductImagePlaceholder";
 import { HoverCard } from "./motion";
 import { useDisplayCurrency } from "./CurrencyProvider";
+import { useCart } from "./CartProvider";
 import { convertMinorUnits } from "@/lib/currency";
-import { duration, easing } from "@/lib/motion/tokens";
+import { duration, easing, spring } from "@/lib/motion/tokens";
+
+type QuickAddState = "idle" | "loading" | "added";
 
 export function ProductCard({ product }: { product: ProductSummary }) {
   const locale = useLocale() as Locale;
   const name = locale === "ar" ? product.nameAr : product.nameEn;
   const { currency: displayCurrency } = useDisplayCurrency();
   const displayAmount = convertMinorUnits(product.fromPriceMinorUnits, product.currency, displayCurrency);
+  const { addItem } = useCart();
+  const router = useRouter();
   // Local-only wishlist toggle — there's no wishlist backend yet, so this
   // doesn't persist across reloads. It's a real, working UI interaction
   // (not a dead button), just not backed by an account-level feature yet.
   const [wishlisted, setWishlisted] = useState(false);
+  const [quickAdd, setQuickAdd] = useState<QuickAddState>("idle");
+
+  // A summary card only has "starting from" pricing — no variant list, no
+  // custom-input schema. So a real quick-add fetches the full product on
+  // click: if it has an active variant AND needs no required fields (a
+  // player ID, an email, etc.), it adds that cheapest variant directly;
+  // otherwise there's no honest way to skip the required inputs, so it
+  // falls through to the real product page instead of pretending to add
+  // something incomplete.
+  async function handleQuickAdd(event: React.MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (quickAdd === "loading") return;
+    setQuickAdd("loading");
+    try {
+      const detail = await getProductBySlug(product.slug);
+      const cheapestActive = [...detail.variants].filter((v) => v.isActive).sort((a, b) => a.listPriceMinorUnits - b.listPriceMinorUnits)[0];
+      if (!cheapestActive || detail.inputSchema.length > 0) {
+        setQuickAdd("idle");
+        router.push(`/products/${product.slug}`);
+        return;
+      }
+      addItem({
+        key: cartItemKey(cheapestActive.id, {}),
+        productSlug: product.slug,
+        variantId: cheapestActive.id,
+        nameAr: product.nameAr,
+        nameEn: product.nameEn,
+        variantNameAr: cheapestActive.nameAr,
+        variantNameEn: cheapestActive.nameEn,
+        unitPriceMinorUnits: cheapestActive.listPriceMinorUnits,
+        currency: cheapestActive.currency,
+        quantity: 1,
+        inputValues: {},
+      });
+      setQuickAdd("added");
+      window.setTimeout(() => setQuickAdd("idle"), 1600);
+    } catch {
+      setQuickAdd("idle");
+      router.push(`/products/${product.slug}`);
+    }
+  }
 
   return (
     <HoverCard className="relative h-full">
@@ -80,22 +129,72 @@ export function ProductCard({ product }: { product: ProductSummary }) {
             </div>
           </div>
         </div>
-        <div className="p-3.5">
-          <p className="text-xs text-[var(--color-text-muted)]">{locale === "ar" ? "يبدأ من" : "Starting from"}</p>
-          <p className="text-base font-bold text-brand-accent">
-            <AnimatePresence mode="wait" initial={false}>
+        <div className="flex items-center justify-between gap-2 p-3.5">
+          <div className="min-w-0">
+            <p className="text-xs text-[var(--color-text-muted)]">{locale === "ar" ? "يبدأ من" : "Starting from"}</p>
+            <p className="truncate text-base font-bold text-brand-accent">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={displayCurrency}
+                  initial={{ opacity: 0, y: -3 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 3 }}
+                  transition={{ duration: duration.fast, ease: easing }}
+                  className="inline-block"
+                >
+                  {formatMoney(displayAmount, displayCurrency, locale)}
+                </motion.span>
+              </AnimatePresence>
+            </p>
+          </div>
+
+          {/* Quick-add — a glowing circular FAB that morphs plus -> spinner
+              -> check, so the whole round trip (fetch variant, add to
+              cart) reads as one continuous gesture instead of a dead
+              click-and-wait. */}
+          <motion.button
+            type="button"
+            onClick={handleQuickAdd}
+            disabled={quickAdd === "loading"}
+            aria-label={locale === "ar" ? "أضف للسلة بسرعة" : "Quick add to cart"}
+            whileHover={quickAdd === "idle" ? { scale: 1.1, rotate: 90 } : undefined}
+            whileTap={quickAdd === "idle" ? { scale: 0.9 } : undefined}
+            transition={{ type: "spring", ...spring }}
+            className={cn(
+              "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white shadow-lg transition-colors",
+              quickAdd === "added" ? "bg-success shadow-success/40" : "bg-gradient-to-br from-brand-primary to-brand-secondary shadow-brand-primary/40",
+            )}
+          >
+            {quickAdd === "idle" ? (
               <motion.span
-                key={displayCurrency}
-                initial={{ opacity: 0, y: -3 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 3 }}
-                transition={{ duration: duration.fast, ease: easing }}
-                className="inline-block"
-              >
-                {formatMoney(displayAmount, displayCurrency, locale)}
-              </motion.span>
+                aria-hidden
+                className="absolute inset-0 -z-10 rounded-full bg-brand-primary/50 blur-md"
+                animate={{ opacity: [0.4, 0.8, 0.4] }}
+                transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+              />
+            ) : null}
+            <AnimatePresence mode="wait" initial={false}>
+              {quickAdd === "loading" ? (
+                <motion.span key="loading" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.6 }}>
+                  <Loader2 className="h-4.5 w-4.5 animate-spin" aria-hidden />
+                </motion.span>
+              ) : quickAdd === "added" ? (
+                <motion.span
+                  key="added"
+                  initial={{ opacity: 0, scale: 0.5, rotate: -45 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0.6 }}
+                  transition={{ type: "spring", ...spring }}
+                >
+                  <Check className="h-4.5 w-4.5" aria-hidden />
+                </motion.span>
+              ) : (
+                <motion.span key="idle" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.6 }}>
+                  <Plus className="h-4.5 w-4.5" aria-hidden />
+                </motion.span>
+              )}
             </AnimatePresence>
-          </p>
+          </motion.button>
         </div>
       </Link>
     </HoverCard>
