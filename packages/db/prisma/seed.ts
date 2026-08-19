@@ -131,6 +131,34 @@ async function main() {
     },
   });
 
+  const freeFireBrand = await prisma.gameBrand.upsert({
+    where: { slug: "free-fire" },
+    update: {},
+    create: {
+      slug: "free-fire",
+      nameAr: "فري فاير",
+      nameEn: "Free Fire",
+      descriptionAr: "شحن الماسات مباشر لحساب فري فاير الخاص بك.",
+      descriptionEn: "Direct diamond top-up to your Free Fire account.",
+      identifierHelpAr: "افتح اللعبة، اذهب للملف الشخصي، وانسخ Player ID الظاهر أسفل اسمك.",
+      identifierHelpEn: "Open the game, go to your profile, and copy the Player ID shown below your name.",
+    },
+  });
+
+  const fortniteBrand = await prisma.gameBrand.upsert({
+    where: { slug: "fortnite" },
+    update: {},
+    create: {
+      slug: "fortnite",
+      nameAr: "فورتنايت",
+      nameEn: "Fortnite",
+      descriptionAr: "شحن V-Bucks مباشر لحساب Epic Games الخاص بك.",
+      descriptionEn: "Direct V-Bucks top-up to your Epic Games account.",
+      identifierHelpAr: "أدخل البريد الإلكتروني المرتبط بحساب Epic Games الخاص بك.",
+      identifierHelpEn: "Enter the email address linked to your Epic Games account.",
+    },
+  });
+
   // Real stock photography (Unsplash License — free for commercial use, no
   // attribution required), not real game screenshots/box art. These are
   // fictional demo products, not real licensed games, so using genuine
@@ -998,6 +1026,168 @@ async function main() {
     },
   });
 
+  // Four more real, industry-standard products — same reasoning and
+  // sourcing approach as the seven above: denominations fixed by the
+  // platform owners (Garena/Google/Microsoft/Epic) and identical across
+  // every reseller in the region.
+  const freeFireProduct = await prisma.product.upsert({
+    where: { slug: "free-fire-diamonds" },
+    update: { imageUrl: DEMO_TOPUP_IMAGE },
+    create: {
+      slug: "free-fire-diamonds",
+      type: ProductType.GAME_TOPUP,
+      categoryId: gamesCategory.id,
+      gameBrandId: freeFireBrand.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_TOPUP_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "منتجات الشحن الرقمي غير قابلة للاسترجاع بعد نجاح التنفيذ.",
+      refundPolicyEn: "Digital top-up products are non-refundable once fulfillment succeeds.",
+      fulfillmentEtaMinutes: 5,
+      isDemoData: false,
+      translations: {
+        create: [
+          { locale: "ar", name: "شحن ماسات فري فاير", description: "شحن ماسات مباشر إلى حساب فري فاير." },
+          { locale: "en", name: "Free Fire Diamonds", description: "Direct diamond top-up to your Free Fire account." },
+        ],
+      },
+      inputDefinitions: {
+        create: [
+          {
+            key: "playerId",
+            labelAr: "معرف اللاعب (Player ID)",
+            labelEn: "Player ID",
+            helpTextAr: "رقم يظهر أسفل اسمك في الملف الشخصي داخل اللعبة.",
+            helpTextEn: "Found below your name on your in-game profile.",
+            fieldType: "text",
+            required: true,
+            regex: "^[0-9]{6,12}$",
+            minLength: 6,
+            maxLength: 12,
+            normalize: "digitsOnly",
+            sortOrder: 1,
+          },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "FF-DIAMOND-100", nameAr: "100 ماسة", nameEn: "100 Diamonds", currency: "SAR", baseCostMinorUnits: 500, marginBasisPoints: 1500, taxRateBasisPoints: 1500, sortOrder: 1 },
+          { sku: "FF-DIAMOND-310", nameAr: "310 ماسة", nameEn: "310 Diamonds", currency: "SAR", baseCostMinorUnits: 1400, marginBasisPoints: 1500, taxRateBasisPoints: 1500, sortOrder: 2 },
+          { sku: "FF-DIAMOND-520", nameAr: "520 ماسة", nameEn: "520 Diamonds", currency: "SAR", baseCostMinorUnits: 2400, marginBasisPoints: 1500, taxRateBasisPoints: 1500, sortOrder: 3 },
+          { sku: "FF-DIAMOND-1060", nameAr: "1060 ماسة", nameEn: "1060 Diamonds", currency: "SAR", baseCostMinorUnits: 4700, marginBasisPoints: 1500, taxRateBasisPoints: 1500, sortOrder: 4 },
+        ],
+      },
+    },
+  });
+
+  const googlePlayGiftCardProduct = await prisma.product.upsert({
+    where: { slug: "google-play-gift-card" },
+    update: { imageUrl: DEMO_GIFT_CARD_IMAGE },
+    create: {
+      slug: "google-play-gift-card",
+      type: ProductType.GIFT_CARD,
+      categoryId: giftCardsCategory.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_GIFT_CARD_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "بطاقات الهدايا الرقمية غير قابلة للاسترجاع بعد تسليم الكود.",
+      refundPolicyEn: "Digital gift cards are non-refundable once the code is delivered.",
+      fulfillmentEtaMinutes: 2,
+      isDemoData: false,
+      translations: {
+        create: [
+          { locale: "ar", name: "بطاقة جوجل بلاي", description: "بطاقة شحن Google Play للمتجر السعودي، تسليم فوري." },
+          { locale: "en", name: "Google Play Gift Card", description: "Google Play gift card for the Saudi store, instant delivery." },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "GPLAY-KSA-15", nameAr: "15 ريال", nameEn: "SAR 15", currency: "SAR", baseCostMinorUnits: 1500, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 1 },
+          { sku: "GPLAY-KSA-30", nameAr: "30 ريال", nameEn: "SAR 30", currency: "SAR", baseCostMinorUnits: 3000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 2 },
+          { sku: "GPLAY-KSA-60", nameAr: "60 ريال", nameEn: "SAR 60", currency: "SAR", baseCostMinorUnits: 6000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 3 },
+          { sku: "GPLAY-KSA-100", nameAr: "100 ريال", nameEn: "SAR 100", currency: "SAR", baseCostMinorUnits: 10000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 4 },
+          { sku: "GPLAY-KSA-200", nameAr: "200 ريال", nameEn: "SAR 200", currency: "SAR", baseCostMinorUnits: 20000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 5 },
+        ],
+      },
+    },
+  });
+
+  const xboxGiftCardProduct = await prisma.product.upsert({
+    where: { slug: "xbox-gift-card" },
+    update: { imageUrl: DEMO_GIFT_CARD_IMAGE },
+    create: {
+      slug: "xbox-gift-card",
+      type: ProductType.GIFT_CARD,
+      categoryId: giftCardsCategory.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_GIFT_CARD_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "بطاقات الهدايا الرقمية غير قابلة للاسترجاع بعد تسليم الكود.",
+      refundPolicyEn: "Digital gift cards are non-refundable once the code is delivered.",
+      fulfillmentEtaMinutes: 2,
+      isDemoData: false,
+      translations: {
+        create: [
+          { locale: "ar", name: "بطاقة إكس بوكس", description: "بطاقة هدايا Xbox، تسليم فوري." },
+          { locale: "en", name: "Xbox Gift Card", description: "Xbox gift card, instant delivery." },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "XBOX-KSA-50", nameAr: "50 ريال", nameEn: "SAR 50", currency: "SAR", baseCostMinorUnits: 5000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 1 },
+          { sku: "XBOX-KSA-100", nameAr: "100 ريال", nameEn: "SAR 100", currency: "SAR", baseCostMinorUnits: 10000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 2 },
+          { sku: "XBOX-KSA-200", nameAr: "200 ريال", nameEn: "SAR 200", currency: "SAR", baseCostMinorUnits: 20000, marginBasisPoints: 300, taxRateBasisPoints: 1500, sortOrder: 3 },
+        ],
+      },
+    },
+  });
+
+  const fortniteProduct = await prisma.product.upsert({
+    where: { slug: "fortnite-v-bucks" },
+    update: { imageUrl: DEMO_TOPUP_IMAGE },
+    create: {
+      slug: "fortnite-v-bucks",
+      type: ProductType.GAME_TOPUP,
+      categoryId: gamesCategory.id,
+      gameBrandId: fortniteBrand.id,
+      status: ProductLifecycleStatus.ACTIVE,
+      imageUrl: DEMO_TOPUP_IMAGE,
+      refundEligible: false,
+      refundPolicyAr: "منتجات الشحن الرقمي غير قابلة للاسترجاع بعد نجاح التنفيذ.",
+      refundPolicyEn: "Digital top-up products are non-refundable once fulfillment succeeds.",
+      fulfillmentEtaMinutes: 5,
+      isDemoData: false,
+      translations: {
+        create: [
+          { locale: "ar", name: "شحن V-Bucks فورتنايت", description: "شحن V-Bucks مباشر إلى حساب Epic Games الخاص بك." },
+          { locale: "en", name: "Fortnite V-Bucks", description: "Direct V-Bucks top-up to your Epic Games account." },
+        ],
+      },
+      inputDefinitions: {
+        create: [
+          {
+            key: "epicEmail",
+            labelAr: "البريد الإلكتروني لحساب Epic Games",
+            labelEn: "Epic Games account email",
+            helpTextAr: "البريد الإلكتروني المستخدم لتسجيل الدخول إلى حسابك في Epic Games.",
+            helpTextEn: "The email address you use to sign in to your Epic Games account.",
+            fieldType: "email",
+            required: true,
+            normalize: "trim",
+            sortOrder: 1,
+          },
+        ],
+      },
+      variants: {
+        create: [
+          { sku: "FORTNITE-VB-1000", nameAr: "1000 V-Bucks", nameEn: "1000 V-Bucks", currency: "SAR", baseCostMinorUnits: 3500, marginBasisPoints: 1500, taxRateBasisPoints: 1500, sortOrder: 1 },
+          { sku: "FORTNITE-VB-2800", nameAr: "2800 V-Bucks", nameEn: "2800 V-Bucks", currency: "SAR", baseCostMinorUnits: 9500, marginBasisPoints: 1500, taxRateBasisPoints: 1500, sortOrder: 2 },
+          { sku: "FORTNITE-VB-5000", nameAr: "5000 V-Bucks", nameEn: "5000 V-Bucks", currency: "SAR", baseCostMinorUnits: 16500, marginBasisPoints: 1500, taxRateBasisPoints: 1500, sortOrder: 3 },
+        ],
+      },
+    },
+  });
+
   const mockProvider = await prisma.provider.upsert({
     where: { code: "mock" },
     update: {},
@@ -1059,6 +1249,21 @@ async function main() {
           "ROBLOX-RBX-400",
           "ROBLOX-RBX-800",
           "ROBLOX-RBX-1700",
+          "FF-DIAMOND-100",
+          "FF-DIAMOND-310",
+          "FF-DIAMOND-520",
+          "FF-DIAMOND-1060",
+          "GPLAY-KSA-15",
+          "GPLAY-KSA-30",
+          "GPLAY-KSA-60",
+          "GPLAY-KSA-100",
+          "GPLAY-KSA-200",
+          "XBOX-KSA-50",
+          "XBOX-KSA-100",
+          "XBOX-KSA-200",
+          "FORTNITE-VB-1000",
+          "FORTNITE-VB-2800",
+          "FORTNITE-VB-5000",
         ],
       },
     },
@@ -1418,6 +1623,10 @@ async function main() {
       noonGiftCardProduct.slug,
       pubgMobileProduct.slug,
       robloxProduct.slug,
+      freeFireProduct.slug,
+      googlePlayGiftCardProduct.slug,
+      xboxGiftCardProduct.slug,
+      fortniteProduct.slug,
     ],
     provider: mockProvider.code,
   });
