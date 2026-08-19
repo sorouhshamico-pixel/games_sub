@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
-import { Zap, Tag, ShieldCheck, Headset } from "lucide-react";
+import { Zap, Tag, ShieldCheck, Headset, Gamepad2, Sparkles, ArrowLeft, ArrowRight } from "lucide-react";
 import { buttonBaseClasses, buttonSizeClasses, buttonVariantClasses, cn } from "@gcc-store/ui";
 import { Link } from "@/i18n/navigation";
 import { Magnetic } from "@/components/motion";
@@ -163,7 +163,7 @@ export function HomeHero({
               />
               <Magnetic strength={0.3}>
                 <motion.span
-                  className="inline-block"
+                  className="group/cta inline-block"
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.985, y: 0 }}
                   transition={{ type: "spring", ...spring }}
@@ -172,22 +172,33 @@ export function HomeHero({
                     href="/games"
                     className={cn(buttonBaseClasses, buttonVariantClasses.primary, buttonSizeClasses.lg, "shadow-lg shadow-brand-primary/30")}
                   >
+                    <Gamepad2 aria-hidden className="h-5 w-5 transition-transform duration-300 group-hover/cta:-rotate-6 group-hover/cta:scale-110" />
                     {ctaLabel}
+                    {locale === "ar" ? (
+                      <ArrowLeft aria-hidden className="h-4 w-4 transition-transform duration-300 group-hover/cta:-translate-x-1" />
+                    ) : (
+                      <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-300 group-hover/cta:translate-x-1" />
+                    )}
                   </Link>
                 </motion.span>
               </Magnetic>
             </div>
 
             <motion.span
-              className="inline-block"
+              className="group/cta2 inline-block"
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.985, y: 0 }}
               transition={{ type: "spring", ...spring }}
             >
               <Link
                 href="/#limited-offers"
-                className={cn(buttonBaseClasses, buttonSizeClasses.lg, "border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-brand-primary/50")}
+                className={cn(
+                  buttonBaseClasses,
+                  buttonSizeClasses.lg,
+                  "border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-brand-primary/50",
+                )}
               >
+                <Sparkles aria-hidden className="h-4 w-4 text-brand-accent transition-transform duration-300 group-hover/cta2:rotate-12 group-hover/cta2:scale-125" />
                 {locale === "ar" ? "استكشف العروض" : "Explore offers"}
               </Link>
             </motion.span>

@@ -81,11 +81,14 @@ export default async function BrandPage({
           {locale === "ar" ? "المنتجات" : "Products"}
         </h2>
         {brand.products.length > 0 ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            {brand.products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+              {brand.products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+            <p className="mt-3 text-xs text-[var(--color-text-muted)]">{t("common.demoDataNotice")}</p>
+          </>
         ) : (
           <EmptyState title={t("common.empty")} />
         )}

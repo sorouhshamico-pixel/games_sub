@@ -125,6 +125,7 @@ export default async function ProductPage({
               <ProductCard key={item.id} product={item} />
             ))}
           </div>
+          <p className="mt-3 text-xs text-[var(--color-text-muted)]">{t("common.demoDataNotice")}</p>
         </section>
       ) : null}
     </div>

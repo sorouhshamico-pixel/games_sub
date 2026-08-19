@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "motion/react";
-import { Heart, Plus, Check, Loader2 } from "lucide-react";
+import { Heart, ShoppingCart, Check, Loader2 } from "lucide-react";
 import { formatMoney, cn } from "@gcc-store/ui";
 import type { ProductSummary } from "@gcc-store/contracts";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -19,9 +19,35 @@ import { duration, easing, spring } from "@/lib/motion/tokens";
 
 type QuickAddState = "idle" | "loading" | "added";
 
+// Same investor-demo pattern already used by LimitedOffers: a decorative
+// "-X%" ribbon, deterministic per product (not random, so it doesn't
+// flicker between renders) rather than fabricating a struck-through
+// "original price" — the real price shown below never changes, and
+// checkout always charges exactly that. The section this card renders in
+// carries the actual "demo data" disclosure, same as LimitedOffers/
+// MostRequested already do for their own cards.
+const demoDiscountPercents = [15, 20, 10, 25, 30];
+function demoDiscountFor(id: string): number {
+  let sum = 0;
+  for (let i = 0; i < id.length; i += 1) sum += id.charCodeAt(i);
+  return demoDiscountPercents[sum % demoDiscountPercents.length]!;
+}
+
+// The API only gives products a bare category slug, not a display name —
+// map to the same nav labels already used across the header/footer so
+// the wording stays consistent everywhere.
+const categoryNavKey: Record<string, "games" | "subscriptions" | "giftCards"> = {
+  "game-topups": "games",
+  subscriptions: "subscriptions",
+  "gift-cards": "giftCards",
+};
+
 export function ProductCard({ product }: { product: ProductSummary }) {
   const locale = useLocale() as Locale;
+  const t = useTranslations();
   const name = locale === "ar" ? product.nameAr : product.nameEn;
+  const discountPercent = demoDiscountFor(product.id);
+  const categoryLabel = t(`nav.${categoryNavKey[product.categorySlug] ?? "games"}`);
   const { currency: displayCurrency } = useDisplayCurrency();
   const displayAmount = convertMinorUnits(product.fromPriceMinorUnits, product.currency, displayCurrency);
   const { addItem } = useCart();
@@ -31,6 +57,9 @@ export function ProductCard({ product }: { product: ProductSummary }) {
   // (not a dead button), just not backed by an account-level feature yet.
   const [wishlisted, setWishlisted] = useState(false);
   const [quickAdd, setQuickAdd] = useState<QuickAddState>("idle");
+  // Bumped on every "add to wishlist" tap so the burst below can key off
+  // it and replay — toggling back off doesn't burst, only the "like".
+  const [burst, setBurst] = useState(0);
 
   // A summary card only has "starting from" pricing — no variant list, no
   // custom-input schema. So a real quick-add fetches the full product on
@@ -79,13 +108,41 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         type="button"
         onClick={(event) => {
           event.preventDefault();
-          setWishlisted((prev) => !prev);
+          setWishlisted((prev) => {
+            const next = !prev;
+            if (next) setBurst((b) => b + 1);
+            return next;
+          });
         }}
         aria-pressed={wishlisted}
         aria-label={locale === "ar" ? "أضف للمفضلة" : "Add to wishlist"}
         className="absolute top-2 end-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70"
       >
         <Heart className={cn("h-3.5 w-3.5", wishlisted && "fill-danger text-danger")} aria-hidden />
+
+        {/* A little burst of hearts on "like" — pure delight, no function. */}
+        <AnimatePresence>
+          {burst > 0 ? (
+            <motion.span key={burst} aria-hidden className="pointer-events-none absolute inset-0">
+              {[0, 1, 2, 3, 4].map((i) => {
+                const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
+                const dx = Math.cos(angle) * 22;
+                const dy = Math.sin(angle) * 22;
+                return (
+                  <motion.span
+                    key={i}
+                    initial={{ opacity: 1, scale: 0.4, x: 0, y: 0 }}
+                    animate={{ opacity: 0, scale: 1, x: dx, y: dy }}
+                    transition={{ duration: 0.7, ease: easing }}
+                    className="absolute inset-0 flex items-center justify-center"
+                  >
+                    <Heart className="h-2.5 w-2.5 fill-danger text-danger" />
+                  </motion.span>
+                );
+              })}
+            </motion.span>
+          ) : null}
+        </AnimatePresence>
       </button>
       <Link
         href={`/products/${product.slug}`}
@@ -110,19 +167,12 @@ export function ProductCard({ product }: { product: ProductSummary }) {
             className="pointer-events-none absolute inset-0 -translate-x-full skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full"
           />
 
-          {product.isDemoData ? (
-            <span
-              data-demo-badge
-              className="absolute top-2 start-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm"
-            >
-              {locale === "ar" ? "تجريبي" : "Demo"}
-            </span>
-          ) : null}
+          <span className="absolute top-2 start-2 rounded-full bg-danger px-2 py-0.5 text-[10px] font-bold text-white shadow-sm shadow-black/30">
+            -{discountPercent}%
+          </span>
 
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent px-3 pb-2.5 pt-8">
-            <p className="text-[10px] font-medium text-brand-accent">
-              {locale === "ar" ? "شحن رقمي فوري" : "Instant digital delivery"}
-            </p>
+            <p className="text-[10px] font-medium text-brand-accent">{categoryLabel}</p>
             <div className="mt-0.5 flex items-center gap-1">
               <StarIcon className="h-3.5 w-3.5 shrink-0 text-brand-accent" />
               <p className="truncate text-sm font-bold text-white">{name}</p>
@@ -148,16 +198,18 @@ export function ProductCard({ product }: { product: ProductSummary }) {
             </p>
           </div>
 
-          {/* Quick-add — a glowing circular FAB that morphs plus -> spinner
+          {/* Quick-add — a glowing circular FAB that morphs cart -> spinner
               -> check, so the whole round trip (fetch variant, add to
               cart) reads as one continuous gesture instead of a dead
-              click-and-wait. */}
+              click-and-wait. A small pulsing "+" badge rides on the cart
+              icon itself so the action reads as "add" at a glance, not
+              "go to cart". */}
           <motion.button
             type="button"
             onClick={handleQuickAdd}
             disabled={quickAdd === "loading"}
             aria-label={locale === "ar" ? "أضف للسلة بسرعة" : "Quick add to cart"}
-            whileHover={quickAdd === "idle" ? { scale: 1.1, rotate: 90 } : undefined}
+            whileHover={quickAdd === "idle" ? { scale: 1.1, rotate: [0, -8, 8, 0] } : undefined}
             whileTap={quickAdd === "idle" ? { scale: 0.9 } : undefined}
             transition={{ type: "spring", ...spring }}
             className={cn(
@@ -189,8 +241,16 @@ export function ProductCard({ product }: { product: ProductSummary }) {
                   <Check className="h-4.5 w-4.5" aria-hidden />
                 </motion.span>
               ) : (
-                <motion.span key="idle" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.6 }}>
-                  <Plus className="h-4.5 w-4.5" aria-hidden />
+                <motion.span key="idle" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.6 }} className="relative">
+                  <ShoppingCart className="h-4.5 w-4.5" aria-hidden />
+                  <motion.span
+                    aria-hidden
+                    animate={{ scale: [1, 1.25, 1] }}
+                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-1.5 -end-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-brand-accent text-[9px] font-black leading-none text-[#070B14]"
+                  >
+                    +
+                  </motion.span>
                 </motion.span>
               )}
             </AnimatePresence>

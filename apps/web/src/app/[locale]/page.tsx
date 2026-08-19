@@ -84,13 +84,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             {loadError ? (
               <ErrorState title={t("common.errorGeneric")} />
             ) : popularProducts && popularProducts.items.length > 0 ? (
-              <StaggerContainer className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-                {popularProducts.items.map((product) => (
-                  <StaggerItem key={product.id}>
-                    <ProductCard product={product} />
-                  </StaggerItem>
-                ))}
-              </StaggerContainer>
+              <>
+                <StaggerContainer className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+                  {popularProducts.items.map((product) => (
+                    <StaggerItem key={product.id}>
+                      <ProductCard product={product} />
+                    </StaggerItem>
+                  ))}
+                </StaggerContainer>
+                <p className="mt-3 text-xs text-[var(--color-text-muted)]">{t("common.demoDataNotice")}</p>
+              </>
             ) : (
               <EmptyState title={t("common.empty")} />
             )}
