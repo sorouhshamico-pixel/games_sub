@@ -7,6 +7,7 @@ import { cn } from "@gcc-store/ui";
 import { Link, useRouter } from "@/i18n/navigation";
 import { BrandLockup } from "./BrandLockup";
 import { LocaleSwitcher } from "./LocaleSwitcher";
+import { CurrencySwitcher } from "./CurrencySwitcher";
 import { CartIcon } from "./CartIcon";
 
 const SCROLL_THRESHOLD = 24;
@@ -53,17 +54,6 @@ export function SiteHeader() {
           : "bg-gradient-to-b from-brand-primary/10 via-[var(--color-surface)]/55 to-[var(--color-surface)]/45 shadow-none",
       )}
     >
-      {/* A glowing hairline instead of a flat border — brightens on scroll,
-          nearly invisible at rest so the promo bar's gradient reads as
-          flowing straight into the header rather than hitting a seam. */}
-      <div
-        aria-hidden
-        className={cn(
-          "absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-brand-primary/60 to-transparent transition-opacity duration-300",
-          isScrolled ? "opacity-100" : "opacity-0",
-        )}
-      />
-
       <div
         className={cn(
           "relative mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 transition-[padding] duration-300",
@@ -121,8 +111,9 @@ export function SiteHeader() {
           </div>
         </form>
 
-        <div className="ms-auto flex items-center gap-3">
+        <div className="ms-auto flex items-center gap-2 sm:gap-3">
           <LocaleSwitcher />
+          <CurrencySwitcher />
           <Link href="/account" aria-label={t("nav.account")} className={iconButton}>
             <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
               <circle cx="12" cy="8" r="3.2" />

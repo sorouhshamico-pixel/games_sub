@@ -10,6 +10,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { BottomNav } from "@/components/BottomNav";
 import { CartProvider } from "@/components/CartProvider";
+import { CurrencyProvider } from "@/components/CurrencyProvider";
 import { CartDrawer } from "@/components/CartDrawer";
 import { FloatingBackToTop } from "@/components/FloatingBackToTop";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
@@ -69,19 +70,21 @@ export default async function LocaleLayout({
       <body className="flex min-h-screen flex-col bg-[var(--color-background)] text-[var(--color-text-primary)] antialiased">
         <NextIntlClientProvider>
           <MotionProvider>
-            <CartProvider>
-              <SiteAtmosphere />
-              <PromoBar />
-              <SiteHeader />
-              <main className="flex-1 pb-20 md:pb-0">
-                <PageTransition>{children}</PageTransition>
-              </main>
-              <SiteFooter />
-              <BottomNav />
-              <CartDrawer />
-              <FloatingBackToTop />
-              <FloatingWhatsApp />
-            </CartProvider>
+            <CurrencyProvider>
+              <CartProvider>
+                <SiteAtmosphere />
+                <PromoBar />
+                <SiteHeader />
+                <main className="flex-1 pb-20 md:pb-0">
+                  <PageTransition>{children}</PageTransition>
+                </main>
+                <SiteFooter />
+                <BottomNav />
+                <CartDrawer />
+                <FloatingBackToTop />
+                <FloatingWhatsApp />
+              </CartProvider>
+            </CurrencyProvider>
           </MotionProvider>
         </NextIntlClientProvider>
       </body>

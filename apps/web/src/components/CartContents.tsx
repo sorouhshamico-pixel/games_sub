@@ -6,9 +6,11 @@ import { formatMoney } from "@gcc-store/ui";
 import type { Locale } from "@gcc-store/i18n";
 import { Link } from "@/i18n/navigation";
 import { useCart } from "@/components/CartProvider";
+import { useDisplayCurrency } from "@/components/CurrencyProvider";
 import { AnimatedPrice } from "@/components/motion";
 import { duration, easing } from "@/lib/motion/tokens";
 import { cartTotal } from "@/lib/cart";
+import { convertMinorUnits } from "@/lib/currency";
 
 /**
  * The actual cart UI (empty state, item list, total, checkout CTA) —
@@ -21,6 +23,7 @@ export function CartContents({ onNavigate }: { onNavigate?: () => void }) {
   const locale = useLocale() as Locale;
   const t = useTranslations();
   const { items, removeItem, setQuantity } = useCart();
+  const { currency: displayCurrency } = useDisplayCurrency();
 
   if (items.length === 0) {
     return (
@@ -77,7 +80,19 @@ export function CartContents({ onNavigate }: { onNavigate?: () => void }) {
                       {name} — {locale === "ar" ? item.variantNameAr : item.variantNameEn}
                     </p>
                     <p className="text-sm text-[var(--color-text-muted)]">
-                      {formatMoney(item.unitPriceMinorUnits, item.currency, locale)} × {item.quantity}
+                      <AnimatePresence mode="wait" initial={false}>
+                        <motion.span
+                          key={displayCurrency}
+                          initial={{ opacity: 0, y: -3 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 3 }}
+                          transition={{ duration: duration.fast, ease: easing }}
+                          className="inline-block"
+                        >
+                          {formatMoney(convertMinorUnits(item.unitPriceMinorUnits, item.currency, displayCurrency), displayCurrency, locale)}
+                        </motion.span>
+                      </AnimatePresence>{" "}
+                      × {item.quantity}
                     </p>
                     {Object.keys(item.inputValues).length > 0 ? (
                       <p className="mt-1 text-xs text-[var(--color-text-muted)]">
@@ -120,7 +135,12 @@ export function CartContents({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className="flex items-center justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-5">
         <span className="font-medium text-[var(--color-text-primary)]">{locale === "ar" ? "الإجمالي" : "Total"}</span>
-        <AnimatedPrice amountMinorUnits={total} currency={currency} locale={locale} className="text-xl font-bold text-brand-accent" />
+        <AnimatedPrice
+          amountMinorUnits={convertMinorUnits(total, currency, displayCurrency)}
+          currency={displayCurrency}
+          locale={locale}
+          className="text-xl font-bold text-brand-accent"
+        />
       </div>
 
       <Link

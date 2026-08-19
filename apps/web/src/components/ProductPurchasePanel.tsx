@@ -8,6 +8,8 @@ import { validateProductInputValues, type ProductDetail } from "@gcc-store/contr
 import type { Locale } from "@gcc-store/i18n";
 import { useRouter } from "@/i18n/navigation";
 import { useCart } from "./CartProvider";
+import { useDisplayCurrency } from "./CurrencyProvider";
+import { convertMinorUnits } from "@/lib/currency";
 import { AnimatedPrice, SuccessCheck } from "./motion";
 import { duration, easing, spring } from "@/lib/motion/tokens";
 import { cartItemKey } from "@/lib/cart";
@@ -19,6 +21,7 @@ export function ProductPurchasePanel({ product }: { product: ProductDetail }) {
   const t = useTranslations();
   const router = useRouter();
   const { addItem } = useCart();
+  const { currency: displayCurrency } = useDisplayCurrency();
 
   const activeVariants = product.variants.filter((v) => v.isActive);
   const [variantId, setVariantId] = useState(activeVariants[0]?.id ?? "");
@@ -126,7 +129,18 @@ export function ProductPurchasePanel({ product }: { product: ProductDetail }) {
                   ) : null}
                 </AnimatePresence>
                 <span className="block font-medium">{locale === "ar" ? variant.nameAr : variant.nameEn}</span>
-                <span className="block text-brand-accent">{formatMoney(variant.listPriceMinorUnits, variant.currency, locale)}</span>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={displayCurrency}
+                    initial={{ opacity: 0, y: -3 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 3 }}
+                    transition={{ duration: duration.fast, ease: easing }}
+                    className="block text-brand-accent"
+                  >
+                    {formatMoney(convertMinorUnits(variant.listPriceMinorUnits, variant.currency, displayCurrency), displayCurrency, locale)}
+                  </motion.span>
+                </AnimatePresence>
               </motion.button>
             );
           })}
@@ -232,7 +246,15 @@ export function ProductPurchasePanel({ product }: { product: ProductDetail }) {
                 </motion.span>
               ) : (
                 <motion.span key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
-                  {selectedVariant ? <AnimatedPrice amountMinorUnits={totalMinorUnits} currency={selectedVariant.currency} locale={locale} /> : ""}
+                  {selectedVariant ? (
+                    <AnimatedPrice
+                      amountMinorUnits={convertMinorUnits(totalMinorUnits, selectedVariant.currency, displayCurrency)}
+                      currency={displayCurrency}
+                      locale={locale}
+                    />
+                  ) : (
+                    ""
+                  )}
                   {" — "}
                   {locale === "ar" ? "أضف للسلة" : "Add to cart"}
                 </motion.span>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLocale } from "next-intl";
+import { AnimatePresence, motion } from "motion/react";
 import { Heart } from "lucide-react";
 import { formatMoney, cn } from "@gcc-store/ui";
 import type { ProductSummary } from "@gcc-store/contracts";
@@ -9,10 +10,15 @@ import { Link } from "@/i18n/navigation";
 import type { Locale } from "@gcc-store/i18n";
 import { ProductImagePlaceholder } from "./ProductImagePlaceholder";
 import { HoverCard } from "./motion";
+import { useDisplayCurrency } from "./CurrencyProvider";
+import { convertMinorUnits } from "@/lib/currency";
+import { duration, easing } from "@/lib/motion/tokens";
 
 export function ProductCard({ product }: { product: ProductSummary }) {
   const locale = useLocale() as Locale;
   const name = locale === "ar" ? product.nameAr : product.nameEn;
+  const { currency: displayCurrency } = useDisplayCurrency();
+  const displayAmount = convertMinorUnits(product.fromPriceMinorUnits, product.currency, displayCurrency);
   // Local-only wishlist toggle — there's no wishlist backend yet, so this
   // doesn't persist across reloads. It's a real, working UI interaction
   // (not a dead button), just not backed by an account-level feature yet.
@@ -77,7 +83,18 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         <div className="p-3.5">
           <p className="text-xs text-[var(--color-text-muted)]">{locale === "ar" ? "يبدأ من" : "Starting from"}</p>
           <p className="text-base font-bold text-brand-accent">
-            {formatMoney(product.fromPriceMinorUnits, product.currency, locale)}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={displayCurrency}
+                initial={{ opacity: 0, y: -3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 3 }}
+                transition={{ duration: duration.fast, ease: easing }}
+                className="inline-block"
+              >
+                {formatMoney(displayAmount, displayCurrency, locale)}
+              </motion.span>
+            </AnimatePresence>
           </p>
         </div>
       </Link>

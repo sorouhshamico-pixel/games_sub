@@ -25,7 +25,8 @@ const flagClassName = "h-3.5 w-5 shrink-0 rounded-[3px] object-cover shadow-[0_0
  * <select> can't render a flag next to the closed-state label consistently
  * across browsers, so this is a small self-built listbox instead (glass
  * trigger button + animated popover), matching the rest of the header's
- * borderless, motion-driven language.
+ * borderless, motion-driven language. Mirrors CurrencySwitcher's shape so
+ * the two feel like one family.
  */
 export function LocaleSwitcher() {
   const [open, setOpen] = useState(false);
