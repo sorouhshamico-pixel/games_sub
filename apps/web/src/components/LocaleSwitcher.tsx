@@ -3,22 +3,29 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { AnimatePresence, motion } from "motion/react";
-import { Check, ChevronDown, Globe } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
+import { SA, GB } from "country-flag-icons/react/3x2";
 import { locales, localeLabels, type Locale } from "@gcc-store/i18n";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { duration, easing, springTransition } from "@/lib/motion/tokens";
 
-const flags: Record<Locale, string> = {
-  ar: "🇸🇦",
-  en: "🇬🇧",
+// Real vector flags (country-flag-icons) rather than Unicode flag emoji —
+// Windows has no built-in flag-emoji glyphs and silently falls back to
+// showing the bare two-letter region code (e.g. "SA"), so emoji flags
+// render as broken-looking text for a large share of desktop users.
+const flags: Record<Locale, typeof SA> = {
+  ar: SA,
+  en: GB,
 };
+
+const flagClassName = "h-3.5 w-5 shrink-0 rounded-[3px] object-cover shadow-[0_0_0_1px_rgba(255,255,255,0.12)]";
 
 /**
  * Custom flag + label dropdown replacing the plain native <select> — a real
- * <select> can't render a flag glyph next to the closed-state label
- * consistently across browsers, so this is a small self-built listbox
- * instead (glass trigger button + animated popover), matching the rest of
- * the header's borderless, motion-driven language.
+ * <select> can't render a flag next to the closed-state label consistently
+ * across browsers, so this is a small self-built listbox instead (glass
+ * trigger button + animated popover), matching the rest of the header's
+ * borderless, motion-driven language.
  */
 export function LocaleSwitcher() {
   const [open, setOpen] = useState(false);
@@ -50,6 +57,8 @@ export function LocaleSwitcher() {
     if (next !== locale) router.replace(pathname, { locale: next });
   }
 
+  const ActiveFlag = flags[locale];
+
   return (
     <div ref={rootRef} className="relative">
       <button
@@ -59,10 +68,7 @@ export function LocaleSwitcher() {
         aria-expanded={open}
         className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-surface-elevated)]/70 px-3 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-brand-primary/15"
       >
-        <Globe aria-hidden className="h-3.5 w-3.5 text-brand-secondary" />
-        <span aria-hidden className="text-base leading-none">
-          {flags[locale]}
-        </span>
+        <ActiveFlag aria-hidden className={flagClassName} />
         {localeLabels[locale]}
         <motion.span animate={{ rotate: open ? 180 : 0 }} transition={springTransition} className="flex">
           <ChevronDown aria-hidden className="h-3.5 w-3.5 text-[var(--color-text-muted)]" />
@@ -81,6 +87,7 @@ export function LocaleSwitcher() {
           >
             {locales.map((l) => {
               const isActive = l === locale;
+              const OptionFlag = flags[l];
               return (
                 <button
                   key={l}
@@ -92,9 +99,7 @@ export function LocaleSwitcher() {
                     isActive ? "bg-brand-primary/15 text-brand-primary" : "text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)]"
                   }`}
                 >
-                  <span aria-hidden className="text-base leading-none">
-                    {flags[l]}
-                  </span>
+                  <OptionFlag aria-hidden className={flagClassName} />
                   <span className="flex-1">{localeLabels[l]}</span>
                   {isActive ? <Check aria-hidden className="h-3.5 w-3.5" /> : null}
                 </button>

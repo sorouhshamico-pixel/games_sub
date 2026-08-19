@@ -14,21 +14,26 @@ const NOISE_DATA_URI =
   );
 
 /**
- * A single cohesive backdrop layer for the whole homepage: a slow-drifting
- * aurora (three blurred blobs, continuous idle motion — same language as
- * the hero's), a soft radial glow that trails the cursor, and a faint
- * noise texture. All transform/opacity, all pointer-events-none, all
- * automatically frozen for prefers-reduced-motion via MotionProvider's
- * global reducedMotion="user" config — the cursor spotlight simply stops
- * updating (harmless, not broken) since it's driven by the same motion
- * value system.
+ * One cohesive backdrop layer for the entire site (mounted once in the
+ * locale layout, behind PromoBar/header/every page/footer): a slow-drifting
+ * aurora of blurred blobs, a soft radial glow that trails the cursor and
+ * "lights up" whatever card or panel it passes behind, and a faint noise
+ * texture so flat dark surfaces read as designed material rather than a
+ * solid fill. Fixed + -z-10, so it sits above the raw document background
+ * but below all real content, and never repaints on route change since the
+ * layout that mounts it persists across navigation.
+ *
+ * All transform/opacity, all pointer-events-none, all automatically frozen
+ * for prefers-reduced-motion via MotionProvider's global reducedMotion="user"
+ * config — the cursor spotlight simply stops updating (harmless, not
+ * broken) since it's driven by the same motion value system.
  */
-export function PageAtmosphere() {
+export function SiteAtmosphere() {
   const cursorX = useMotionValue(-400);
   const cursorY = useMotionValue(-400);
   const smoothX = useSpring(cursorX, { stiffness: 60, damping: 20, mass: 0.5 });
   const smoothY = useSpring(cursorY, { stiffness: 60, damping: 20, mass: 0.5 });
-  const spotlightBackground = useMotionTemplate`radial-gradient(560px circle at ${smoothX}px ${smoothY}px, rgba(124,58,237,0.08), transparent 75%)`;
+  const spotlightBackground = useMotionTemplate`radial-gradient(620px circle at ${smoothX}px ${smoothY}px, rgba(124,58,237,0.1), transparent 75%)`;
 
   useEffect(() => {
     // Pointer-only (matches Magnetic/Testimonials tilt precedent) — never
@@ -57,6 +62,11 @@ export function PageAtmosphere() {
         animate={{ x: [0, 18, -18, 0], y: [0, -10, 14, 0], opacity: [0.5, 0.85, 0.5] }}
         transition={{ duration: 19, repeat: Infinity, ease: "easeInOut", delay: 1 }}
         className="absolute bottom-0 start-1/3 h-72 w-72 rounded-full bg-brand-accent/5 blur-3xl"
+      />
+      <motion.div
+        animate={{ x: [0, -16, 22, 0], y: [0, 12, -16, 0], scale: [1, 1.05, 0.97, 1] }}
+        transition={{ duration: 24, repeat: Infinity, ease: "easeInOut", delay: 3.5 }}
+        className="absolute bottom-1/4 end-1/4 h-64 w-64 rounded-full bg-brand-primary/6 blur-3xl"
       />
 
       <motion.div className="absolute inset-0" style={{ background: spotlightBackground }} />
