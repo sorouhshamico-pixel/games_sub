@@ -20,12 +20,26 @@ export const dynamic = "force-dynamic";
 // so the hero visibly reacts to what's selected.
 const categoryHero: Record<
   string,
-  { Icon: typeof Gamepad2; color: "primary" | "secondary" | "accent"; image: string; badgeAr: string; badgeEn: string; subtitleAr: string; subtitleEn: string }
+  {
+    Icon: typeof Gamepad2;
+    color: "primary" | "secondary" | "accent";
+    image: string;
+    titleAr: string;
+    titleEn: string;
+    badgeAr: string;
+    badgeEn: string;
+    subtitleAr: string;
+    subtitleEn: string;
+  }
 > = {
   "game-topups": {
     Icon: Gamepad2,
     color: "primary",
     image: "/images/hero/game-top-up-illustration.png",
+    // Same wording as the footer's quick links, so the category name
+    // doesn't drift into a second phrasing depending on where it appears.
+    titleAr: "شحن الألعاب",
+    titleEn: "Game top-ups",
     badgeAr: "شحن فوري",
     badgeEn: "Instant top-up",
     subtitleAr: "اشحن رصيدك في أي لعبة خلال ثوانٍ، بأمان وسهولة تامة",
@@ -35,6 +49,8 @@ const categoryHero: Record<
     Icon: PlayCircle,
     color: "secondary",
     image: "/images/hero/digital-subscriptions-illustration.png",
+    titleAr: "الاشتراكات الرقمية",
+    titleEn: "Digital subscriptions",
     badgeAr: "تفعيل فوري",
     badgeEn: "Instant activation",
     subtitleAr: "فعّل اشتراكاتك الرقمية المفضلة بسهولة وأمان تام",
@@ -44,6 +60,8 @@ const categoryHero: Record<
     Icon: Gift,
     color: "accent",
     image: "/images/hero/gift-cards-illustration.png",
+    titleAr: "بطاقات الهدايا",
+    titleEn: "Gift cards",
     badgeAr: "الهدية المثالية",
     badgeEn: "The perfect gift",
     subtitleAr: "بطاقات هدايا رقمية لكل المناسبات، تسليم فوري",
@@ -107,7 +125,9 @@ export default async function GamesPage({
               <span aria-hidden className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl ${accent.badge}`}>
                 <HeroIcon className="h-6 w-6" />
               </span>
-              <h1 className="text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">{t("nav.games")}</h1>
+              <h1 className="text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">
+                {activeHero ? (locale === "ar" ? activeHero.titleAr : activeHero.titleEn) : t("nav.games")}
+              </h1>
 
               {search ? (
                 <p className="mt-2 text-sm text-[var(--color-text-muted)]">
@@ -176,12 +196,15 @@ export default async function GamesPage({
 
       <GameCategoryFilter categories={categories} activeCategory={category} locale={typedLocale} />
 
+      {/* Distinct heading per section — the brand list and the results
+          grid used to both sit under a heading that just repeated "الألعاب"
+          from the hero title above them. */}
       {brands.length > 0 ? (
         <Reveal>
           <section>
             <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-[var(--color-text-primary)]">
               <Gamepad2 className="h-5 w-5 text-brand-secondary" aria-hidden />
-              {locale === "ar" ? "الألعاب" : "Games"}
+              {locale === "ar" ? "تصفح حسب اللعبة" : "Browse by game"}
             </h2>
             <BrandSlider brands={brands} locale={typedLocale} />
           </section>
@@ -189,6 +212,10 @@ export default async function GamesPage({
       ) : null}
 
       <section>
+        <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-[var(--color-text-primary)]">
+          <Sparkles className="h-5 w-5 text-brand-accent" aria-hidden />
+          {locale === "ar" ? "النتائج" : "Results"}
+        </h2>
         {loadError ? (
           <ErrorState title={t("common.errorGeneric")} />
         ) : products && products.items.length > 0 ? (
