@@ -48,12 +48,22 @@ export function SiteHeader() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 backdrop-blur-lg transition-[background,box-shadow] duration-300",
-        isScrolled
-          ? "bg-[var(--color-surface)]/90 shadow-[0_1px_0_0_rgba(5,199,242,0.18),0_12px_24px_-16px_rgba(5,199,242,0.25)]"
-          : "bg-gradient-to-b from-brand-primary/10 via-[var(--color-surface)]/55 to-[var(--color-surface)]/45 shadow-none",
+        "sticky top-0 z-40 backdrop-blur-lg transition-shadow duration-300",
+        isScrolled ? "shadow-[0_1px_0_0_rgba(5,199,242,0.18),0_12px_24px_-16px_rgba(5,199,242,0.25)]" : "shadow-none",
       )}
     >
+      {/* Background lives on its own layer, masked to dissolve at the
+          bottom instead of cutting hard into the page below — so the
+          promo bar, header, and hero read as one continuous surface
+          rather than a stack of boxed panels. */}
+      <div
+        aria-hidden
+        className={cn(
+          "absolute inset-0 -z-10 transition-[background] duration-300 [mask-image:linear-gradient(to_bottom,black_65%,transparent_100%)]",
+          isScrolled ? "bg-[var(--color-surface)]/85" : "bg-gradient-to-b from-brand-primary/6 via-[var(--color-surface)]/22 to-[var(--color-surface)]/12",
+        )}
+      />
+
       <div
         className={cn(
           "relative mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 transition-[padding] duration-300",

@@ -47,8 +47,6 @@ export function CurrencySwitcher() {
     setCurrency(next);
   }
 
-  const ActiveFlag = Flags[currencyCountry[currency] as keyof typeof Flags];
-
   return (
     <div ref={rootRef} className="relative">
       <button
@@ -58,7 +56,6 @@ export function CurrencySwitcher() {
         aria-expanded={open}
         className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-surface-elevated)]/70 px-3 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-brand-primary/15"
       >
-        <ActiveFlag aria-hidden className={flagClassName} />
         <AnimatePresence mode="wait" initial={false}>
           <motion.span
             key={currency}
