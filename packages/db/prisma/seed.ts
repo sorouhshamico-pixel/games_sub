@@ -177,6 +177,7 @@ async function main() {
   const DEMO_SKYFALL_IMAGE = "https://images.unsplash.com/photo-1560419015-7c427e8ae5ba?q=80&w=1200&auto=format&fit=crop";
   const DEMO_PREMIUM_CARD_IMAGE = "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=1200&auto=format&fit=crop";
   const SHOPPING_GIFT_CARD_IMAGE = "https://images.unsplash.com/photo-1597463330912-eb868206b68e?q=80&w=1200&auto=format&fit=crop";
+  const NOON_GIFT_CARD_IMAGE = "https://images.unsplash.com/photo-1556740772-1a741367b93e?q=80&w=1200&auto=format&fit=crop";
 
   const topupProduct = await prisma.product.upsert({
     where: { slug: "demo-battle-arena-diamonds" },
@@ -899,13 +900,13 @@ async function main() {
 
   const noonGiftCardProduct = await prisma.product.upsert({
     where: { slug: "noon-gift-card" },
-    update: { imageUrl: SHOPPING_GIFT_CARD_IMAGE },
+    update: { imageUrl: NOON_GIFT_CARD_IMAGE },
     create: {
       slug: "noon-gift-card",
       type: ProductType.GIFT_CARD,
       categoryId: giftCardsCategory.id,
       status: ProductLifecycleStatus.ACTIVE,
-      imageUrl: SHOPPING_GIFT_CARD_IMAGE,
+      imageUrl: NOON_GIFT_CARD_IMAGE,
       refundEligible: false,
       refundPolicyAr: "بطاقات الهدايا الرقمية غير قابلة للاسترجاع بعد تسليم الكود.",
       refundPolicyEn: "Digital gift cards are non-refundable once the code is delivered.",
