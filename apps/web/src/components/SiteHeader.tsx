@@ -60,7 +60,7 @@ export function SiteHeader() {
         aria-hidden
         className={cn(
           "absolute inset-0 -z-10 transition-[background] duration-300 [mask-image:linear-gradient(to_bottom,black_65%,transparent_100%)]",
-          isScrolled ? "bg-[var(--color-surface)]/85" : "bg-gradient-to-b from-brand-primary/6 via-[var(--color-surface)]/22 to-[var(--color-surface)]/12",
+          isScrolled ? "bg-[var(--color-surface)]/85" : "bg-gradient-to-b from-brand-primary/10 via-[var(--color-surface)]/22 to-[var(--color-surface)]/12",
         )}
       />
 
@@ -121,16 +121,21 @@ export function SiteHeader() {
           </div>
         </form>
 
-        <div className="ms-auto flex items-center gap-2 sm:gap-3">
+        <div className="ms-auto flex items-center gap-1.5 sm:gap-3">
           <LocaleSwitcher />
           <CurrencySwitcher />
-          <Link href="/account" aria-label={t("nav.account")} className={iconButton}>
+          {/* Account and cart are deliberately hidden below md — BottomNav
+              already covers both there, so keeping them here too would
+              just be the same action twice and burn scarce header width. */}
+          <Link href="/account" aria-label={t("nav.account")} className={cn(iconButton, "hidden md:inline-flex")}>
             <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
               <circle cx="12" cy="8" r="3.2" />
               <path strokeLinecap="round" d="M5 20c1.2-3.5 4-5.2 7-5.2s5.8 1.7 7 5.2" />
             </svg>
           </Link>
-          <CartIcon />
+          <span className="hidden md:inline-flex">
+            <CartIcon />
+          </span>
         </div>
       </div>
     </header>

@@ -67,10 +67,10 @@ export function LocaleSwitcher() {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-surface-elevated)]/70 px-3 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-brand-primary/15"
+        className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-surface-elevated)]/70 px-2 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-brand-primary/15 sm:px-3"
       >
         <ActiveFlag aria-hidden className={flagClassName} />
-        {localeLabels[locale]}
+        <span className="hidden sm:inline">{localeLabels[locale]}</span>
         <motion.span animate={{ rotate: open ? 180 : 0 }} transition={springTransition} className="flex">
           <ChevronDown aria-hidden className="h-3.5 w-3.5 text-[var(--color-text-muted)]" />
         </motion.span>

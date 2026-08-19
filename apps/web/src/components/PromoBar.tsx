@@ -28,14 +28,15 @@ export function PromoBar() {
   return (
     <Link
       href="/#limited-offers"
-      className="group relative flex flex-wrap items-center justify-center gap-2 overflow-hidden px-4 py-2.5 text-center text-xs font-medium text-[var(--color-text-primary)] sm:text-sm"
+      // Same backdrop-blur-lg as SiteHeader directly below it — without a
+      // matching blur, the animated background behind them blurs starting
+      // exactly at the header's top edge, and that blurred/crisp boundary
+      // reads as a hard line no matter how closely the colors are matched.
+      className="group relative flex flex-wrap items-center justify-center gap-2 overflow-hidden px-4 py-2.5 text-center text-xs font-medium text-[var(--color-text-primary)] backdrop-blur-lg sm:text-sm"
     >
-      {/* Background lives on its own layer, masked to dissolve at the
-          bottom instead of cutting hard into the header — the text/badge
-          content above stays fully crisp regardless of the fade. */}
       <span
         aria-hidden
-        className="absolute inset-0 -z-10 bg-gradient-to-r from-brand-primary/12 via-brand-secondary/9 to-brand-primary/12 transition-colors duration-300 group-hover:from-brand-primary/18 group-hover:to-brand-primary/18 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]"
+        className="absolute inset-0 -z-10 bg-gradient-to-r from-brand-primary/10 via-brand-secondary/8 to-brand-primary/10 transition-colors duration-300 group-hover:from-brand-primary/16 group-hover:to-brand-primary/16"
       />
 
       {/* Slow diagonal shimmer sweep — a single soft highlight drifting

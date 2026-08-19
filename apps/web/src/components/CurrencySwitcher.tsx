@@ -54,7 +54,7 @@ export function CurrencySwitcher() {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-surface-elevated)]/70 px-3 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-brand-primary/15"
+        className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-surface-elevated)]/70 px-2 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-brand-primary/15 sm:px-3"
       >
         <AnimatePresence mode="wait" initial={false}>
           <motion.span
@@ -80,7 +80,7 @@ export function CurrencySwitcher() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.96 }}
             transition={{ duration: duration.fast, ease: easing }}
-            className="absolute end-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/95 p-1.5 shadow-2xl shadow-black/30 backdrop-blur-lg"
+            className="absolute end-0 top-full z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/95 p-1.5 shadow-2xl shadow-black/30 backdrop-blur-lg"
           >
             {currencyOrder.map((c) => {
               const isActive = c === currency;
