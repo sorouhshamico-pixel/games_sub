@@ -193,19 +193,29 @@ export function HomeHero({
             </motion.span>
           </motion.div>
 
-          <motion.div variants={heroItem} className="mt-10 grid grid-cols-2 gap-x-6 gap-y-4 sm:flex sm:flex-wrap sm:items-center">
+          {/* Always a fixed 2x2 grid — never left to flex-wrap's mercy,
+              which used to leave the 4th badge dangling alone on its own
+              row once 3 fit the available width. Each badge gets a faint
+              glass card so the pairing reads as designed, not just text
+              wrapping into two lines. */}
+          <motion.div variants={heroItem} className="mt-10 grid grid-cols-2 gap-3 sm:gap-4">
             {featureStrip.map(({ Icon, colorClass, ar, en }, index) => {
               const copy = locale === "ar" ? ar : en;
               return (
-                <div key={index} className="flex items-center gap-2.5">
+                <motion.div
+                  key={index}
+                  whileHover={{ y: -2 }}
+                  transition={{ type: "spring", ...spring }}
+                  className="flex items-center gap-2.5 rounded-xl bg-[var(--color-surface-elevated)]/50 p-2.5 transition-colors hover:bg-[var(--color-surface-elevated)]/80"
+                >
                   <span aria-hidden className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", colorClass)}>
                     <Icon className="h-4.5 w-4.5" />
                   </span>
-                  <div className="text-sm">
-                    <p className="font-semibold text-[var(--color-text-primary)]">{copy.title}</p>
-                    <p className="text-xs text-[var(--color-text-muted)]">{copy.sub}</p>
+                  <div className="min-w-0 text-sm">
+                    <p className="truncate font-semibold text-[var(--color-text-primary)]">{copy.title}</p>
+                    <p className="truncate text-xs text-[var(--color-text-muted)]">{copy.sub}</p>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </motion.div>
