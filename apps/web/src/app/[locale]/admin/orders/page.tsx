@@ -4,6 +4,7 @@ import type { Locale } from "@gcc-store/i18n";
 import { Link, redirect } from "@/i18n/navigation";
 import { ApiError, getAdminOrders } from "@/lib/api";
 import { getServerCookieHeader } from "@/lib/server-cookies";
+import { OrderStatusFilter } from "@/components/admin/OrderStatusFilter";
 
 export const dynamic = "force-dynamic";
 
@@ -43,9 +44,15 @@ export default async function AdminOrdersPage({
     );
   }
 
+  const currentPage = page ? Number(page) : 1;
+  const totalPages = Math.max(1, Math.ceil(result.total / result.pageSize));
+
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-10">
-      <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">{locale === "ar" ? "الطلبات" : "Orders"}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">{locale === "ar" ? "الطلبات" : "Orders"}</h1>
+        <OrderStatusFilter currentStatus={status} />
+      </div>
 
       <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)]">
         <table className="w-full text-sm">
@@ -75,9 +82,38 @@ export default async function AdminOrdersPage({
           </tbody>
         </table>
       </div>
-      <p className="text-sm text-[var(--color-text-muted)]">
-        {locale === "ar" ? `الإجمالي: ${result.total}` : `Total: ${result.total}`}
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-[var(--color-text-muted)]">
+          {locale === "ar" ? `الإجمالي: ${result.total}` : `Total: ${result.total}`}
+        </p>
+        {totalPages > 1 ? (
+          <div className="flex items-center gap-3 text-sm">
+            {currentPage > 1 ? (
+              <Link
+                href={{ pathname: "/admin/orders", query: { ...(status ? { status } : {}), page: String(currentPage - 1) } }}
+                className="text-brand-primary hover:underline"
+              >
+                {locale === "ar" ? "السابق" : "Previous"}
+              </Link>
+            ) : (
+              <span className="text-[var(--color-text-muted)]">{locale === "ar" ? "السابق" : "Previous"}</span>
+            )}
+            <span className="text-[var(--color-text-muted)]">
+              {locale === "ar" ? `صفحة ${currentPage} من ${totalPages}` : `Page ${currentPage} of ${totalPages}`}
+            </span>
+            {currentPage < totalPages ? (
+              <Link
+                href={{ pathname: "/admin/orders", query: { ...(status ? { status } : {}), page: String(currentPage + 1) } }}
+                className="text-brand-primary hover:underline"
+              >
+                {locale === "ar" ? "التالي" : "Next"}
+              </Link>
+            ) : (
+              <span className="text-[var(--color-text-muted)]">{locale === "ar" ? "التالي" : "Next"}</span>
+            )}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
