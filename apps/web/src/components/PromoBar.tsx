@@ -9,9 +9,10 @@ import { BoltIcon } from "./home/icons";
 
 /**
  * Investor-demo top announcement strip — same "-X%" illustrative framing as
- * the homepage's LimitedOffers section, which carries the actual demo-data
- * disclaimer. Links there instead of repeating the disclaimer in this thin
- * bar, so it stays functional rather than a dead visual element.
+ * the homepage's LimitedOffers section. Links to the full /offers page (the
+ * whole catalog, sorted by discount) instead of the homepage anchor, so
+ * shoppers scrolled past the homepage strip still reach every offer, not
+ * just the four featured there. The demo-data disclaimer lives on that page.
  *
  * Deliberately borderless and gradient-only (no bottom rule) so it reads as
  * the top edge of one continuous panel with SiteHeader below it, rather than
@@ -27,7 +28,7 @@ export function PromoBar() {
 
   return (
     <Link
-      href="/#limited-offers"
+      href="/offers"
       // Same backdrop-blur-lg as SiteHeader directly below it — without a
       // matching blur, the animated background behind them blurs starting
       // exactly at the header's top edge, and that blurred/crisp boundary

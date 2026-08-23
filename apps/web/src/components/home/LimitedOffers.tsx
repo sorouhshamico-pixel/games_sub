@@ -57,12 +57,17 @@ export function LimitedOffers({ products, locale }: { products: ProductSummary[]
             </span>
             {locale === "ar" ? "عروض لفترة محدودة" : "Limited time offers"}
           </h2>
-          <div
-            role="timer"
-            aria-live="off"
-            className="flex items-center gap-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 font-mono text-sm tabular-nums text-[var(--color-text-primary)]"
-          >
-            <span>{String(h).padStart(2, "0")}</span>:<span>{String(m).padStart(2, "0")}</span>:<span>{String(s).padStart(2, "0")}</span>
+          <div className="flex items-center gap-3">
+            <div
+              role="timer"
+              aria-live="off"
+              className="flex items-center gap-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 font-mono text-sm tabular-nums text-[var(--color-text-primary)]"
+            >
+              <span>{String(h).padStart(2, "0")}</span>:<span>{String(m).padStart(2, "0")}</span>:<span>{String(s).padStart(2, "0")}</span>
+            </div>
+            <Link href="/offers" className="hidden text-sm font-medium text-brand-secondary hover:underline sm:inline">
+              {locale === "ar" ? "عرض الكل" : "See all"}
+            </Link>
           </div>
         </div>
         <StaggerContainer className="grid grid-cols-2 gap-4 sm:grid-cols-4">
