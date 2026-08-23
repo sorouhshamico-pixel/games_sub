@@ -7,6 +7,11 @@ import { ContentService } from "./content.service";
 export class ContentController {
   constructor(private readonly contentService: ContentService) {}
 
+  @Get("store-settings")
+  getPublicStoreSettings() {
+    return this.contentService.getPublicStoreSettings();
+  }
+
   @Get("pages/:slug")
   getPage(@Param("slug") slug: string, @Query("locale") locale: "ar" | "en" = "ar") {
     return this.contentService.getPage(slug, locale === "en" ? "en" : "ar");

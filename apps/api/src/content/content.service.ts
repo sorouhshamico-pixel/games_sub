@@ -1,9 +1,22 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { prisma } from "@gcc-store/db";
 import type { PageContent, BlogPostSummary, BlogPostDetail } from "@gcc-store/contracts";
+import { getStoreSetting } from "../admin/settings/admin-settings.service";
 
 @Injectable()
 export class ContentService {
+  /** Only the subset of AppSetting that's safe for an unauthenticated
+   * visitor to read — never the whole settings object (future admin-only
+   * keys shouldn't need a second thought about what this leaks). */
+  async getPublicStoreSettings() {
+    const [maintenanceMode, supportEmail, supportPhone] = await Promise.all([
+      getStoreSetting("maintenanceMode"),
+      getStoreSetting("supportEmail"),
+      getStoreSetting("supportPhone"),
+    ]);
+    return { maintenanceMode, supportEmail, supportPhone };
+  }
+
   async getPage(slug: string, locale: "ar" | "en"): Promise<PageContent> {
     const page = await prisma.page.findUnique({
       where: { slug },

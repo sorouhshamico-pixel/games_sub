@@ -16,3 +16,4 @@ if (process.env["NODE_ENV"] !== "production") {
 export * from "../generated/client";
 export * from "./order-state-machine";
 export * from "./notifications";
+export * from "./audit-log";

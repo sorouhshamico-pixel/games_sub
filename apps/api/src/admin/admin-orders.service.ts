@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import { prisma, OrderStatus, OrderStateMachine, InvalidOrderTransitionError, recordNotification } from "@gcc-store/db";
+import { prisma, OrderStatus, OrderStateMachine, InvalidOrderTransitionError, recordNotification, recordAuditLog } from "@gcc-store/db";
 
 // Curated subset of what the state machine *allows* — see
 // docs/ORDER_STATE_MACHINE.md's "what's not built yet" note calling out
@@ -35,6 +35,13 @@ export class AdminOrdersService {
     try {
       await prisma.$transaction(async (tx) => {
         await orderStateMachine.transition(tx, orderId, order.status, toStatus, { type: "admin", id: adminUserId }, reason, correlationId);
+        await recordAuditLog(tx, {
+          actorUserId: adminUserId,
+          action: "order.status_changed",
+          entityType: "Order",
+          entityId: orderId,
+          metadata: { fromStatus: order.status, toStatus, reason },
+        });
 
         if (toStatus === OrderStatus.COMPLETED || toStatus === OrderStatus.FAILED) {
           await recordNotification(tx, {

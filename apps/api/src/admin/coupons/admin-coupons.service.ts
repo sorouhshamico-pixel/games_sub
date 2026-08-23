@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import { prisma } from "@gcc-store/db";
+import { prisma, recordAuditLog } from "@gcc-store/db";
 import type { CreateCouponDto, UpdateCouponDto } from "./dto/create-coupon.dto";
 
 @Injectable()
@@ -14,7 +14,7 @@ export class AdminCouponsService {
     return coupon;
   }
 
-  async createCoupon(dto: CreateCouponDto) {
+  async createCoupon(dto: CreateCouponDto, adminUserId: string) {
     this.validateDiscountValue(dto.discountType, dto.discountValue);
     this.validateDateWindow(dto.startsAt, dto.endsAt);
 
@@ -22,21 +22,25 @@ export class AdminCouponsService {
     const existing = await prisma.coupon.findUnique({ where: { code } });
     if (existing) throw new ConflictException(`Coupon code "${code}" already exists`);
 
-    return prisma.coupon.create({
-      data: {
-        code,
-        discountType: dto.discountType,
-        discountValue: dto.discountValue,
-        maxRedemptions: dto.maxRedemptions,
-        maxRedemptionsPerCustomer: dto.maxRedemptionsPerCustomer,
-        minOrderAmountMinorUnits: dto.minOrderAmountMinorUnits,
-        startsAt: dto.startsAt ? new Date(dto.startsAt) : undefined,
-        endsAt: dto.endsAt ? new Date(dto.endsAt) : undefined,
-      },
+    return prisma.$transaction(async (tx) => {
+      const coupon = await tx.coupon.create({
+        data: {
+          code,
+          discountType: dto.discountType,
+          discountValue: dto.discountValue,
+          maxRedemptions: dto.maxRedemptions,
+          maxRedemptionsPerCustomer: dto.maxRedemptionsPerCustomer,
+          minOrderAmountMinorUnits: dto.minOrderAmountMinorUnits,
+          startsAt: dto.startsAt ? new Date(dto.startsAt) : undefined,
+          endsAt: dto.endsAt ? new Date(dto.endsAt) : undefined,
+        },
+      });
+      await recordAuditLog(tx, { actorUserId: adminUserId, action: "coupon.created", entityType: "Coupon", entityId: coupon.id, metadata: { code: coupon.code } });
+      return coupon;
     });
   }
 
-  async updateCoupon(id: string, dto: UpdateCouponDto) {
+  async updateCoupon(id: string, dto: UpdateCouponDto, adminUserId: string) {
     const coupon = await this.getCoupon(id);
     const discountType = dto.discountType ?? (coupon.discountType as "percentage" | "fixed");
     const discountValue = dto.discountValue ?? coupon.discountValue;
@@ -46,25 +50,33 @@ export class AdminCouponsService {
       dto.endsAt ?? coupon.endsAt?.toISOString(),
     );
 
-    return prisma.coupon.update({
-      where: { id },
-      data: {
-        discountType: dto.discountType,
-        discountValue: dto.discountValue,
-        maxRedemptions: dto.maxRedemptions,
-        maxRedemptionsPerCustomer: dto.maxRedemptionsPerCustomer,
-        minOrderAmountMinorUnits: dto.minOrderAmountMinorUnits,
-        startsAt: dto.startsAt ? new Date(dto.startsAt) : undefined,
-        endsAt: dto.endsAt ? new Date(dto.endsAt) : undefined,
-        isActive: dto.isActive,
-      },
+    return prisma.$transaction(async (tx) => {
+      const updated = await tx.coupon.update({
+        where: { id },
+        data: {
+          discountType: dto.discountType,
+          discountValue: dto.discountValue,
+          maxRedemptions: dto.maxRedemptions,
+          maxRedemptionsPerCustomer: dto.maxRedemptionsPerCustomer,
+          minOrderAmountMinorUnits: dto.minOrderAmountMinorUnits,
+          startsAt: dto.startsAt ? new Date(dto.startsAt) : undefined,
+          endsAt: dto.endsAt ? new Date(dto.endsAt) : undefined,
+          isActive: dto.isActive,
+        },
+      });
+      await recordAuditLog(tx, { actorUserId: adminUserId, action: "coupon.updated", entityType: "Coupon", entityId: id, metadata: dto as never });
+      return updated;
     });
   }
 
   /** Deactivates rather than deletes — coupons are referenced by historical Orders/CouponRedemptions. */
-  async deactivateCoupon(id: string) {
+  async deactivateCoupon(id: string, adminUserId: string) {
     await this.getCoupon(id);
-    return prisma.coupon.update({ where: { id }, data: { isActive: false } });
+    return prisma.$transaction(async (tx) => {
+      const updated = await tx.coupon.update({ where: { id }, data: { isActive: false } });
+      await recordAuditLog(tx, { actorUserId: adminUserId, action: "coupon.deactivated", entityType: "Coupon", entityId: id });
+      return updated;
+    });
   }
 
   private validateDiscountValue(discountType: string, discountValue: number) {

@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { prisma, OrderStatus, PaymentStatus, OrderStateMachine, recordNotification } from "@gcc-store/db";
+import { prisma, OrderStatus, PaymentStatus, OrderStateMachine, recordNotification, recordAuditLog } from "@gcc-store/db";
 import { PAYMENT_GATEWAY, type PaymentGateway } from "../../payments/payment-gateway.interface";
+import { getStoreSetting } from "../settings/admin-settings.service";
 import type { CreateRefundDto } from "./dto/create-refund.dto";
 
 // Orders can only move to REFUND_PENDING from one of these — see
@@ -34,6 +35,17 @@ export class AdminRefundsService {
       throw new BadRequestException(`Order in status ${order.status} cannot be refunded`);
     }
 
+    // Configurable via /admin/settings — no configured window means no
+    // enforcement (the previous, always-eligible behavior), same as every
+    // other optional AppSetting defaulting to "off" until an admin sets it.
+    const refundWindowDays = await getStoreSetting("refundWindowDays");
+    if (refundWindowDays !== null) {
+      const windowEnd = new Date(order.createdAt.getTime() + refundWindowDays * 24 * 60 * 60 * 1000);
+      if (Date.now() > windowEnd.getTime()) {
+        throw new BadRequestException(`This order is outside the ${refundWindowDays}-day refund window`);
+      }
+    }
+
     const payment = order.payments.find((p) => p.status === PaymentStatus.CAPTURED || p.status === PaymentStatus.PARTIALLY_REFUNDED);
     if (!payment) throw new BadRequestException("Order has no captured payment to refund");
 
@@ -62,6 +74,13 @@ export class AdminRefundsService {
         },
       });
       await orderStateMachine.transition(tx, order.id, fromStatus, OrderStatus.REFUND_PENDING, { type: "admin", id: adminUserId }, dto.reason, correlationId);
+      await recordAuditLog(tx, {
+        actorUserId: adminUserId,
+        action: "order.refund_requested",
+        entityType: "Order",
+        entityId: order.id,
+        metadata: { amountMinorUnits: requestedAmount, reason: dto.reason },
+      });
       return created;
     });
 

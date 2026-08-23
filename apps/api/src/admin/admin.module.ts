@@ -11,6 +11,11 @@ import { AdminRefundsController } from "./refunds/admin-refunds.controller";
 import { AdminRefundsService } from "./refunds/admin-refunds.service";
 import { AdminCouponsController } from "./coupons/admin-coupons.controller";
 import { AdminCouponsService } from "./coupons/admin-coupons.service";
+import { AdminUsersController } from "./users/admin-users.controller";
+import { AdminUsersService } from "./users/admin-users.service";
+import { AdminSettingsController } from "./settings/admin-settings.controller";
+import { AdminSettingsService } from "./settings/admin-settings.service";
+import { AdminAuditLogController } from "./audit-log/admin-audit-log.controller";
 
 @Module({
   imports: [AuthModule, PaymentsModule, InvoicingModule],
@@ -20,7 +25,17 @@ import { AdminCouponsService } from "./coupons/admin-coupons.service";
     AdminCatalogController,
     AdminRefundsController,
     AdminCouponsController,
+    AdminUsersController,
+    AdminSettingsController,
+    AdminAuditLogController,
   ],
-  providers: [AdminOrdersService, AdminCatalogService, AdminRefundsService, AdminCouponsService],
+  providers: [
+    AdminOrdersService,
+    AdminCatalogService,
+    AdminRefundsService,
+    AdminCouponsService,
+    AdminUsersService,
+    AdminSettingsService,
+  ],
 })
 export class AdminModule {}

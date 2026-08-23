@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { UserRole } from "@gcc-store/db";
 import { SessionAuthGuard } from "../../auth/guards/session-auth.guard";
 import { RolesGuard } from "../../auth/guards/roles.guard";
 import { Roles } from "../../auth/decorators/roles.decorator";
+import type { AuthenticatedRequest } from "../../auth/request-user";
 import { AdminCatalogService } from "./admin-catalog.service";
 import { CreateCategoryDto, UpdateCategoryDto } from "./dto/create-category.dto";
 import { CreateProductDto, CreateVariantDto } from "./dto/create-product.dto";
@@ -27,20 +28,20 @@ export class AdminCatalogController {
 
   @Post("categories")
   @Roles(...CATALOG_EDITOR_ROLES)
-  createCategory(@Body() dto: CreateCategoryDto) {
-    return this.catalogService.createCategory(dto);
+  createCategory(@Body() dto: CreateCategoryDto, @Req() req: AuthenticatedRequest) {
+    return this.catalogService.createCategory(dto, req.user!.id);
   }
 
   @Patch("categories/:id")
   @Roles(...CATALOG_EDITOR_ROLES)
-  updateCategory(@Param("id") id: string, @Body() dto: UpdateCategoryDto) {
-    return this.catalogService.updateCategory(id, dto);
+  updateCategory(@Param("id") id: string, @Body() dto: UpdateCategoryDto, @Req() req: AuthenticatedRequest) {
+    return this.catalogService.updateCategory(id, dto, req.user!.id);
   }
 
   @Delete("categories/:id")
   @Roles(...CATALOG_EDITOR_ROLES)
-  deactivateCategory(@Param("id") id: string) {
-    return this.catalogService.deactivateCategory(id);
+  deactivateCategory(@Param("id") id: string, @Req() req: AuthenticatedRequest) {
+    return this.catalogService.deactivateCategory(id, req.user!.id);
   }
 
   @Get("products")
@@ -57,37 +58,37 @@ export class AdminCatalogController {
 
   @Post("products")
   @Roles(...CATALOG_EDITOR_ROLES)
-  createProduct(@Body() dto: CreateProductDto) {
-    return this.catalogService.createProduct(dto);
+  createProduct(@Body() dto: CreateProductDto, @Req() req: AuthenticatedRequest) {
+    return this.catalogService.createProduct(dto, req.user!.id);
   }
 
   @Patch("products/:id")
   @Roles(...CATALOG_EDITOR_ROLES)
-  updateProduct(@Param("id") id: string, @Body() dto: UpdateProductDto) {
-    return this.catalogService.updateProduct(id, dto);
+  updateProduct(@Param("id") id: string, @Body() dto: UpdateProductDto, @Req() req: AuthenticatedRequest) {
+    return this.catalogService.updateProduct(id, dto, req.user!.id);
   }
 
   @Delete("products/:id")
   @Roles(...CATALOG_EDITOR_ROLES)
-  softDeleteProduct(@Param("id") id: string) {
-    return this.catalogService.softDeleteProduct(id);
+  softDeleteProduct(@Param("id") id: string, @Req() req: AuthenticatedRequest) {
+    return this.catalogService.softDeleteProduct(id, req.user!.id);
   }
 
   @Post("products/:id/variants")
   @Roles(...CATALOG_EDITOR_ROLES)
-  createVariant(@Param("id") productId: string, @Body() dto: CreateVariantDto) {
-    return this.catalogService.createVariant(productId, dto);
+  createVariant(@Param("id") productId: string, @Body() dto: CreateVariantDto, @Req() req: AuthenticatedRequest) {
+    return this.catalogService.createVariant(productId, dto, req.user!.id);
   }
 
   @Patch("variants/:id")
   @Roles(...CATALOG_EDITOR_ROLES)
-  updateVariant(@Param("id") variantId: string, @Body() dto: UpdateVariantDto) {
-    return this.catalogService.updateVariant(variantId, dto);
+  updateVariant(@Param("id") variantId: string, @Body() dto: UpdateVariantDto, @Req() req: AuthenticatedRequest) {
+    return this.catalogService.updateVariant(variantId, dto, req.user!.id);
   }
 
   @Delete("variants/:id")
   @Roles(...CATALOG_EDITOR_ROLES)
-  deactivateVariant(@Param("id") variantId: string) {
-    return this.catalogService.deactivateVariant(variantId);
+  deactivateVariant(@Param("id") variantId: string, @Req() req: AuthenticatedRequest) {
+    return this.catalogService.deactivateVariant(variantId, req.user!.id);
   }
 }
