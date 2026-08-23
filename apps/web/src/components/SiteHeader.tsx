@@ -126,13 +126,22 @@ export function SiteHeader() {
           <CurrencySwitcher />
           {/* Account and cart are deliberately hidden below md — BottomNav
               already covers both there, so keeping them here too would
-              just be the same action twice and burn scarce header width. */}
-          <Link href="/account" aria-label={t("nav.account")} className={cn(iconButton, "hidden md:inline-flex")}>
-            <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <circle cx="12" cy="8" r="3.2" />
-              <path strokeLinecap="round" d="M5 20c1.2-3.5 4-5.2 7-5.2s5.8 1.7 7 5.2" />
-            </svg>
-          </Link>
+              just be the same action twice and burn scarce header width.
+              The "hidden" and iconButton's own unscoped "inline-flex" can't
+              both live in one class string — same specificity, no media
+              query on either, so which one wins depends on Tailwind's
+              generated CSS order, not the order of classes here. Wrapping
+              in its own span (same pattern the cart icon already uses)
+              keeps "hidden md:inline-flex" isolated on an element with no
+              competing unscoped display utility of its own. */}
+          <span className="hidden md:inline-flex">
+            <Link href="/account" aria-label={t("nav.account")} className={iconButton}>
+              <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <circle cx="12" cy="8" r="3.2" />
+                <path strokeLinecap="round" d="M5 20c1.2-3.5 4-5.2 7-5.2s5.8 1.7 7 5.2" />
+              </svg>
+            </Link>
+          </span>
           <span className="hidden md:inline-flex">
             <CartIcon />
           </span>
