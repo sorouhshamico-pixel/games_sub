@@ -1,12 +1,13 @@
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { EmptyState, ErrorState } from "@gcc-store/ui";
-import { BookOpen, Clock, Flame, Search as SearchIcon, Sparkles } from "lucide-react";
+import { BookOpen, Clock, Flame, Search as SearchIcon, Sparkles, Tags as TagsIcon } from "lucide-react";
 import { ApiError, listBlogPosts } from "@/lib/api";
 import { Link } from "@/i18n/navigation";
 import { BlogPostCard } from "@/components/blog/BlogPostCard";
 import { CategoryFilter } from "@/components/blog/CategoryFilter";
 import { LatestArticlesGrid } from "@/components/blog/LatestArticlesGrid";
+import { blogCategories } from "@/lib/blogCategories";
 import { WhatsAppIcon } from "@/components/home/icons";
 import { NewsletterSignup } from "@/components/home/NewsletterSignup";
 import { SectionHeading } from "@/components/home/SectionHeading";
@@ -176,6 +177,36 @@ export default async function BlogPage({
                     );
                   })}
                 </StaggerContainer>
+
+                {/* Tag cloud — fills the space the narrower "Most read"
+                    column left empty next to the taller "Latest articles"
+                    column. Reuses the real blog categories (each already a
+                    working filter link) rather than inventing tag data
+                    that doesn't exist anywhere in the schema, with varying
+                    pill sizes for a genuine cloud feel instead of a flat
+                    uniform list. */}
+                <div className="mt-8 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+                  <h2 className="mb-3 flex items-center gap-2 text-sm font-bold text-[var(--color-text-primary)]">
+                    <TagsIcon className="h-4 w-4 text-brand-secondary" aria-hidden />
+                    {locale === "ar" ? "الوسوم" : "Tags"}
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {blogCategories.map((cat, index) => {
+                      const size = ["text-sm", "text-xs", "text-sm", "text-xs", "text-base", "text-xs"][index % 6];
+                      return (
+                        <HoverCard key={cat.slug}>
+                          <Link
+                            href={{ pathname: "/blog", query: { category: cat.slug } }}
+                            className={`inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-3 py-1.5 font-medium text-[var(--color-text-muted)] transition-colors hover:border-brand-primary/50 hover:text-brand-primary ${size}`}
+                          >
+                            <cat.Icon className="h-3.5 w-3.5" aria-hidden />
+                            {locale === "ar" ? cat.ar : cat.en}
+                          </Link>
+                        </HoverCard>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
               <div className="lg:col-span-2">
