@@ -15,24 +15,10 @@ import { HoverCard } from "./motion";
 import { useDisplayCurrency } from "./CurrencyProvider";
 import { useCart } from "./CartProvider";
 import { convertMinorUnits } from "@/lib/currency";
+import { demoDiscountFor } from "@/lib/discount";
 import { duration, easing, spring } from "@/lib/motion/tokens";
 
 type QuickAddState = "idle" | "loading" | "added";
-
-// Same investor-demo pattern already used by LimitedOffers: a decorative
-// "-X%", deterministic per product (not random, so it doesn't flicker
-// between renders). The struck-through "original" price below is derived
-// FROM the real price (original = real / (1 - percent)) rather than the
-// other way around, so the bold "now" price is always exactly what
-// checkout actually charges — only the crossed-out reference price is
-// illustrative. The section this card renders in carries the actual
-// "demo data" disclosure, same as LimitedOffers/MostRequested already do.
-const demoDiscountPercents = [15, 20, 10, 25, 30];
-function demoDiscountFor(id: string): number {
-  let sum = 0;
-  for (let i = 0; i < id.length; i += 1) sum += id.charCodeAt(i);
-  return demoDiscountPercents[sum % demoDiscountPercents.length]!;
-}
 
 // The API only gives products a bare category slug, not a display name —
 // map to the same nav labels already used across the header/footer so

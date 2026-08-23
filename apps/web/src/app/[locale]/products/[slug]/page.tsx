@@ -7,6 +7,7 @@ import { ProductPurchasePanel } from "@/components/ProductPurchasePanel";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductImagePlaceholder } from "@/components/ProductImagePlaceholder";
 import { ApiError, getProductBySlug, listProducts } from "@/lib/api";
+import { demoDiscountFor } from "@/lib/discount";
 import { Reveal, StaggerContainer, StaggerItem } from "@/components/motion";
 import type { Locale } from "@gcc-store/i18n";
 
@@ -86,6 +87,10 @@ export default async function ProductPage({
   const description = locale === "ar" ? product.descriptionAr : product.descriptionEn;
   const identifierHelp = locale === "ar" ? product.identifierHelpAr : product.identifierHelpEn;
   const meta = categoryMeta[product.categorySlug] ?? categoryMeta["game-topups"]!;
+  // Same id-based discount every ProductCard for this product already
+  // shows in listings/related grids — without this the "-X%" ribbon a
+  // shopper clicked through from would just vanish on this page.
+  const discountPercent = demoDiscountFor(product.id);
 
   let related: Awaited<ReturnType<typeof listProducts>> | null = null;
   try {
@@ -145,6 +150,9 @@ export default async function ProductPage({
               >
                 <meta.Icon className="h-3.5 w-3.5" aria-hidden />
                 {locale === "ar" ? meta.labelAr : meta.labelEn}
+              </span>
+              <span className="absolute top-3 start-5 rounded-full bg-danger px-2.5 py-1 text-xs font-bold text-white shadow-lg shadow-black/30">
+                -{discountPercent}%
               </span>
             </div>
 

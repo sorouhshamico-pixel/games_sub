@@ -10,6 +10,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useCart } from "./CartProvider";
 import { useDisplayCurrency } from "./CurrencyProvider";
 import { convertMinorUnits } from "@/lib/currency";
+import { demoDiscountFor } from "@/lib/discount";
 import { AnimatedPrice, SuccessCheck } from "./motion";
 import { duration, easing, spring } from "@/lib/motion/tokens";
 import { cartItemKey } from "@/lib/cart";
@@ -23,6 +24,10 @@ export function ProductPurchasePanel({ product }: { product: ProductDetail }) {
   const { addItem } = useCart();
   const { currency: displayCurrency } = useDisplayCurrency();
 
+  // Same id-based "-X%" the product's ProductCard already shows in every
+  // listing — carried through here so it doesn't vanish the moment a
+  // shopper clicks into the product they saw it on.
+  const discountPercent = demoDiscountFor(product.id);
   const activeVariants = product.variants.filter((v) => v.isActive);
   const [variantId, setVariantId] = useState(activeVariants[0]?.id ?? "");
   const [quantity, setQuantity] = useState(1);
@@ -95,12 +100,17 @@ export function ProductPurchasePanel({ product }: { product: ProductDetail }) {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <p className="mb-2 text-sm font-medium text-[var(--color-text-primary)]">
-          {locale === "ar" ? "اختر الفئة" : "Choose an option"}
-        </p>
+        <div className="mb-2 flex items-center gap-2">
+          <p className="text-sm font-medium text-[var(--color-text-primary)]">
+            {locale === "ar" ? "اختر الفئة" : "Choose an option"}
+          </p>
+          <span className="rounded-full bg-danger px-2 py-0.5 text-[10px] font-bold text-white">-{discountPercent}%</span>
+        </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {activeVariants.map((variant) => {
             const isSelected = variant.id === variantId;
+            const variantAmount = convertMinorUnits(variant.listPriceMinorUnits, variant.currency, displayCurrency);
+            const variantOriginalAmount = Math.round(variantAmount / (1 - discountPercent / 100));
             return (
               <motion.button
                 key={variant.id}
@@ -136,15 +146,28 @@ export function ProductPurchasePanel({ product }: { product: ProductDetail }) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 3 }}
                     transition={{ duration: duration.fast, ease: easing }}
+                    className="block text-[10px] text-[var(--color-text-muted)] line-through decoration-danger/70"
+                  >
+                    {formatMoney(variantOriginalAmount, displayCurrency, locale)}
+                  </motion.span>
+                </AnimatePresence>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={displayCurrency}
+                    initial={{ opacity: 0, y: -3 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 3 }}
+                    transition={{ duration: duration.fast, ease: easing }}
                     className="block text-brand-accent"
                   >
-                    {formatMoney(convertMinorUnits(variant.listPriceMinorUnits, variant.currency, displayCurrency), displayCurrency, locale)}
+                    {formatMoney(variantAmount, displayCurrency, locale)}
                   </motion.span>
                 </AnimatePresence>
               </motion.button>
             );
           })}
         </div>
+        <p className="mt-2 text-[11px] text-[var(--color-text-muted)]">{t("common.demoDataNotice")}</p>
       </div>
 
       {product.inputSchema.length > 0 ? (
