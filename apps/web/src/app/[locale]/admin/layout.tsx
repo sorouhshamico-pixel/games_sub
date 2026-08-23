@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@gcc-store/i18n";
 import { Link } from "@/i18n/navigation";
+import { getAdminUser } from "@/lib/admin-auth";
 
 export default async function AdminLayout({
   children,
@@ -12,6 +13,19 @@ export default async function AdminLayout({
   const { locale } = await params;
   const typedLocale = locale as Locale;
   setRequestLocale(typedLocale);
+
+  // Coarse gate: keeps customer/anonymous visitors from ever seeing the
+  // admin nav at all. Each page still does its own per-resource check —
+  // this only blocks non-staff accounts, not staff accounts hitting a
+  // resource their specific role isn't allowed to touch.
+  const user = await getAdminUser(typedLocale);
+  if (!user) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-16 text-center text-[var(--color-text-muted)]">
+        {locale === "ar" ? "ليس لديك صلاحية الوصول للوحة التحكم" : "You don't have permission to access the admin dashboard"}
+      </div>
+    );
+  }
 
   const tabs = [
     { href: "/admin", label: locale === "ar" ? "لوحة التحكم" : "Dashboard" },
