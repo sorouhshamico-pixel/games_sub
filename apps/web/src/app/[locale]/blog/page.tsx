@@ -6,6 +6,7 @@ import { ApiError, listBlogPosts } from "@/lib/api";
 import { Link } from "@/i18n/navigation";
 import { BlogPostCard } from "@/components/blog/BlogPostCard";
 import { CategoryFilter } from "@/components/blog/CategoryFilter";
+import { LatestArticlesGrid } from "@/components/blog/LatestArticlesGrid";
 import { WhatsAppIcon } from "@/components/home/icons";
 import { NewsletterSignup } from "@/components/home/NewsletterSignup";
 import { SectionHeading } from "@/components/home/SectionHeading";
@@ -40,7 +41,6 @@ export default async function BlogPage({
   const featured = items.slice(0, 2);
   const mostRead = items.slice(0, 4);
   const latest = items.slice(2);
-  const hasMore = posts ? page * posts.pageSize < posts.total : false;
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-14 px-4 py-10">
@@ -181,26 +181,10 @@ export default async function BlogPage({
               <div className="lg:col-span-2">
                 <SectionHeading title={locale === "ar" ? "أحدث المقالات" : "Latest articles"} />
                 {latest.length > 0 ? (
-                  <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {latest.map((post) => (
-                      <StaggerItem key={post.slug}>
-                        <BlogPostCard post={post} locale={typedLocale} />
-                      </StaggerItem>
-                    ))}
-                  </StaggerContainer>
+                  <LatestArticlesGrid posts={latest} locale={typedLocale} />
                 ) : (
                   <p className="text-sm text-[var(--color-text-muted)]">{t("common.empty")}</p>
                 )}
-                {hasMore ? (
-                  <div className="mt-6 flex justify-center">
-                    <Link
-                      href={{ pathname: "/blog", query: { ...(category ? { category } : {}), page: page + 1 } }}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-3 text-sm font-medium text-[var(--color-text-primary)] transition-all hover:-translate-y-0.5 hover:border-brand-primary/50"
-                    >
-                      {locale === "ar" ? "اقرأ المزيد" : "Read more"} →
-                    </Link>
-                  </div>
-                ) : null}
               </div>
             </section>
           </Reveal>
