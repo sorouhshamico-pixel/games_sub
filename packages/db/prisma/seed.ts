@@ -1309,14 +1309,34 @@ async function main() {
           {
             locale: "ar",
             title: "الأسئلة الشائعة",
-            bodyMarkdown:
-              "## كم يستغرق الشحن؟\nيتم التنفيذ خلال دقائق بعد تأكيد الدفع في أغلب الحالات.\n\n## ماذا لو أدخلت معرف اللاعب بشكل خاطئ؟\nتحقق من صحة المعرف قبل الدفع، فمنتجات الشحن الرقمي غير قابلة للاسترجاع بعد التنفيذ.\n\n## هل يمكنني استرجاع المبلغ؟\nيعتمد ذلك على نوع المنتج، راجع [سياسة الاسترجاع](/pages/refunds).",
+            bodyMarkdown: [
+              "## كم يستغرق الشحن؟\nيتم التنفيذ خلال دقائق بعد تأكيد الدفع في أغلب الحالات.",
+              "## ماذا لو أدخلت معرف اللاعب بشكل خاطئ؟\nتحقق من صحة المعرف قبل الدفع، فمنتجات الشحن الرقمي غير قابلة للاسترجاع بعد التنفيذ.",
+              "## هل يمكنني استرجاع المبلغ؟\nيعتمد ذلك على نوع المنتج، راجع [سياسة الاسترجاع](/pages/refunds).",
+              "## ما طرق الدفع المتاحة؟\nندعم بطاقات مدى، وفيزا، وماستركارد، وApple Pay. جميع المعاملات مشفّرة وآمنة.",
+              "## هل يمكنني تتبع حالة طلبي؟\nنعم، بعد إتمام الطلب يمكنك متابعة حالته من صفحة تتبع الطلب باستخدام رقم الطلب.",
+              "## هل يمكنني عرض الأسعار بعملة أخرى غير الريال؟\nنعم، يمكنك تغيير العملة المعروضة من أعلى الموقع (درهم إماراتي، دينار كويتي، ريال قطري، دينار بحريني، ريال عماني) — مع العلم أن التحويل تقريبي، والدفع الفعلي يتم دائمًا بالريال السعودي.",
+              "## هل يوجد أكواد خصم أو كوبونات؟\nنعم، ندعم أكواد الخصم في صفحة الدفع. تابع صفحة العروض للحصول على أحدث الأكواد المتاحة.",
+              "## هل بياناتي وطرق دفعي آمنة؟\nنستخدم اتصالًا مشفرًا لجميع المعاملات، ولا نقوم بتخزين بيانات بطاقتك على خوادمنا.",
+              "## ماذا أفعل إذا تأخر وصول الشحن؟\nتحقق أولًا من صفحة تتبع الطلب، وإذا استمر التأخير لأكثر من ساعة تواصل معنا عبر النموذج أدناه أو واتساب.",
+              "## كيف أتواصل مع الدعم؟\nيمكنك تعبئة نموذج التواصل أدناه أو مراسلتنا عبر واتساب، وسنرد عليك بأسرع وقت ممكن.",
+            ].join("\n\n"),
           },
           {
             locale: "en",
             title: "Frequently Asked Questions",
-            bodyMarkdown:
-              "## How long does delivery take?\nMost orders are fulfilled within minutes of payment confirmation.\n\n## What if I entered the wrong Player ID?\nDouble-check your ID before paying — digital top-ups are non-refundable once fulfilled.\n\n## Can I get a refund?\nIt depends on the product type, see our [refund policy](/pages/refunds).",
+            bodyMarkdown: [
+              "## How long does delivery take?\nMost orders are fulfilled within minutes of payment confirmation.",
+              "## What if I entered the wrong Player ID?\nDouble-check your ID before paying — digital top-ups are non-refundable once fulfilled.",
+              "## Can I get a refund?\nIt depends on the product type, see our [refund policy](/pages/refunds).",
+              "## What payment methods are supported?\nWe support mada, Visa, Mastercard, and Apple Pay. All transactions are encrypted and secure.",
+              "## Can I track my order?\nYes — after checkout you can follow your order's status from the order tracking page using your order number.",
+              "## Can I see prices in a currency other than SAR?\nYes, you can switch the displayed currency from the top of the site (AED, KWD, QAR, BHD, OMR) — note the conversion is approximate, and you're always charged in Saudi Riyals.",
+              "## Are there discount codes or coupons?\nYes, we support discount codes at checkout. Check our offers page for the latest available codes.",
+              "## Is my payment data safe?\nWe use encrypted connections for every transaction and never store your card details on our servers.",
+              "## What if my top-up is delayed?\nFirst check the order tracking page — if the delay continues past an hour, reach us through the form below or WhatsApp.",
+              "## How do I contact support?\nFill out the contact form below or message us on WhatsApp, and we'll get back to you as fast as possible.",
+            ].join("\n\n"),
           },
         ],
       },
