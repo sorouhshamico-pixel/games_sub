@@ -80,20 +80,22 @@ export default async function BlogPostPage({
 
         {meta ? (
           <Reveal>
-            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl">
-              <Image src={meta.coverImage} alt="" fill priority sizes="(min-width: 1024px) 768px, 100vw" className="object-cover" />
+            <div className="relative">
+              <div aria-hidden className="pointer-events-none absolute -inset-3 -z-10 rounded-[2rem] bg-gradient-to-br from-brand-primary/25 via-brand-secondary/15 to-transparent opacity-70 blur-2xl" />
+              <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/40">
+                <Image src={meta.coverImage} alt="" fill priority sizes="(min-width: 1024px) 768px, 100vw" className="object-cover" />
+                <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+              </div>
+              <span className="absolute -bottom-3 start-6 flex items-center gap-1.5 rounded-full border border-white/10 bg-[var(--color-surface)]/90 px-3 py-1.5 text-xs font-bold text-brand-primary shadow-xl shadow-black/30 backdrop-blur-md">
+                <meta.Icon className="h-3.5 w-3.5" aria-hidden />
+                {locale === "ar" ? meta.ar : meta.en}
+              </span>
             </div>
           </Reveal>
         ) : null}
 
         <Reveal>
-          <div>
-            {meta ? (
-              <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-brand-primary/15 px-3 py-1 text-xs font-medium text-brand-primary">
-                <meta.Icon className="h-3.5 w-3.5" aria-hidden />
-                {locale === "ar" ? meta.ar : meta.en}
-              </span>
-            ) : null}
+          <div className="mt-3">
             <h1 className="text-3xl font-bold leading-tight text-[var(--color-text-primary)] sm:text-4xl">{post.title}</h1>
             <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-[var(--color-text-muted)]">
               <span className="flex items-center gap-1.5">
@@ -115,8 +117,8 @@ export default async function BlogPostPage({
           </div>
         </Reveal>
 
-        <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-6">
-          <ShareButton locale={typedLocale} />
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--color-border)] pt-6">
+          <ShareButton locale={typedLocale} title={post.title} />
           <Link href="/blog" className="text-sm font-medium text-brand-secondary hover:underline">
             {locale === "ar" ? "عرض كل المقالات" : "View all articles"} →
           </Link>
