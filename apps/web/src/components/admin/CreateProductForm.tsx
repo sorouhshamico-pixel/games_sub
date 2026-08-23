@@ -27,6 +27,7 @@ export function CreateProductForm({ categories }: { categories: AdminCategory[] 
   const [nameEn, setNameEn] = useState("");
   const [descriptionAr, setDescriptionAr] = useState("");
   const [descriptionEn, setDescriptionEn] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [sku, setSku] = useState("");
   const [variantNameAr, setVariantNameAr] = useState("");
   const [variantNameEn, setVariantNameEn] = useState("");
@@ -55,6 +56,7 @@ export function CreateProductForm({ categories }: { categories: AdminCategory[] 
       slug,
       type,
       categoryId,
+      imageUrl: imageUrl.trim() || undefined,
       translations: [
         { locale: "ar", name: nameAr, description: descriptionAr },
         { locale: "en", name: nameEn, description: descriptionEn },
@@ -163,6 +165,19 @@ export function CreateProductForm({ categories }: { categories: AdminCategory[] 
             {locale === "ar" ? "الوصف بالإنجليزية" : "English description"}
           </label>
           <textarea id="descEn" required value={descriptionEn} onChange={(e) => setDescriptionEn(e.target.value)} className={inputClass} rows={2} />
+        </div>
+        <div>
+          <label htmlFor="imageUrl" className={labelClass}>
+            {locale === "ar" ? "رابط الصورة (اختياري)" : "Image URL (optional)"}
+          </label>
+          <input
+            id="imageUrl"
+            type="url"
+            placeholder="https://..."
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            className={inputClass}
+          />
         </div>
       </section>
 

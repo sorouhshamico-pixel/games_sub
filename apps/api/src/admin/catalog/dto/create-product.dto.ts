@@ -9,6 +9,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  IsUrl,
   Matches,
   Max,
   Min,
@@ -165,9 +166,9 @@ export class CreateProductDto {
   @IsString()
   gameBrandId?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: "Must be an https URL" })
   @IsOptional()
-  @IsString()
+  @IsUrl({ protocols: ["https"], require_protocol: true })
   imageUrl?: string;
 
   @ApiPropertyOptional({ default: false })

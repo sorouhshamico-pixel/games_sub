@@ -5,7 +5,7 @@ import { useLocale } from "next-intl";
 import type { Locale } from "@gcc-store/i18n";
 import { formatMoney } from "@gcc-store/ui";
 import type { AdminProductDetail } from "@/lib/api";
-import { deactivateAdminVariant, deleteAdminProduct, updateAdminProductStatus } from "@/lib/api";
+import { deactivateAdminVariant, deleteAdminProduct, updateAdminProductImage, updateAdminProductStatus, ApiError } from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
 import { AddVariantForm } from "./AddVariantForm";
 
@@ -15,8 +15,33 @@ export function ProductAdminPanel({ product }: { product: AdminProductDetail }) 
   const locale = useLocale() as Locale;
   const router = useRouter();
   const [status, setStatus] = useState(product.status);
+  const [imageUrl, setImageUrl] = useState(product.imageUrl ?? "");
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [imageSaving, setImageSaving] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  async function handleImageSave(event: React.FormEvent) {
+    event.preventDefault();
+    setImageError(null);
+    setImageSaving(true);
+    try {
+      await updateAdminProductImage(product.id, imageUrl.trim());
+      router.refresh();
+    } catch (err) {
+      setImageError(
+        err instanceof ApiError
+          ? locale === "ar"
+            ? "الرابط غير صالح — يجب أن يبدأ بـ https://"
+            : "Invalid URL — must start with https://"
+          : locale === "ar"
+            ? "حدث خطأ غير متوقع"
+            : "Something went wrong",
+      );
+    } finally {
+      setImageSaving(false);
+    }
+  }
 
   async function handleStatusChange(next: string) {
     setBusy(true);
@@ -92,6 +117,38 @@ export function ProductAdminPanel({ product }: { product: AdminProductDetail }) 
           {error}
         </p>
       ) : null}
+
+      <form onSubmit={handleImageSave} className="flex flex-col gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+        <h2 className="font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "صورة المنتج" : "Product image"}</h2>
+        <div className="flex flex-wrap items-start gap-4">
+          <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)]">
+            {imageUrl ? <img src={imageUrl} alt="" className="h-full w-full object-cover" /> : null}
+          </div>
+          <div className="min-w-[16rem] flex-1">
+            <label htmlFor="product-image-url" className="mb-1 block text-xs font-medium text-[var(--color-text-muted)]">
+              {locale === "ar" ? "رابط الصورة (https فقط — لا يوجد رفع ملفات بعد)" : "Image URL (https only — no file upload yet)"}
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="product-image-url"
+                type="url"
+                placeholder="https://..."
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-3 py-1.5 text-sm text-[var(--color-text-primary)]"
+              />
+              <button
+                type="submit"
+                disabled={imageSaving}
+                className="shrink-0 rounded-lg bg-brand-primary px-4 py-1.5 text-sm font-medium text-white disabled:opacity-60"
+              >
+                {locale === "ar" ? "حفظ" : "Save"}
+              </button>
+            </div>
+            {imageError ? <p className="mt-1 text-sm text-danger">{imageError}</p> : null}
+          </div>
+        </div>
+      </form>
 
       <section>
         <h2 className="mb-3 font-semibold text-[var(--color-text-primary)]">{locale === "ar" ? "الفئات السعرية" : "Price tiers"}</h2>
