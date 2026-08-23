@@ -11,18 +11,23 @@ import { BrandLockup } from "./BrandLockup";
 
 // Real supplied artwork for every payment mark now (see
 // public/images/payment/NOTICE.md) — no more text-only chips or mixed
-// icon-library fallbacks.
+// icon-library fallbacks. The source renders each carry a lot of empty
+// dark canvas around the actual mark (measured directly: Mastercard's
+// real content is only ~57-59% of the frame, Google Play's is a short
+// band at ~28% of the height) — `scale` zooms past that margin so the
+// mark itself fills the small tile instead of floating in a sea of
+// padding, calibrated per image so nothing gets clipped.
 const paymentBadges = [
-  { name: "mada", imgSrc: "/images/payment/mada.png" },
-  { name: "Visa", imgSrc: "/images/payment/visa.png" },
-  { name: "Mastercard", imgSrc: "/images/payment/mastercard.png" },
-  { name: "Apple Pay", imgSrc: "/images/payment/apple-pay.png" },
+  { name: "mada", imgSrc: "/images/payment/mada.png", scale: 1.15 },
+  { name: "Visa", imgSrc: "/images/payment/visa.png", scale: 1.2 },
+  { name: "Mastercard", imgSrc: "/images/payment/mastercard.png", scale: 1.55 },
+  { name: "Apple Pay", imgSrc: "/images/payment/apple-pay.png", scale: 1.1 },
 ];
 
 // Same real-artwork treatment for the app store badges.
 const appBadges = [
-  { name: "App Store", imgSrc: "/images/app/app-store.png" },
-  { name: "Google Play", imgSrc: "/images/app/google-play.png" },
+  { name: "App Store", imgSrc: "/images/app/app-store.png", scale: 1 },
+  { name: "Google Play", imgSrc: "/images/app/google-play.png", scale: 1.5 },
 ];
 
 // Decorative only — no real Shahnoo social accounts exist yet, so these are
@@ -139,19 +144,25 @@ export function SiteFooter() {
 
           <div>
             <FooterHeading>{locale === "ar" ? "طرق الدفع" : "Payment methods"}</FooterHeading>
-            <StaggerContainer className="grid grid-cols-2 gap-2.5">
+            {/* Small fixed-size tiles instead of stretching to fill the
+                grid — a flex-wrap cluster of compact chips reads as a
+                trust strip, not a wall of oversized banners. */}
+            <StaggerContainer className="flex flex-wrap gap-2">
               {paymentBadges.map((badge) => (
                 <StaggerItem key={badge.name}>
                   <HoverCard>
                     {/* No frame/ring/shadow of ours — the card's own baked-in
                         glowing border is the only boundary. Shown crisp at
                         full opacity, just a gentle brightness lift on hover. */}
-                    <img
-                      src={badge.imgSrc}
-                      alt={badge.name}
-                      loading="lazy"
-                      className="aspect-[3/2] w-full rounded-lg object-cover brightness-100 transition-[filter] duration-300 hover:brightness-110"
-                    />
+                    <span className="block h-9 w-14 overflow-hidden rounded-lg">
+                      <img
+                        src={badge.imgSrc}
+                        alt={badge.name}
+                        loading="lazy"
+                        style={{ transform: `scale(${badge.scale})` }}
+                        className="h-full w-full rounded-lg object-cover brightness-100 transition-[filter] duration-300 hover:brightness-110"
+                      />
+                    </span>
                   </HoverCard>
                 </StaggerItem>
               ))}
@@ -166,7 +177,7 @@ export function SiteFooter() {
             <p className="-mt-2 mb-3 text-sm text-[var(--color-text-muted)]">
               {locale === "ar" ? "تجربة أسرع وأكثر سهولة" : "A faster, easier experience"}
             </p>
-            <StaggerContainer className="grid grid-cols-2 gap-2.5">
+            <StaggerContainer className="flex flex-wrap gap-2.5">
               {appBadges.map((badge) => (
                 <StaggerItem key={badge.name}>
                   <HoverCard>
@@ -174,14 +185,15 @@ export function SiteFooter() {
                         ours, the card's own glowing border is the only
                         boundary — with a small "Coming soon" ribbon since
                         there's no real app yet to link to. */}
-                    <span className="relative block overflow-hidden rounded-lg">
+                    <span className="relative block h-10 w-16 overflow-hidden rounded-lg">
                       <img
                         src={badge.imgSrc}
                         alt={badge.name}
                         loading="lazy"
-                        className="aspect-[3/2] w-full rounded-lg object-cover transition-[filter] duration-300 hover:brightness-110"
+                        style={{ transform: `scale(${badge.scale})` }}
+                        className="h-full w-full rounded-lg object-cover transition-[filter] duration-300 hover:brightness-110"
                       />
-                      <span className="absolute bottom-1.5 end-1.5 rounded-full bg-black/70 px-2 py-0.5 text-[9px] font-semibold text-white backdrop-blur-sm">
+                      <span className="absolute bottom-0.5 end-0.5 rounded-full bg-black/70 px-1.5 py-0.5 text-[7px] font-semibold text-white backdrop-blur-sm">
                         {locale === "ar" ? "قريبًا" : "Coming soon"}
                       </span>
                     </span>
