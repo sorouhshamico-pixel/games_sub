@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { EmptyState, ErrorState } from "@gcc-store/ui";
-import { BookOpen, Clock, Search as SearchIcon } from "lucide-react";
+import { BookOpen, Clock, Flame, Search as SearchIcon, Sparkles } from "lucide-react";
 import { ApiError, listBlogPosts } from "@/lib/api";
 import { Link } from "@/i18n/navigation";
 import { BlogPostCard } from "@/components/blog/BlogPostCard";
@@ -54,8 +54,14 @@ export default async function BlogPage({
 
       <Reveal>
         <section className="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-gradient-to-br from-brand-primary/10 via-[var(--color-surface)] to-brand-secondary/10 p-8 sm:p-12">
+          <div aria-hidden className="pointer-events-none absolute -top-20 end-0 h-64 w-64 rounded-full bg-brand-secondary/15 blur-3xl" />
+          <div aria-hidden className="pointer-events-none absolute -bottom-24 start-1/4 h-56 w-56 rounded-full bg-brand-primary/15 blur-3xl" />
+
           <div className="relative grid items-center gap-10 lg:grid-cols-2">
             <div>
+              <span aria-hidden className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary/15 text-brand-primary">
+                <BookOpen className="h-6 w-6" />
+              </span>
               <h1 className="text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">
                 {locale === "ar" ? "مدونة شحنو" : "The Shahnoo Blog"}
               </h1>
@@ -93,6 +99,10 @@ export default async function BlogPage({
               <div className="absolute end-8 top-6 h-24 w-24 rotate-6 overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/40">
                 <Image src="/images/blog/security-shield.jpg" alt="" fill sizes="100px" className="object-cover" />
               </div>
+              <span className="absolute -bottom-3 start-1/4 flex items-center gap-1.5 rounded-full border border-white/10 bg-[var(--color-surface)]/90 px-3 py-1.5 text-xs font-bold text-brand-secondary shadow-xl shadow-black/30 backdrop-blur-md">
+                <Sparkles className="h-3.5 w-3.5" aria-hidden />
+                {locale === "ar" ? "محتوى موثوق" : "Trusted content"}
+              </span>
             </div>
           </div>
         </section>
@@ -109,7 +119,7 @@ export default async function BlogPage({
               <StaggerContainer className="grid gap-4 sm:grid-cols-2">
                 {featured.map((post) => (
                   <StaggerItem key={post.slug}>
-                    <BlogPostCard post={post} locale={typedLocale} />
+                    <BlogPostCard post={post} locale={typedLocale} featured />
                   </StaggerItem>
                 ))}
               </StaggerContainer>
@@ -133,27 +143,38 @@ export default async function BlogPage({
                   {locale === "ar" ? "الأكثر قراءة" : "Most read"}
                 </h2>
                 <StaggerContainer className="flex flex-col gap-3">
-                  {mostRead.map((post, index) => (
-                    <StaggerItem key={post.slug}>
-                      <HoverCard>
-                        <Link
-                          href={`/blog/${post.slug}`}
-                          className="flex items-start gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 transition-colors hover:border-brand-primary/50"
-                        >
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-primary/15 text-xs font-bold text-brand-primary">
-                            {index + 1}
-                          </span>
-                          <div className="min-w-0">
-                            <p className="line-clamp-2 text-sm font-semibold text-[var(--color-text-primary)]">{post.title}</p>
-                            <span className="mt-1 flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
-                              <Clock className="h-3 w-3" aria-hidden />
-                              {locale === "ar" ? `${post.readingMinutes} دقائق` : `${post.readingMinutes} min`}
+                  {mostRead.map((post, index) => {
+                    const isTop = index === 0;
+                    return (
+                      <StaggerItem key={post.slug}>
+                        <HoverCard>
+                          <Link
+                            href={`/blog/${post.slug}`}
+                            className={`flex items-start gap-3 rounded-xl border p-3 transition-colors ${
+                              isTop
+                                ? "border-brand-accent/40 bg-gradient-to-br from-brand-accent/10 to-transparent hover:border-brand-accent/70"
+                                : "border-[var(--color-border)] bg-[var(--color-surface)] hover:border-brand-primary/50"
+                            }`}
+                          >
+                            <span
+                              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                                isTop ? "bg-brand-accent text-[#070B14]" : "bg-brand-primary/15 text-brand-primary"
+                              }`}
+                            >
+                              {isTop ? <Flame className="h-3.5 w-3.5" aria-hidden /> : index + 1}
                             </span>
-                          </div>
-                        </Link>
-                      </HoverCard>
-                    </StaggerItem>
-                  ))}
+                            <div className="min-w-0">
+                              <p className="line-clamp-2 text-sm font-semibold text-[var(--color-text-primary)]">{post.title}</p>
+                              <span className="mt-1 flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
+                                <Clock className="h-3 w-3" aria-hidden />
+                                {locale === "ar" ? `${post.readingMinutes} دقائق` : `${post.readingMinutes} min`}
+                              </span>
+                            </div>
+                          </Link>
+                        </HoverCard>
+                      </StaggerItem>
+                    );
+                  })}
                 </StaggerContainer>
               </div>
 
@@ -188,8 +209,9 @@ export default async function BlogPage({
 
       <Reveal>
         <section className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border border-[var(--color-border)] bg-gradient-to-br from-brand-primary/10 to-brand-secondary/10 p-8">
-            <h2 className="text-xl font-bold text-[var(--color-text-primary)]">{locale === "ar" ? "جاهز للشحن؟" : "Ready to top up?"}</h2>
+          <div className="relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-gradient-to-br from-brand-primary/10 to-brand-secondary/10 p-8">
+            <div aria-hidden className="pointer-events-none absolute -top-10 end-0 -z-10 h-32 w-32 rounded-full bg-brand-primary/20 blur-3xl" />
+            <h2 className="relative text-xl font-bold text-[var(--color-text-primary)]">{locale === "ar" ? "جاهز للشحن؟" : "Ready to top up?"}</h2>
             <p className="mt-2 text-sm text-[var(--color-text-muted)]">
               {locale === "ar" ? "اكتشف الألعاب والعروض وشحن بسرعة وأمان الآن" : "Discover games and offers, and top up fast and safely now"}
             </p>
