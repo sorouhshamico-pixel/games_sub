@@ -114,7 +114,7 @@ export function HomeHero({
         <motion.div initial="hidden" animate="visible" variants={heroContainer}>
           <motion.h1
             variants={titleContainer}
-            className="max-w-2xl text-4xl font-bold leading-tight text-[var(--color-text-primary)] sm:text-5xl"
+            className="max-w-2xl text-2xl font-bold leading-tight text-[var(--color-text-primary)] sm:text-4xl lg:text-5xl"
           >
             {words.map((word, index) => (
               <motion.span key={index} variants={titleWord} className="inline-block">
