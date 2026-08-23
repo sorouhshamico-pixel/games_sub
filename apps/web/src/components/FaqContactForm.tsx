@@ -15,6 +15,7 @@ type SubmitState = "idle" | "sending" | "sent";
 export function FaqContactForm({ locale }: { locale: Locale }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [state, setState] = useState<SubmitState>("idle");
 
@@ -57,7 +58,7 @@ export function FaqContactForm({ locale }: { locale: Locale }) {
                 {locale === "ar" ? "عبّئ النموذج وسنرد عليك في أسرع وقت" : "Fill out the form and we'll reply as fast as we can"}
               </p>
 
-              <form onSubmit={handleSubmit} className="mt-5 grid gap-3 sm:grid-cols-2">
+              <form onSubmit={handleSubmit} className="mt-5 grid gap-3 sm:grid-cols-3">
                 <div>
                   <label htmlFor="contact-name" className="sr-only">
                     {locale === "ar" ? "الاسم" : "Name"}
@@ -85,7 +86,21 @@ export function FaqContactForm({ locale }: { locale: Locale }) {
                     className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-primary"
                   />
                 </div>
-                <div className="sm:col-span-2">
+                <div>
+                  <label htmlFor="contact-phone" className="sr-only">
+                    {locale === "ar" ? "رقم الجوال" : "Phone number"}
+                  </label>
+                  <input
+                    id="contact-phone"
+                    type="tel"
+                    inputMode="tel"
+                    value={phone}
+                    onChange={(event) => setPhone(event.target.value)}
+                    placeholder={locale === "ar" ? "رقم الجوال" : "Phone number"}
+                    className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-primary"
+                  />
+                </div>
+                <div className="sm:col-span-3">
                   <label htmlFor="contact-message" className="sr-only">
                     {locale === "ar" ? "رسالتك" : "Your message"}
                   </label>
@@ -106,7 +121,7 @@ export function FaqContactForm({ locale }: { locale: Locale }) {
                   whileHover={state === "idle" ? { y: -2 } : undefined}
                   whileTap={state === "idle" ? { scale: 0.985, y: 0 } : undefined}
                   transition={{ type: "spring", ...spring }}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-80 sm:col-span-2 sm:w-fit"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-80 sm:col-span-3 sm:w-fit"
                 >
                   {state === "sending" ? (
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
