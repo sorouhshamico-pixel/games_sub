@@ -7,6 +7,7 @@ import { formatMoney } from "@gcc-store/ui";
 import type { AdminProductDetail } from "@/lib/api";
 import { deactivateAdminVariant, deleteAdminProduct, updateAdminProductStatus } from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
+import { AddVariantForm } from "./AddVariantForm";
 
 const STATUSES = ["DRAFT", "ACTIVE", "PAUSED", "OUT_OF_STOCK", "RETIRED"] as const;
 
@@ -117,6 +118,9 @@ export function ProductAdminPanel({ product }: { product: AdminProductDetail }) 
               )}
             </div>
           ))}
+        </div>
+        <div className="mt-3">
+          <AddVariantForm productId={product.id} />
         </div>
       </section>
     </div>

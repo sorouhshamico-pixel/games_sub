@@ -4,6 +4,7 @@ import { redirect } from "@/i18n/navigation";
 import { ApiError, getAdminCategories } from "@/lib/api";
 import { getServerCookieHeader } from "@/lib/server-cookies";
 import { CreateCategoryForm } from "@/components/admin/CreateCategoryForm";
+import { EditCategoryRow } from "@/components/admin/EditCategoryRow";
 
 export const dynamic = "force-dynamic";
 
@@ -45,18 +46,12 @@ export default async function AdminCategoriesPage({ params }: { params: Promise<
               <th className="p-3 text-start">{locale === "ar" ? "الاسم بالعربية" : "Arabic"}</th>
               <th className="p-3 text-start">{locale === "ar" ? "الاسم بالإنجليزية" : "English"}</th>
               <th className="p-3 text-start">{locale === "ar" ? "الحالة" : "Status"}</th>
+              <th className="p-3 text-start">{locale === "ar" ? "إجراءات" : "Actions"}</th>
             </tr>
           </thead>
           <tbody>
             {categories.map((category) => (
-              <tr key={category.id} className="border-t border-[var(--color-border)]">
-                <td className="p-3 font-mono text-xs text-[var(--color-text-primary)]">{category.slug}</td>
-                <td className="p-3 text-[var(--color-text-primary)]">{category.nameAr}</td>
-                <td className="p-3 text-[var(--color-text-primary)]">{category.nameEn}</td>
-                <td className="p-3 text-[var(--color-text-muted)]">
-                  {category.isActive ? (locale === "ar" ? "نشطة" : "Active") : locale === "ar" ? "معطّلة" : "Inactive"}
-                </td>
-              </tr>
+              <EditCategoryRow key={category.id} category={category} />
             ))}
           </tbody>
         </table>

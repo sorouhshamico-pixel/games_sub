@@ -1,11 +1,10 @@
 import { setRequestLocale } from "next-intl/server";
-import { formatMoney } from "@gcc-store/ui";
 import type { Locale } from "@gcc-store/i18n";
 import { redirect } from "@/i18n/navigation";
 import { ApiError, getAdminCoupons } from "@/lib/api";
 import { getServerCookieHeader } from "@/lib/server-cookies";
 import { CreateCouponForm } from "@/components/admin/CreateCouponForm";
-import { DeactivateCouponButton } from "@/components/admin/DeactivateCouponButton";
+import { EditCouponRow } from "@/components/admin/EditCouponRow";
 
 export const dynamic = "force-dynamic";
 
@@ -54,28 +53,7 @@ export default async function AdminCouponsPage({ params }: { params: Promise<{ l
           </thead>
           <tbody>
             {coupons.map((coupon) => (
-              <tr key={coupon.id} className="border-t border-[var(--color-border)]">
-                <td className="p-3 font-mono text-xs text-[var(--color-text-primary)]">{coupon.code}</td>
-                <td className="p-3 text-[var(--color-text-primary)]">
-                  {coupon.discountType === "percentage"
-                    ? `${coupon.discountValue / 100}%`
-                    : formatMoney(coupon.discountValue, "SAR", typedLocale)}
-                </td>
-                <td className="p-3 text-[var(--color-text-muted)]">
-                  {coupon.maxRedemptionsPerCustomer ? `${coupon.maxRedemptionsPerCustomer}/${locale === "ar" ? "عميل" : "customer"} · ` : ""}
-                  {coupon.maxRedemptions ?? (locale === "ar" ? "غير محدود" : "unlimited")}
-                </td>
-                <td className="p-3 text-[var(--color-text-muted)]">
-                  {coupon.minOrderAmountMinorUnits ? formatMoney(coupon.minOrderAmountMinorUnits, "SAR", typedLocale) : "—"}
-                </td>
-                <td className="p-3 text-[var(--color-text-muted)]">
-                  {coupon.endsAt ? new Date(coupon.endsAt).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US") : "—"}
-                </td>
-                <td className="p-3 text-[var(--color-text-muted)]">
-                  {coupon.isActive ? (locale === "ar" ? "نشط" : "Active") : locale === "ar" ? "معطّل" : "Inactive"}
-                </td>
-                <td className="p-3">{coupon.isActive ? <DeactivateCouponButton couponId={coupon.id} /> : null}</td>
-              </tr>
+              <EditCouponRow key={coupon.id} coupon={coupon} locale={typedLocale} />
             ))}
           </tbody>
         </table>

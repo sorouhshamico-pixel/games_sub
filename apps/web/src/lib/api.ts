@@ -295,6 +295,13 @@ export function createAdminCategory(input: { slug: string; nameAr: string; nameE
   return apiPost("/admin/catalog/categories", input);
 }
 
+export function updateAdminCategory(
+  id: string,
+  input: Partial<{ slug: string; nameAr: string; nameEn: string; sortOrder: number; isActive: boolean }>,
+): Promise<AdminCategory> {
+  return apiMutate("PATCH", `/admin/catalog/categories/${id}`, input);
+}
+
 export interface AdminProductVariant {
   id: string;
   sku: string;
@@ -403,6 +410,19 @@ export function deactivateAdminVariant(variantId: string): Promise<AdminProductV
   return apiMutate("DELETE", `/admin/catalog/variants/${variantId}`);
 }
 
+export interface CreateAdminVariantInput {
+  sku: string;
+  nameAr: string;
+  nameEn: string;
+  currency: SupportedCurrency;
+  baseCostMinorUnits: number;
+  marginBasisPoints?: number;
+}
+
+export function createAdminVariant(productId: string, input: CreateAdminVariantInput): Promise<AdminProductVariant> {
+  return apiPost(`/admin/catalog/products/${productId}/variants`, input);
+}
+
 // --- Admin coupons ----------------------------------------------------------
 
 export interface AdminCoupon {
@@ -440,4 +460,17 @@ export function createAdminCoupon(input: CreateAdminCouponInput): Promise<AdminC
 
 export function deactivateAdminCoupon(id: string): Promise<AdminCoupon> {
   return apiMutate("DELETE", `/admin/coupons/${id}`);
+}
+
+export function updateAdminCoupon(
+  id: string,
+  input: Partial<{
+    maxRedemptions: number;
+    maxRedemptionsPerCustomer: number;
+    minOrderAmountMinorUnits: number;
+    startsAt: string;
+    endsAt: string;
+  }>,
+): Promise<AdminCoupon> {
+  return apiMutate("PATCH", `/admin/coupons/${id}`, input);
 }
