@@ -45,14 +45,15 @@ export function BrandLockup({ variant = "header" }: { variant?: "header" | "foot
         <span
           className={cn(
             "font-extrabold tracking-tight bg-gradient-to-br from-[var(--color-text-primary)] to-brand-secondary bg-clip-text text-transparent",
+            locale === "en" && "uppercase tracking-wide font-[family-name:var(--font-heading-display)]",
             size.name,
           )}
         >
           {locale === "ar" ? "شحنو" : "Shahnoo"}
         </span>
-        {locale === "ar" ? (
-          <span className={cn("font-semibold text-brand-secondary", size.sub)}>SHAHNOO</span>
-        ) : null}
+        <span className={cn("font-semibold text-brand-secondary", size.sub)}>
+          {locale === "ar" ? "SHAHNOO" : "GAME TOP-UPS"}
+        </span>
       </span>
     </Link>
   );
