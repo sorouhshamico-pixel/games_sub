@@ -3,11 +3,11 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { EmptyState, ErrorState } from "@gcc-store/ui";
 import { Gamepad2, Gift, PlayCircle, Sparkles } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { ProductCard } from "@/components/ProductCard";
 import { GameCategoryFilter } from "@/components/games/GameCategoryFilter";
 import { BrandSlider } from "@/components/games/BrandSlider";
+import { ProductsWithFilters } from "@/components/games/ProductsWithFilters";
 import { ApiError, getBrands, getCategories, listProducts } from "@/lib/api";
-import { AnimatedCounter, Reveal, StaggerContainer, StaggerItem } from "@/components/motion";
+import { AnimatedCounter, Reveal } from "@/components/motion";
 import type { Locale } from "@gcc-store/i18n";
 
 export const dynamic = "force-dynamic";
@@ -220,13 +220,7 @@ export default async function GamesPage({
           <ErrorState title={t("common.errorGeneric")} />
         ) : products && products.items.length > 0 ? (
           <>
-            <StaggerContainer className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-              {products.items.map((product) => (
-                <StaggerItem key={product.id}>
-                  <ProductCard product={product} />
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
+            <ProductsWithFilters products={products.items} locale={typedLocale} />
             <p className="mt-3 text-xs text-[var(--color-text-muted)]">{t("common.demoDataNotice")}</p>
           </>
         ) : (
