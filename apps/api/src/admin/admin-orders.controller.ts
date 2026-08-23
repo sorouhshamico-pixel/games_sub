@@ -1,18 +1,24 @@
-import { Controller, Get, NotFoundException, Param, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, NotFoundException, Param, Patch, Query, Req, UseGuards } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { prisma, UserRole } from "@gcc-store/db";
 import { SessionAuthGuard } from "../auth/guards/session-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
+import type { AuthenticatedRequest } from "../auth/request-user";
 import { InvoicingService } from "../invoicing/invoicing.service";
+import { AdminOrdersService } from "./admin-orders.service";
 import { ListOrdersQueryDto } from "./dto/list-orders.dto";
+import { UpdateOrderStatusDto } from "./dto/update-order-status.dto";
 
 @ApiTags("admin")
 @Controller("admin/orders")
 @UseGuards(SessionAuthGuard, RolesGuard)
 @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.FINANCE, UserRole.SUPPORT, UserRole.READ_ONLY_ANALYST)
 export class AdminOrdersController {
-  constructor(private readonly invoicingService: InvoicingService) {}
+  constructor(
+    private readonly invoicingService: InvoicingService,
+    private readonly adminOrdersService: AdminOrdersService,
+  ) {}
 
   @Get()
   async list(@Query() query: ListOrdersQueryDto) {
@@ -67,5 +73,16 @@ export class AdminOrdersController {
     const invoiceQrCodeDataUri = order.invoice ? await this.invoicingService.buildQrImageDataUri(order.invoice, order) : null;
 
     return { ...order, notifications, invoiceQrCodeDataUri };
+  }
+
+  @Patch(":id/status")
+  // FINANCE and READ_ONLY_ANALYST deliberately excluded — this is a
+  // fulfillment/support resolution action, not a money one (refunds already
+  // have their own endpoint/role check), and READ_ONLY_ANALYST is read-only
+  // by name. Method-level @Roles() replaces the class-level list entirely
+  // (RolesGuard uses getAllAndOverride), it doesn't add to it.
+  @Roles(UserRole.SUPER_ADMIN, UserRole.OPERATIONS, UserRole.SUPPORT)
+  updateStatus(@Param("id") id: string, @Body() dto: UpdateOrderStatusDto, @Req() req: AuthenticatedRequest) {
+    return this.adminOrdersService.updateStatus(id, dto.toStatus, dto.reason, req.user!.id);
   }
 }

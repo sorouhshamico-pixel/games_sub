@@ -4,6 +4,7 @@ import { PaymentsModule } from "../payments/payments.module";
 import { InvoicingModule } from "../invoicing/invoicing.module";
 import { DashboardController } from "./dashboard.controller";
 import { AdminOrdersController } from "./admin-orders.controller";
+import { AdminOrdersService } from "./admin-orders.service";
 import { AdminCatalogController } from "./catalog/admin-catalog.controller";
 import { AdminCatalogService } from "./catalog/admin-catalog.service";
 import { AdminRefundsController } from "./refunds/admin-refunds.controller";
@@ -20,6 +21,6 @@ import { AdminCouponsService } from "./coupons/admin-coupons.service";
     AdminRefundsController,
     AdminCouponsController,
   ],
-  providers: [AdminCatalogService, AdminRefundsService, AdminCouponsService],
+  providers: [AdminOrdersService, AdminCatalogService, AdminRefundsService, AdminCouponsService],
 })
 export class AdminModule {}

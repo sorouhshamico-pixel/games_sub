@@ -276,6 +276,21 @@ export function createAdminRefund(
   return apiPost(`/admin/orders/${orderId}/refund`, input);
 }
 
+// Curated targets per current status — mirrors the backend's own allow-list
+// (apps/api/src/admin/admin-orders.service.ts ADMIN_MANUAL_TRANSITIONS) so
+// the UI only ever offers a transition that will actually succeed, not the
+// full state-machine graph which includes automated-only targets like PAID.
+export const ADMIN_MANUAL_ORDER_TRANSITIONS: Partial<Record<string, string[]>> = {
+  DRAFT: ["CANCELLED"],
+  PENDING_PAYMENT: ["CANCELLED"],
+  FAILED: ["CANCELLED"],
+  MANUAL_REVIEW: ["COMPLETED", "PARTIALLY_FULFILLED", "FAILED"],
+};
+
+export function updateAdminOrderStatus(orderId: string, toStatus: string, reason: string): Promise<{ id: string; status: string }> {
+  return apiMutate("PATCH", `/admin/orders/${orderId}/status`, { toStatus, reason });
+}
+
 // --- Admin catalog ---------------------------------------------------------
 
 export interface AdminCategory {
@@ -372,6 +387,7 @@ export interface CreateAdminProductInput {
   slug: string;
   type: string;
   categoryId: string;
+  imageUrl?: string;
   refundEligible?: boolean;
   translations: AdminProductTranslation[];
   variants: Array<{
@@ -400,6 +416,10 @@ export function createAdminProduct(input: CreateAdminProductInput): Promise<Admi
 
 export function updateAdminProductStatus(id: string, status: string): Promise<AdminProductDetail> {
   return apiMutate("PATCH", `/admin/catalog/products/${id}`, { status });
+}
+
+export function updateAdminProductImage(id: string, imageUrl: string): Promise<AdminProductDetail> {
+  return apiMutate("PATCH", `/admin/catalog/products/${id}`, { imageUrl });
 }
 
 export function deleteAdminProduct(id: string): Promise<AdminProductDetail> {

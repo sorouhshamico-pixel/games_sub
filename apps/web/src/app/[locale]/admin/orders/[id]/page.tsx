@@ -5,6 +5,7 @@ import { redirect } from "@/i18n/navigation";
 import { ApiError, getAdminOrderDetail } from "@/lib/api";
 import { getServerCookieHeader } from "@/lib/server-cookies";
 import { RefundForm } from "@/components/admin/RefundForm";
+import { OrderStatusChangeForm } from "@/components/admin/OrderStatusChangeForm";
 
 export const dynamic = "force-dynamic";
 
@@ -109,6 +110,8 @@ export default async function AdminOrderDetailPage({
           </>
         ) : null}
       </section>
+
+      <OrderStatusChangeForm orderId={order.id} currentStatus={order.status} />
 
       {canRefund ? <RefundForm orderId={order.id} refundableMinorUnits={refundableMinorUnits} currency={order.currency} /> : null}
 
