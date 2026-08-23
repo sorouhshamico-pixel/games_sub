@@ -99,10 +99,20 @@ export default async function LocaleLayout({
                 <SiteAtmosphere />
                 <PromoBar />
                 <SiteHeader />
-                <main className="flex-1 pb-20 md:pb-0">
-                  <PageTransition>{children}</PageTransition>
-                </main>
-                <SiteFooter />
+                {/* The clearance for the fixed BottomNav has to wrap the
+                    footer too, not just <main> — the footer renders below
+                    it in normal flow on mobile, so without this its last
+                    ~60px (copyright line, etc.) scrolled in behind the nav
+                    bar instead of stopping above it. calc() adds the real
+                    iOS home-indicator inset on top of the nav's own height
+                    instead of guessing a fixed number that's wrong on
+                    notched phones. */}
+                <div className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
+                  <main>
+                    <PageTransition>{children}</PageTransition>
+                  </main>
+                  <SiteFooter />
+                </div>
                 <BottomNav />
                 <CartDrawer />
                 <FloatingBackToTop />
