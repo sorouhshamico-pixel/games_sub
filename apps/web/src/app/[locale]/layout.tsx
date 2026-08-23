@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Alexandria, Inter } from "next/font/google";
+import { Alexandria, Inter, Orbitron, Rajdhani } from "next/font/google";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -29,6 +29,26 @@ const latinFont = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-latin",
+  display: "swap",
+});
+
+// Gaming-flavored display faces for English headings only — Arabic keeps
+// Alexandria throughout, and English body copy keeps Inter for readability.
+// Orbitron's geometric, uppercase-first letterforms carry the biggest H1s;
+// Rajdhani (still unmistakably "esports HUD", but far more legible at
+// smaller sizes) carries H2/H3. Both are scoped to `[dir="ltr"]` in
+// globals.css, same pattern already used for the Latin/Arabic font stack.
+const headingDisplayFont = Orbitron({
+  subsets: ["latin"],
+  weight: ["700", "800", "900"],
+  variable: "--font-heading-display",
+  display: "swap",
+});
+
+const headingFont = Rajdhani({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-heading",
   display: "swap",
 });
 
@@ -66,7 +86,11 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} dir={localeDirection[locale]} className={`${arabicFont.variable} ${latinFont.variable}`}>
+    <html
+      lang={locale}
+      dir={localeDirection[locale]}
+      className={`${arabicFont.variable} ${latinFont.variable} ${headingDisplayFont.variable} ${headingFont.variable}`}
+    >
       <body className="flex min-h-screen flex-col bg-[var(--color-background)] text-[var(--color-text-primary)] antialiased">
         <NextIntlClientProvider>
           <MotionProvider>

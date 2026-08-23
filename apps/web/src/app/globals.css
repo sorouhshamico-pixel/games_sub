@@ -27,3 +27,21 @@ html {
 :root[dir="ltr"] body {
   font-family: var(--font-latin), var(--font-arabic), sans-serif;
 }
+
+/* English-only heading treatment — a gaming/esports-flavored display face,
+   uppercase (Arabic has no letter case, so this never touches the RTL
+   locale). H1 gets Orbitron for maximum "brand moment" impact; H2/H3 use
+   Rajdhani, which stays sharp and readable at smaller sizes instead of
+   Orbitron's geometry turning to noise once it's much below hero scale. */
+:root[dir="ltr"] h1 {
+  font-family: var(--font-heading-display), var(--font-latin), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+:root[dir="ltr"] h2,
+:root[dir="ltr"] h3 {
+  font-family: var(--font-heading), var(--font-latin), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
