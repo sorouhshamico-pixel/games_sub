@@ -1,8 +1,9 @@
 "use client";
 
+import { useId, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { motion } from "motion/react";
-import { Heart } from "lucide-react";
+import { ChevronDown, Heart } from "lucide-react";
 import { SiTiktok, SiInstagram, SiX, SiYoutube } from "react-icons/si";
 import { Link } from "@/i18n/navigation";
 import { Reveal, StaggerContainer, StaggerItem, HoverCard } from "@/components/motion";
@@ -58,6 +59,38 @@ function FooterHeading({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Below `sm`, five full-height sections stacked one after another made for
+// a very long scroll to reach the bottom bar — each becomes a collapsible
+// accordion instead. `sm:!grid` on the content forces it visibly open at
+// `sm:` and up regardless of `open`, so this is the same always-expanded
+// desktop/tablet layout as before; only mobile gets the toggle, and the
+// content itself renders once (not duplicated per breakpoint).
+function FooterSection({ title, defaultOpen = false, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen);
+  const contentId = useId();
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-controls={contentId}
+        className="flex w-full items-start justify-between sm:pointer-events-none sm:cursor-default"
+      >
+        <FooterHeading>{title}</FooterHeading>
+        <ChevronDown
+          aria-hidden
+          className={`h-4 w-4 shrink-0 text-[var(--color-text-muted)] transition-transform sm:hidden ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      <div id={contentId} className={`grid overflow-hidden transition-[grid-template-rows] duration-300 ease-out sm:!grid-rows-[1fr] ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+        <div className="min-h-0">{children}</div>
+      </div>
+    </div>
+  );
+}
+
 export function SiteFooter() {
   const t = useTranslations();
   const locale = useLocale();
@@ -68,7 +101,7 @@ export function SiteFooter() {
     { href: { pathname: "/games", query: { category: "game-topups" } }, ar: "شحن الألعاب", en: "Game top-ups" },
     { href: { pathname: "/games", query: { category: "subscriptions" } }, ar: "الاشتراكات الرقمية", en: "Digital subscriptions" },
     { href: { pathname: "/games", query: { category: "gift-cards" } }, ar: "بطاقات الهدايا", en: "Gift cards" },
-    { href: "/#limited-offers" as const, ar: "العروض", en: "Offers" },
+    { href: "/offers" as const, ar: "العروض", en: "Offers" },
     { href: "/blog" as const, ar: "المدونة", en: "Blog" },
   ];
 
@@ -116,8 +149,7 @@ export function SiteFooter() {
             </div>
           </div>
 
-          <div>
-            <FooterHeading>{locale === "ar" ? "روابط سريعة" : "Quick links"}</FooterHeading>
+          <FooterSection title={locale === "ar" ? "روابط سريعة" : "Quick links"} defaultOpen>
             <StaggerContainer className="flex flex-col gap-2">
               {quickLinks.map((link, index) => (
                 <StaggerItem key={index}>
@@ -127,10 +159,9 @@ export function SiteFooter() {
                 </StaggerItem>
               ))}
             </StaggerContainer>
-          </div>
+          </FooterSection>
 
-          <div>
-            <FooterHeading>{locale === "ar" ? "دعم العملاء" : "Customer support"}</FooterHeading>
+          <FooterSection title={locale === "ar" ? "دعم العملاء" : "Customer support"}>
             <StaggerContainer className="flex flex-col gap-2">
               {supportLinks.map((link, index) => (
                 <StaggerItem key={index}>
@@ -140,10 +171,9 @@ export function SiteFooter() {
                 </StaggerItem>
               ))}
             </StaggerContainer>
-          </div>
+          </FooterSection>
 
-          <div>
-            <FooterHeading>{locale === "ar" ? "طرق الدفع" : "Payment methods"}</FooterHeading>
+          <FooterSection title={locale === "ar" ? "طرق الدفع" : "Payment methods"}>
             {/* Small fixed-size tiles instead of stretching to fill the
                 grid — a flex-wrap cluster of compact chips reads as a
                 trust strip, not a wall of oversized banners. */}
@@ -170,10 +200,9 @@ export function SiteFooter() {
             <p className="mt-3 text-[11px] text-[var(--color-text-muted)]">
               {locale === "ar" ? "بوابة الدفع النشطة حاليًا للتجربة فقط" : "The live payment gateway is for testing only"}
             </p>
-          </div>
+          </FooterSection>
 
-          <div>
-            <FooterHeading>{locale === "ar" ? "حمل التطبيق" : "Get the app"}</FooterHeading>
+          <FooterSection title={locale === "ar" ? "حمل التطبيق" : "Get the app"}>
             <p className="-mt-2 mb-3 text-sm text-[var(--color-text-muted)]">
               {locale === "ar" ? "تجربة أسرع وأكثر سهولة" : "A faster, easier experience"}
             </p>
@@ -201,7 +230,7 @@ export function SiteFooter() {
                 </StaggerItem>
               ))}
             </StaggerContainer>
-          </div>
+          </FooterSection>
         </div>
       </Reveal>
 
