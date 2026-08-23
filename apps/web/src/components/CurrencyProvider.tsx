@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { SupportedCurrency } from "@gcc-store/contracts";
+import { detectCurrencyFromTimezone } from "@/lib/geoCurrency";
 
 const CURRENCY_STORAGE_KEY = "gcc-store.currency.v1";
 
@@ -23,14 +24,22 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrencyState] = useState<SupportedCurrency>("SAR");
 
   // Read the saved preference once on mount (not during render) to avoid a
-  // server/client markup mismatch — same pattern as CartProvider.
+  // server/client markup mismatch — same pattern as CartProvider. A saved
+  // preference is an explicit past choice, so it always wins; only a
+  // first-ever visit falls through to auto-detecting the currency from the
+  // visitor's timezone.
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(CURRENCY_STORAGE_KEY);
-      if (saved) setCurrencyState(saved as SupportedCurrency);
+      if (saved) {
+        setCurrencyState(saved as SupportedCurrency);
+        return;
+      }
     } catch {
-      // Storage unavailable (private mode, etc.) — silently keep the SAR default.
+      // Storage unavailable (private mode, etc.) — fall through to detection.
     }
+    const detected = detectCurrencyFromTimezone();
+    if (detected) setCurrencyState(detected);
   }, []);
 
   function setCurrency(next: SupportedCurrency) {
