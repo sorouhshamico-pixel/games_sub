@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
 import { setRequestLocale } from "next-intl/server";
 import { Clock3, HelpCircle, MessageCircle, ShieldCheck } from "lucide-react";
-import { ApiError, getPage } from "@/lib/api";
+import { ApiError, getPage, getPublicStoreSettings } from "@/lib/api";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { FaqContactForm } from "@/components/FaqContactForm";
 import { Reveal } from "@/components/motion";
@@ -52,6 +52,13 @@ export default async function CmsPage({
         </div>
       </article>
     );
+  }
+
+  let supportEmail: string | null = null;
+  try {
+    ({ supportEmail } = await getPublicStoreSettings());
+  } catch {
+    supportEmail = null;
   }
 
   const infoTiles = [
@@ -120,7 +127,7 @@ export default async function CmsPage({
         <FaqAccordion markdown={page.bodyMarkdown} />
       </Reveal>
 
-      <FaqContactForm locale={typedLocale} />
+      <FaqContactForm locale={typedLocale} supportEmail={supportEmail} />
     </div>
   );
 }

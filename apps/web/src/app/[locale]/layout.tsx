@@ -15,7 +15,9 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { FloatingBackToTop } from "@/components/FloatingBackToTop";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { SiteAtmosphere } from "@/components/SiteAtmosphere";
+import { MaintenanceBanner } from "@/components/MaintenanceBanner";
 import { MotionProvider, PageTransition } from "@/components/motion";
+import { getPublicStoreSettings } from "@/lib/api";
 import "../globals.css";
 
 const arabicFont = Alexandria({
@@ -85,6 +87,20 @@ export default async function LocaleLayout({
   const locale = requested as Locale;
   setRequestLocale(locale);
 
+  // A down/slow API shouldn't take the whole site with it just for a
+  // banner — same "fail to the safe default" shape as every other
+  // best-effort admin-settings read in this app.
+  let maintenanceMode = false;
+  let supportPhone: string | null = null;
+  try {
+    const settings = await getPublicStoreSettings();
+    maintenanceMode = settings.maintenanceMode;
+    supportPhone = settings.supportPhone;
+  } catch {
+    maintenanceMode = false;
+    supportPhone = null;
+  }
+
   return (
     <html
       lang={locale}
@@ -96,6 +112,7 @@ export default async function LocaleLayout({
           <MotionProvider>
             <CurrencyProvider>
               <CartProvider>
+                {maintenanceMode ? <MaintenanceBanner locale={locale} /> : null}
                 <SiteAtmosphere />
                 <PromoBar />
                 <SiteHeader />
@@ -116,7 +133,7 @@ export default async function LocaleLayout({
                 <BottomNav />
                 <CartDrawer />
                 <FloatingBackToTop />
-                <FloatingWhatsApp />
+                <FloatingWhatsApp supportPhone={supportPhone} />
               </CartProvider>
             </CurrencyProvider>
           </MotionProvider>

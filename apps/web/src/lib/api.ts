@@ -149,6 +149,16 @@ export function getPage(slug: string, locale: "ar" | "en"): Promise<PageContent>
   return apiFetch(`/content/pages/${slug}?locale=${locale}`);
 }
 
+export interface PublicStoreSettings {
+  maintenanceMode: boolean;
+  supportEmail: string | null;
+  supportPhone: string | null;
+}
+
+export function getPublicStoreSettings(): Promise<PublicStoreSettings> {
+  return apiFetch("/content/store-settings");
+}
+
 export interface ListBlogPostsResult {
   items: BlogPostSummary[];
   page: number;
@@ -212,10 +222,75 @@ export interface AdminDashboard {
   ordersByStatus: Record<string, number>;
   fulfillment: { successRatePercent: number | null; byStatus: Record<string, number> };
   providers: Array<{ code: string; name: string; latestBalance: { balanceMinorUnits: number; currency: SupportedCurrency; capturedAt: string } | null }>;
+  dailyRevenue: Array<{ date: string; totalMinorUnits: number }>;
+  topProducts: Array<{ name: string; revenueMinorUnits: number }>;
 }
 
-export function getAdminDashboard(options: RequestOptions = {}): Promise<AdminDashboard> {
-  return apiFetch("/admin/dashboard", options);
+export function getAdminDashboard(days: 7 | 30 | 90 = 30, options: RequestOptions = {}): Promise<AdminDashboard> {
+  return apiFetch(`/admin/dashboard?days=${days}`, options);
+}
+
+// --- Admin users -------------------------------------------------------
+
+export interface AdminStaffUser {
+  id: string;
+  email: string | null;
+  role: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export function getAdminUsers(options: RequestOptions = {}): Promise<AdminStaffUser[]> {
+  return apiFetch("/admin/users", options);
+}
+
+export function createAdminStaffUser(input: { email: string; password: string; role: string }): Promise<AdminStaffUser> {
+  return apiPost("/admin/users", input);
+}
+
+export function updateAdminStaffUser(id: string, input: Partial<{ role: string; isActive: boolean }>): Promise<AdminStaffUser> {
+  return apiMutate("PATCH", `/admin/users/${id}`, input);
+}
+
+// --- Admin settings ------------------------------------------------------
+
+export interface StoreSettings {
+  supportEmail: string | null;
+  supportPhone: string | null;
+  refundWindowDays: number | null;
+  maintenanceMode: boolean;
+}
+
+export function getAdminSettings(options: RequestOptions = {}): Promise<StoreSettings> {
+  return apiFetch("/admin/settings", options);
+}
+
+export function updateAdminSettings(input: Partial<StoreSettings>): Promise<StoreSettings> {
+  return apiMutate("PATCH", "/admin/settings", input);
+}
+
+// --- Admin audit log -------------------------------------------------------
+
+export interface AdminAuditLogEntry {
+  id: string;
+  actorUserId: string | null;
+  actor: { email: string | null; role: string } | null;
+  action: string;
+  entityType: string;
+  entityId: string;
+  metadataJson: unknown;
+  createdAt: string;
+}
+
+export function getAdminAuditLog(
+  params: { entityType?: string; page?: number } = {},
+  options: RequestOptions = {},
+): Promise<{ items: AdminAuditLogEntry[]; page: number; pageSize: number; total: number }> {
+  const query = new URLSearchParams();
+  if (params.entityType) query.set("entityType", params.entityType);
+  if (params.page) query.set("page", String(params.page));
+  const qs = query.toString();
+  return apiFetch(`/admin/audit-log${qs ? `?${qs}` : ""}`, options);
 }
 
 export interface AdminOrderSummary {

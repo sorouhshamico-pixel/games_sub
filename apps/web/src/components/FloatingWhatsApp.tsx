@@ -8,13 +8,16 @@ import { WhatsAppIcon } from "./home/icons";
 
 /**
  * Site-wide floating WhatsApp-style contact bubble — fixed bottom-right
- * (physical, per direction). Routed to the real FAQ/help page rather than
- * a fabricated wa.me phone number: a wrong or placeholder number would
- * message a real, unrelated person, which stays true regardless of how
- * polished the button looks. Sits above BottomNav on mobile.
+ * (physical, per direction). Falls back to the FAQ/help page rather than a
+ * fabricated wa.me phone number when no real one is configured: a wrong or
+ * placeholder number would message a real, unrelated person. Once an admin
+ * sets a real number in Settings, this opens an actual WhatsApp chat to it.
+ * Sits above BottomNav on mobile.
  */
-export function FloatingWhatsApp() {
+export function FloatingWhatsApp({ supportPhone }: { supportPhone: string | null }) {
   const locale = useLocale();
+  const cleanedPhone = supportPhone?.replace(/[^\d]/g, "") || null;
+  const href = cleanedPhone ? `https://wa.me/${cleanedPhone}` : "/pages/faq";
 
   return (
     <motion.div
@@ -46,13 +49,25 @@ export function FloatingWhatsApp() {
         </span>
 
         <motion.div whileHover={{ scale: 1.1, y: -3 }} whileTap={{ scale: 0.92 }} transition={{ type: "spring", ...spring }} className="relative h-full w-full">
-          <Link
-            href="/pages/faq"
-            aria-label={locale === "ar" ? "تواصل معنا على واتساب" : "Contact us on WhatsApp"}
-            className="flex h-full w-full items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-[#25D366]/40"
-          >
-            <WhatsAppIcon className="h-7 w-7" aria-hidden />
-          </Link>
+          {cleanedPhone ? (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={locale === "ar" ? "تواصل معنا على واتساب" : "Contact us on WhatsApp"}
+              className="flex h-full w-full items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-[#25D366]/40"
+            >
+              <WhatsAppIcon className="h-7 w-7" aria-hidden />
+            </a>
+          ) : (
+            <Link
+              href="/pages/faq"
+              aria-label={locale === "ar" ? "تواصل معنا على واتساب" : "Contact us on WhatsApp"}
+              className="flex h-full w-full items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-[#25D366]/40"
+            >
+              <WhatsAppIcon className="h-7 w-7" aria-hidden />
+            </Link>
+          )}
         </motion.div>
       </div>
     </motion.div>

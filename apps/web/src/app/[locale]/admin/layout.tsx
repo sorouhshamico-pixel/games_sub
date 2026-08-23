@@ -27,12 +27,24 @@ export default async function AdminLayout({
     );
   }
 
+  // Tabs a role can't actually use are hidden rather than shown-then-403 —
+  // each page still enforces its own role check server-side regardless, this
+  // is purely nav polish.
   const tabs = [
     { href: "/admin", label: locale === "ar" ? "لوحة التحكم" : "Dashboard" },
     { href: "/admin/orders", label: locale === "ar" ? "الطلبات" : "Orders" },
     { href: "/admin/products", label: locale === "ar" ? "المنتجات" : "Products" },
     { href: "/admin/categories", label: locale === "ar" ? "الفئات" : "Categories" },
     { href: "/admin/coupons", label: locale === "ar" ? "أكواد الخصم" : "Coupons" },
+    ...(user.role === "SUPER_ADMIN" || user.role === "READ_ONLY_ANALYST"
+      ? [{ href: "/admin/audit-log", label: locale === "ar" ? "سجل التدقيق" : "Audit log" }]
+      : []),
+    ...(user.role === "SUPER_ADMIN"
+      ? [
+          { href: "/admin/users", label: locale === "ar" ? "فريق العمل" : "Staff" },
+          { href: "/admin/settings", label: locale === "ar" ? "الإعدادات" : "Settings" },
+        ]
+      : []),
   ];
 
   return (

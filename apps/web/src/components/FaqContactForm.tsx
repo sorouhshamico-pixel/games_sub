@@ -12,7 +12,7 @@ type SubmitState = "idle" | "sending" | "sent";
 /** Investor-demo contact form — same pattern as the homepage's newsletter
  * signup: the success state is a local UI transition only, since there's
  * no real support-ticket endpoint yet. Nothing is actually sent anywhere. */
-export function FaqContactForm({ locale }: { locale: Locale }) {
+export function FaqContactForm({ locale, supportEmail }: { locale: Locale; supportEmail: string | null }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -132,7 +132,16 @@ export function FaqContactForm({ locale }: { locale: Locale }) {
                 </motion.button>
               </form>
 
-              <p className="mt-4 text-xs text-[var(--color-text-muted)]">
+              {supportEmail ? (
+                <p className="mt-4 text-sm text-[var(--color-text-muted)]">
+                  {locale === "ar" ? "أو راسلنا مباشرة على " : "Or email us directly at "}
+                  <a href={`mailto:${supportEmail}`} className="font-medium text-brand-primary hover:underline">
+                    {supportEmail}
+                  </a>
+                </p>
+              ) : null}
+
+              <p className="mt-2 text-xs text-[var(--color-text-muted)]">
                 {locale === "ar" ? "بيانات تجريبية لأغراض العرض فقط" : "Demo data for display purposes only"}
               </p>
             </motion.div>
