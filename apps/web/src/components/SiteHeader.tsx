@@ -9,6 +9,7 @@ import { BrandLockup } from "./BrandLockup";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { CurrencySwitcher } from "./CurrencySwitcher";
 import { CartIcon } from "./CartIcon";
+import { MobileMenu } from "./MobileMenu";
 
 const SCROLL_THRESHOLD = 24;
 
@@ -145,6 +146,7 @@ export function SiteHeader() {
           <span className="hidden md:inline-flex">
             <CartIcon />
           </span>
+          <MobileMenu />
         </div>
       </div>
     </header>
