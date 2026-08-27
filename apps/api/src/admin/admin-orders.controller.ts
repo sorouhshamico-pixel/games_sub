@@ -1,12 +1,13 @@
 import { Body, Controller, Get, NotFoundException, Param, Patch, Query, Req, UseGuards } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
-import { prisma, UserRole } from "@gcc-store/db";
+import { prisma, UserRole, PaymentStatus } from "@gcc-store/db";
 import { SessionAuthGuard } from "../auth/guards/session-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
 import type { AuthenticatedRequest } from "../auth/request-user";
 import { InvoicingService } from "../invoicing/invoicing.service";
 import { AdminOrdersService } from "./admin-orders.service";
+import { REFUNDABLE_STATUSES } from "./refunds/admin-refunds.service";
 import { ListOrdersQueryDto } from "./dto/list-orders.dto";
 import { UpdateOrderStatusDto } from "./dto/update-order-status.dto";
 
@@ -72,7 +73,16 @@ export class AdminOrdersController {
 
     const invoiceQrCodeDataUri = order.invoice ? await this.invoicingService.buildQrImageDataUri(order.invoice, order) : null;
 
-    return { ...order, notifications, invoiceQrCodeDataUri };
+    // Computed once, server-side, from the same REFUNDABLE_STATUSES the
+    // refund endpoint itself enforces — the frontend used to re-derive this
+    // (a duplicated status list plus its own captured-payment/already-
+    // refunded arithmetic) purely to decide whether to render the refund
+    // form. One source of truth now; the two can't drift out of sync.
+    const capturedPayment = order.payments.find((p) => p.status === PaymentStatus.CAPTURED || p.status === PaymentStatus.PARTIALLY_REFUNDED);
+    const alreadyRefunded = order.refunds.filter((r) => r.status === "succeeded").reduce((sum, r) => sum + r.amountMinorUnits, 0);
+    const refundableMinorUnits = REFUNDABLE_STATUSES.includes(order.status) && capturedPayment ? Math.max(0, capturedPayment.amountMinorUnits - alreadyRefunded) : 0;
+
+    return { ...order, notifications, invoiceQrCodeDataUri, refundableMinorUnits };
   }
 
   @Patch(":id/status")

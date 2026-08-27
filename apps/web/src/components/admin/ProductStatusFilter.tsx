@@ -2,8 +2,7 @@
 
 import { useLocale } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-
-const STATUSES = ["DRAFT", "ACTIVE", "PAUSED", "OUT_OF_STOCK", "RETIRED"] as const;
+import { PRODUCT_LIFECYCLE_STATUSES as STATUSES } from "@/lib/admin-constants";
 
 export function ProductStatusFilter({ currentStatus }: { currentStatus?: string }) {
   const locale = useLocale();

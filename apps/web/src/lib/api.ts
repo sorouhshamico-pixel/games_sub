@@ -338,6 +338,10 @@ export interface AdminOrderDetail extends AdminOrderSummary {
   notifications: Array<{ id: string; channel: string; templateKey: string; status: string; sentAt: string | null; createdAt: string }>;
   invoice: { invoiceNumber: string; issuedAt: string; zatcaStatus: string | null } | null;
   invoiceQrCodeDataUri: string | null;
+  /** Computed server-side from the same status list the refund endpoint
+   * itself enforces — 0 means "not eligible right now," no separate
+   * canRefund flag needed. */
+  refundableMinorUnits: number;
 }
 
 export function getAdminOrderDetail(id: string, options: RequestOptions = {}): Promise<AdminOrderDetail> {

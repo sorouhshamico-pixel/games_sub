@@ -8,7 +8,7 @@ import type { CreateRefundDto } from "./dto/create-refund.dto";
 // Orders can only move to REFUND_PENDING from one of these — see
 // docs/ORDER_STATE_MACHINE.md. Anything else (still PENDING_PAYMENT, already
 // REFUNDED, ...) isn't a valid place to start a refund from.
-const REFUNDABLE_STATUSES: OrderStatus[] = [
+export const REFUNDABLE_STATUSES: OrderStatus[] = [
   OrderStatus.PAID,
   OrderStatus.FULFILLMENT_QUEUED,
   OrderStatus.PROCESSING,

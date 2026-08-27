@@ -9,16 +9,6 @@ import { OrderStatusChangeForm } from "@/components/admin/OrderStatusChangeForm"
 
 export const dynamic = "force-dynamic";
 
-const REFUNDABLE_STATUSES = new Set([
-  "PAID",
-  "FULFILLMENT_QUEUED",
-  "PROCESSING",
-  "PARTIALLY_FULFILLED",
-  "COMPLETED",
-  "FAILED",
-  "MANUAL_REVIEW",
-]);
-
 export default async function AdminOrderDetailPage({
   params,
 }: {
@@ -56,10 +46,7 @@ export default async function AdminOrderDetailPage({
     );
   }
 
-  const capturedPayment = order.payments.find((p) => p.status === "CAPTURED" || p.status === "PARTIALLY_REFUNDED");
-  const alreadyRefunded = order.refunds.filter((r) => r.status === "succeeded").reduce((sum, r) => sum + r.amountMinorUnits, 0);
-  const refundableMinorUnits = capturedPayment ? capturedPayment.amountMinorUnits - alreadyRefunded : 0;
-  const canRefund = REFUNDABLE_STATUSES.has(order.status) && refundableMinorUnits > 0;
+  const canRefund = order.refundableMinorUnits > 0;
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-10">
@@ -113,7 +100,7 @@ export default async function AdminOrderDetailPage({
 
       <OrderStatusChangeForm orderId={order.id} currentStatus={order.status} />
 
-      {canRefund ? <RefundForm orderId={order.id} refundableMinorUnits={refundableMinorUnits} currency={order.currency} /> : null}
+      {canRefund ? <RefundForm orderId={order.id} refundableMinorUnits={order.refundableMinorUnits} currency={order.currency} /> : null}
 
       {order.invoice ? (
         <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">

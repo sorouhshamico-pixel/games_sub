@@ -6,13 +6,18 @@ import { UserRole } from "@gcc-store/db";
 // admin-only endpoint. Staff accounts are created here on purpose so a
 // customer signup can never accidentally (or maliciously) land on a
 // privileged role.
+//
+// CONTENT_SEO is deliberately excluded even though it's a real value in the
+// UserRole enum: no controller anywhere grants it a single @Roles(...) entry
+// (there's no blog/pages CMS admin surface for it to manage yet), so an
+// account created with it would get 403 on every admin endpoint including
+// the dashboard — a dead end, not a real role, until that surface exists.
 const STAFF_ROLES = [
   UserRole.SUPER_ADMIN,
   UserRole.OPERATIONS,
   UserRole.FINANCE,
   UserRole.SUPPORT,
   UserRole.CATALOG_MANAGER,
-  UserRole.CONTENT_SEO,
   UserRole.READ_ONLY_ANALYST,
 ] as const;
 

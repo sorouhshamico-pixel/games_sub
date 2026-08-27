@@ -6,7 +6,9 @@ import type { Locale } from "@gcc-store/i18n";
 import { useRouter } from "@/i18n/navigation";
 import { ApiError, updateAdminStaffUser, type AdminStaffUser } from "@/lib/api";
 
-const STAFF_ROLES = ["SUPER_ADMIN", "OPERATIONS", "FINANCE", "SUPPORT", "CATALOG_MANAGER", "CONTENT_SEO", "READ_ONLY_ANALYST"] as const;
+// CONTENT_SEO excluded — see create-staff-user.dto.ts on the API side: no
+// admin controller grants it any access yet, so it would be a dead-end role.
+const STAFF_ROLES = ["SUPER_ADMIN", "OPERATIONS", "FINANCE", "SUPPORT", "CATALOG_MANAGER", "READ_ONLY_ANALYST"] as const;
 
 export function EditStaffUserRow({ user, isSelf }: { user: AdminStaffUser; isSelf: boolean }) {
   const locale = useLocale() as Locale;

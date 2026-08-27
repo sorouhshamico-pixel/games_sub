@@ -8,8 +8,7 @@ import type { AdminProductDetail } from "@/lib/api";
 import { deactivateAdminVariant, deleteAdminProduct, updateAdminProductImage, updateAdminProductStatus, ApiError } from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
 import { AddVariantForm } from "./AddVariantForm";
-
-const STATUSES = ["DRAFT", "ACTIVE", "PAUSED", "OUT_OF_STOCK", "RETIRED"] as const;
+import { PRODUCT_LIFECYCLE_STATUSES as STATUSES } from "@/lib/admin-constants";
 
 export function ProductAdminPanel({ product }: { product: AdminProductDetail }) {
   const locale = useLocale() as Locale;

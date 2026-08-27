@@ -191,7 +191,7 @@ export function HomeHero({
               transition={{ type: "spring", ...spring }}
             >
               <Link
-                href="/#limited-offers"
+                href="/offers"
                 className={cn(
                   buttonBaseClasses,
                   buttonSizeClasses.lg,
