@@ -1,6 +1,7 @@
 import { type INestApplication, ValidationPipe } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import cookieParser from "cookie-parser";
+import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { AllExceptionsFilter } from "../src/common/all-exceptions.filter";
 
@@ -23,4 +24,22 @@ export async function createTestApp(): Promise<INestApplication> {
 
   await app.init();
   return app;
+}
+
+/**
+ * Logs in as the seeded SUPER_ADMIN and returns the session cookie. Was
+ * copy-pasted identically into coupon.integration-spec.ts and
+ * refund.integration-spec.ts before this — extracted here since every new
+ * admin-endpoint spec needs the exact same login, and a third-plus copy
+ * would be past the point duplication is cheaper than a shared helper.
+ */
+export async function adminCookie(app: INestApplication) {
+  const adminSeedEmail = process.env["ADMIN_SEED_EMAIL"] ?? "admin@example.com";
+  const adminSeedPassword = process.env["ADMIN_SEED_PASSWORD"];
+  if (!adminSeedPassword) throw new Error("ADMIN_SEED_PASSWORD must be set for this test to log in as the seeded admin");
+  const res = await request(app.getHttpServer())
+    .post("/api/v1/auth/login")
+    .send({ email: adminSeedEmail, password: adminSeedPassword })
+    .expect(201);
+  return res.headers["set-cookie"];
 }

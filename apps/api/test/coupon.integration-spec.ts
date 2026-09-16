@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { prisma } from "@gcc-store/db";
-import { createTestApp } from "./test-app";
+import { createTestApp, adminCookie } from "./test-app";
 
 // See checkout.integration-spec.ts for why this is DATABASE_URL-gated.
 describe.skipIf(!process.env["DATABASE_URL"])("Coupons (integration)", () => {
@@ -30,17 +30,6 @@ describe.skipIf(!process.env["DATABASE_URL"])("Coupons (integration)", () => {
     const variant = product.variants[0];
     if (!variant) throw new Error("Seed data missing DEMO-BA-DIAMOND variants — run `pnpm db:seed` first");
     return variant;
-  }
-
-  async function adminCookie() {
-    const adminSeedEmail = process.env["ADMIN_SEED_EMAIL"] ?? "admin@example.com";
-    const adminSeedPassword = process.env["ADMIN_SEED_PASSWORD"];
-    if (!adminSeedPassword) throw new Error("ADMIN_SEED_PASSWORD must be set for this test to log in as the seeded admin");
-    const res = await request(app.getHttpServer())
-      .post("/api/v1/auth/login")
-      .send({ email: adminSeedEmail, password: adminSeedPassword })
-      .expect(201);
-    return res.headers["set-cookie"];
   }
 
   async function makeCoupon(overrides: Partial<{
@@ -226,7 +215,7 @@ describe.skipIf(!process.env["DATABASE_URL"])("Coupons (integration)", () => {
 
   describe("admin CRUD", () => {
     it("creates, lists, updates, and deactivates a coupon as SUPER_ADMIN", async () => {
-      const cookie = await adminCookie();
+      const cookie = await adminCookie(app);
       const code = `ADMIN-${Date.now()}`;
       createdCouponCodes.push(code.toUpperCase());
 
@@ -255,7 +244,7 @@ describe.skipIf(!process.env["DATABASE_URL"])("Coupons (integration)", () => {
     });
 
     it("rejects a duplicate coupon code with 409", async () => {
-      const cookie = await adminCookie();
+      const cookie = await adminCookie(app);
       const code = await makeCoupon({});
 
       await request(app.getHttpServer())

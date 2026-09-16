@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { prisma } from "@gcc-store/db";
-import { createTestApp } from "./test-app";
+import { createTestApp, adminCookie } from "./test-app";
 
 // See checkout.integration-spec.ts for why this is DATABASE_URL-gated.
 describe.skipIf(!process.env["DATABASE_URL"])("Refunds (integration)", () => {
@@ -43,20 +43,9 @@ describe.skipIf(!process.env["DATABASE_URL"])("Refunds (integration)", () => {
     return checkoutRes.body as { orderNumber: string; trackingToken: string; totalMinorUnits: number };
   }
 
-  async function adminCookie() {
-    const adminSeedEmail = process.env["ADMIN_SEED_EMAIL"] ?? "admin@example.com";
-    const adminSeedPassword = process.env["ADMIN_SEED_PASSWORD"];
-    if (!adminSeedPassword) throw new Error("ADMIN_SEED_PASSWORD must be set for this test to log in as the seeded admin");
-    const res = await request(app.getHttpServer())
-      .post("/api/v1/auth/login")
-      .send({ email: adminSeedEmail, password: adminSeedPassword })
-      .expect(201);
-    return res.headers["set-cookie"];
-  }
-
   it("fully refunds a paid order and marks it REFUNDED", async () => {
     const order = await paidOrder("700001");
-    const cookie = await adminCookie();
+    const cookie = await adminCookie(app);
     const orderRow = await prisma.order.findUniqueOrThrow({ where: { orderNumber: order.orderNumber } });
 
     const refundRes = await request(app.getHttpServer())
@@ -76,7 +65,7 @@ describe.skipIf(!process.env["DATABASE_URL"])("Refunds (integration)", () => {
 
   it("partially refunds and marks the order PARTIALLY_REFUNDED", async () => {
     const order = await paidOrder("700002");
-    const cookie = await adminCookie();
+    const cookie = await adminCookie(app);
     const orderRow = await prisma.order.findUniqueOrThrow({ where: { orderNumber: order.orderNumber } });
     const partialAmount = Math.floor(order.totalMinorUnits / 2);
 
@@ -92,7 +81,7 @@ describe.skipIf(!process.env["DATABASE_URL"])("Refunds (integration)", () => {
 
   it("rejects a refund larger than what's refundable", async () => {
     const order = await paidOrder("700003");
-    const cookie = await adminCookie();
+    const cookie = await adminCookie(app);
     const orderRow = await prisma.order.findUniqueOrThrow({ where: { orderNumber: order.orderNumber } });
 
     await request(app.getHttpServer())
@@ -103,7 +92,7 @@ describe.skipIf(!process.env["DATABASE_URL"])("Refunds (integration)", () => {
   });
 
   it("rejects refunding an order that was never paid", async () => {
-    const cookie = await adminCookie();
+    const cookie = await adminCookie(app);
     const variant = await getSeededVariant();
     const checkoutRes = await request(app.getHttpServer())
       .post("/api/v1/checkout")
