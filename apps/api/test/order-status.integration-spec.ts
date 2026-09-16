@@ -9,16 +9,17 @@ import { createTestApp, adminCookie } from "./test-app";
 describe.skipIf(!process.env["DATABASE_URL"])("Manual order status changes (integration)", () => {
   let app: INestApplication;
   const financeEmail = `integration-status-finance-${Date.now()}@example.com`;
-  const testOrderIds: string[] = [];
 
   beforeAll(async () => {
     app = await createTestApp();
   });
 
+  // Orders created here are deliberately left in place, same as
+  // checkout.integration-spec.ts — deleting them back out would mean
+  // manually walking the Order FK graph (payments, fulfillments, ...) in
+  // dependency order, and CI provisions a fresh Postgres per run anyway so
+  // nothing leaks across runs.
   afterAll(async () => {
-    await prisma.orderStatusEvent.deleteMany({ where: { orderId: { in: testOrderIds } } });
-    await prisma.orderItem.deleteMany({ where: { orderId: { in: testOrderIds } } });
-    await prisma.order.deleteMany({ where: { id: { in: testOrderIds } } });
     await prisma.user.deleteMany({ where: { email: financeEmail } });
     await app.close();
     await prisma.$disconnect();
@@ -44,7 +45,6 @@ describe.skipIf(!process.env["DATABASE_URL"])("Manual order status changes (inte
       .send({ items: [{ variantId: variant.id, quantity: 1, inputValues: { playerId, serverId: "1" } }] })
       .expect(201);
     const order = await prisma.order.findUniqueOrThrow({ where: { orderNumber: res.body.orderNumber } });
-    testOrderIds.push(order.id);
     return order;
   }
 
@@ -77,7 +77,6 @@ describe.skipIf(!process.env["DATABASE_URL"])("Manual order status changes (inte
         },
       },
     });
-    testOrderIds.push(order.id);
     return order;
   }
 

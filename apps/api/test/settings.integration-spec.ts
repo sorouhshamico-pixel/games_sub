@@ -9,19 +9,22 @@ import { createTestApp, adminCookie } from "./test-app";
 describe.skipIf(!process.env["DATABASE_URL"])("Store settings (integration)", () => {
   let app: INestApplication;
   const opsEmail = `integration-settings-ops-${Date.now()}@example.com`;
-  const testOrderIds: string[] = [];
 
   beforeAll(async () => {
     app = await createTestApp();
   });
 
+  // The order created below is deliberately left in place, same as
+  // checkout.integration-spec.ts — it goes through a real payment
+  // confirmation, which synchronously creates Fulfillment rows, so
+  // deleting it back out would mean walking the full Order FK graph in
+  // dependency order. CI provisions a fresh Postgres per run, so nothing
+  // leaks across runs.
   afterAll(async () => {
     // PATCH's DTO only accepts a real int for refundWindowDays (no null-to-
     // unset path), so clearing it back to "no enforcement" for whatever
     // spec file runs after this one goes straight through Prisma.
     await prisma.appSetting.deleteMany({ where: { key: { in: ["refundWindowDays", "supportEmail", "supportPhone", "maintenanceMode"] } } });
-    await prisma.orderItem.deleteMany({ where: { orderId: { in: testOrderIds } } });
-    await prisma.order.deleteMany({ where: { id: { in: testOrderIds } } });
     await prisma.user.deleteMany({ where: { email: opsEmail } });
     await app.close();
     await prisma.$disconnect();
@@ -95,7 +98,6 @@ describe.skipIf(!process.env["DATABASE_URL"])("Store settings (integration)", ()
       .expect(201);
     await request(app.getHttpServer()).post(`/api/v1/payments/mock/${checkoutRes.body.payment.paymentId}/confirm`).expect(200);
     const order = await prisma.order.findUniqueOrThrow({ where: { orderNumber: checkoutRes.body.orderNumber } });
-    testOrderIds.push(order.id);
 
     // Backdate past the 3-day window — direct Prisma write for test setup
     // only; the assertion below goes through the real API.
