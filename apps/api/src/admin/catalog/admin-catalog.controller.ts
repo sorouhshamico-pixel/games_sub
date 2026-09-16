@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import type { Response } from "express";
 import { ApiTags } from "@nestjs/swagger";
 import { UserRole } from "@gcc-store/db";
@@ -6,7 +7,7 @@ import { SessionAuthGuard } from "../../auth/guards/session-auth.guard";
 import { RolesGuard } from "../../auth/guards/roles.guard";
 import { Roles } from "../../auth/decorators/roles.decorator";
 import type { AuthenticatedRequest } from "../../auth/request-user";
-import { AdminCatalogService } from "./admin-catalog.service";
+import { AdminCatalogService, MAX_PRODUCT_IMAGE_BYTES } from "./admin-catalog.service";
 import { CreateCategoryDto, UpdateCategoryDto } from "./dto/create-category.dto";
 import { CreateProductDto, CreateVariantDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
@@ -86,6 +87,14 @@ export class AdminCatalogController {
   @Roles(...CATALOG_EDITOR_ROLES)
   softDeleteProduct(@Param("id") id: string, @Req() req: AuthenticatedRequest) {
     return this.catalogService.softDeleteProduct(id, req.user!.id);
+  }
+
+  @Post("products/:id/image")
+  @Roles(...CATALOG_EDITOR_ROLES)
+  @UseInterceptors(FileInterceptor("file", { limits: { fileSize: MAX_PRODUCT_IMAGE_BYTES } }))
+  uploadProductImage(@Param("id") id: string, @UploadedFile() file: Express.Multer.File, @Req() req: AuthenticatedRequest) {
+    if (!file) throw new BadRequestException("No file uploaded — expected a multipart field named \"file\"");
+    return this.catalogService.uploadProductImage(id, file, req.user!.id);
   }
 
   @Post("products/:id/variants")

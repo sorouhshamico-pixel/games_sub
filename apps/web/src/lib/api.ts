@@ -504,6 +504,31 @@ export function updateAdminProductImage(id: string, imageUrl: string): Promise<A
   return apiMutate("PATCH", `/admin/catalog/products/${id}`, { imageUrl });
 }
 
+// Multipart, not JSON — can't go through apiMutate/apiPost, which always
+// send Content-Type: application/json.
+export async function uploadAdminProductImage(id: string, file: File): Promise<AdminProductDetail> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/admin/catalog/products/${id}/image`, {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+  } catch {
+    throw new ApiError("network_error", 0);
+  }
+
+  if (!response.ok) {
+    const details = await response.json().catch(() => null);
+    throw new ApiError(details?.error?.message ?? `request_failed_${response.status}`, response.status);
+  }
+
+  return (await response.json()) as AdminProductDetail;
+}
+
 export function deleteAdminProduct(id: string): Promise<AdminProductDetail> {
   return apiMutate("DELETE", `/admin/catalog/products/${id}`);
 }

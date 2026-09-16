@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { AuthModule } from "../auth/auth.module";
 import { PaymentsModule } from "../payments/payments.module";
 import { InvoicingModule } from "../invoicing/invoicing.module";
+import { StorageModule } from "../storage/storage.module";
 import { DashboardController } from "./dashboard.controller";
 import { AdminOrdersController } from "./admin-orders.controller";
 import { AdminOrdersService } from "./admin-orders.service";
@@ -18,7 +19,7 @@ import { AdminSettingsService } from "./settings/admin-settings.service";
 import { AdminAuditLogController } from "./audit-log/admin-audit-log.controller";
 
 @Module({
-  imports: [AuthModule, PaymentsModule, InvoicingModule],
+  imports: [AuthModule, PaymentsModule, InvoicingModule, StorageModule],
   controllers: [
     DashboardController,
     AdminOrdersController,

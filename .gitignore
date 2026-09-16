@@ -37,3 +37,7 @@ Thumbs.db
 
 # Docker volumes (local dev data)
 .docker-data/
+
+# Local-disk fallback for uploaded product images (apps/api/src/storage) —
+# only ever populated when S3_* env vars aren't set.
+apps/api/uploads/

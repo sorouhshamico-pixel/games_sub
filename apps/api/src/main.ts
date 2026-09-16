@@ -13,15 +13,25 @@ loadEnv({ path: path.resolve(__dirname, "../../../.env") });
 import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
+import type { NestExpressApplication } from "@nestjs/platform-express";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import { AppModule } from "./app.module";
 import { CorrelationIdMiddleware } from "./common/correlation-id.middleware";
 import { AllExceptionsFilter } from "./common/all-exceptions.filter";
+import { UPLOADS_DIR } from "./storage/uploads-dir";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // Product images are public content, not an authenticated JSON response,
+  // so a plain static file route is the right shape for them — served with
+  // the same api/v1 prefix LocalDiskStorageProvider bakes into the URLs it
+  // returns (via API_PUBLIC_URL), so the two can't drift apart. Only used
+  // when LocalDiskStorageProvider is the active backend (see
+  // storage.module.ts); harmless no-op otherwise since nothing ever writes
+  // into this directory.
+  app.useStaticAssets(UPLOADS_DIR, { prefix: "/api/v1/uploads" });
 
   app.use(
     helmet({

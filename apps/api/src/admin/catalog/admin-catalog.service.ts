@@ -1,14 +1,27 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { randomUUID } from "node:crypto";
+import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { prisma, Prisma, ProductLifecycleStatus, recordAuditLog } from "@gcc-store/db";
 import { toCsv } from "../../common/csv";
+import { STORAGE_PROVIDER, type StorageProvider } from "../../storage/storage-provider.interface";
 import type { CreateCategoryDto, UpdateCategoryDto } from "./dto/create-category.dto";
 import type { CreateProductDto, CreateVariantDto } from "./dto/create-product.dto";
 import type { UpdateProductDto } from "./dto/update-product.dto";
 import type { UpdateVariantDto } from "./dto/update-variant.dto";
 import type { ExportProductsQueryDto } from "./dto/export-products.dto";
 
+// Deliberately narrow — SVG is excluded even though browsers render it as an
+// image, since an SVG can carry inline <script>/event-handler XSS if it's
+// ever served inline instead of as a download. See docs/SECURITY.md.
+const ALLOWED_IMAGE_MIME_TYPES: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+export const MAX_PRODUCT_IMAGE_BYTES = 5 * 1024 * 1024;
+
 @Injectable()
 export class AdminCatalogService {
+  constructor(@Inject(STORAGE_PROVIDER) private readonly storage: StorageProvider) {}
   // --- Categories -----------------------------------------------------
 
   listCategories() {
@@ -215,6 +228,26 @@ export class AdminCatalogService {
         include: { translations: true, variants: true, inputDefinitions: true },
       });
       await recordAuditLog(tx, { actorUserId: adminUserId, action: "product.updated", entityType: "Product", entityId: id, metadata: dto as never });
+      return product;
+    });
+  }
+
+  async uploadProductImage(id: string, file: { buffer: Buffer; mimetype: string; size: number }, adminUserId: string) {
+    await this.getProduct(id);
+
+    const extension = ALLOWED_IMAGE_MIME_TYPES[file.mimetype];
+    if (!extension) throw new BadRequestException("Image must be JPEG, PNG, or WebP");
+    if (file.size > MAX_PRODUCT_IMAGE_BYTES) throw new BadRequestException("Image must be 5MB or smaller");
+
+    const { url } = await this.storage.upload({ buffer: file.buffer, mimeType: file.mimetype }, `products/${randomUUID()}.${extension}`);
+
+    return prisma.$transaction(async (tx) => {
+      const product = await tx.product.update({
+        where: { id },
+        data: { imageUrl: url },
+        include: { translations: true, variants: true, inputDefinitions: true },
+      });
+      await recordAuditLog(tx, { actorUserId: adminUserId, action: "product.image_uploaded", entityType: "Product", entityId: id, metadata: { url } });
       return product;
     });
   }
