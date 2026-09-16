@@ -65,6 +65,11 @@ is organized around those two, plus the standard web-app surface (auth, input, a
 - **Dependency scanning in CI.** `pnpm audit --audit-level=high` runs on every push
   (`.github/workflows/ci.yml`) — fails the build on high/critical advisories in
   production dependencies.
+- **Product image upload validation** (`apps/api/src/storage`, `AdminCatalogService.uploadProductImage`).
+  Mimetype allowlist (JPEG/PNG/WebP only — SVG is deliberately excluded, since an inline
+  SVG can carry a `<script>`/event-handler payload if it's ever served inline rather than
+  as a forced download), a 5MB size cap, and a server-generated random filename (no
+  user-supplied filename or extension ever reaches the filesystem or storage key).
 
 ## Explicitly not done yet
 
