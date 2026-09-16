@@ -1,9 +1,11 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { prisma, Prisma, ProductLifecycleStatus, recordAuditLog } from "@gcc-store/db";
+import { toCsv } from "../../common/csv";
 import type { CreateCategoryDto, UpdateCategoryDto } from "./dto/create-category.dto";
 import type { CreateProductDto, CreateVariantDto } from "./dto/create-product.dto";
 import type { UpdateProductDto } from "./dto/update-product.dto";
 import type { UpdateVariantDto } from "./dto/update-variant.dto";
+import type { ExportProductsQueryDto } from "./dto/export-products.dto";
 
 @Injectable()
 export class AdminCatalogService {
@@ -72,6 +74,38 @@ export class AdminCatalogService {
     ]);
 
     return { items, page: params.page, pageSize: params.pageSize, total };
+  }
+
+  async exportProductsCsv(params: ExportProductsQueryDto): Promise<string> {
+    const where: Prisma.ProductWhereInput = {
+      deletedAt: null,
+      ...(params.status ? { status: params.status } : {}),
+      ...(params.categoryId ? { categoryId: params.categoryId } : {}),
+    };
+    const products = await prisma.product.findMany({
+      where,
+      include: { translations: true, category: true, variants: { where: { isActive: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return toCsv(
+      ["Slug", "Name (AR)", "Name (EN)", "Category", "Status", "Active variants", "From price (major units)", "Currency"],
+      products.map((p) => {
+        const nameAr = p.translations.find((t) => t.locale === "ar")?.name ?? "";
+        const nameEn = p.translations.find((t) => t.locale === "en")?.name ?? "";
+        const cheapest = p.variants.length > 0 ? Math.min(...p.variants.map((v) => v.baseCostMinorUnits)) : null;
+        return [
+          p.slug,
+          nameAr,
+          nameEn,
+          p.category.nameEn,
+          p.status,
+          p.variants.length,
+          cheapest !== null ? (cheapest / 100).toFixed(2) : "",
+          p.variants[0]?.currency ?? "",
+        ];
+      }),
+    );
   }
 
   async getProduct(id: string) {

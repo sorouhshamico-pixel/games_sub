@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
+import type { Response } from "express";
 import { ApiTags } from "@nestjs/swagger";
 import { UserRole } from "@gcc-store/db";
 import { SessionAuthGuard } from "../../auth/guards/session-auth.guard";
@@ -11,6 +12,7 @@ import { CreateProductDto, CreateVariantDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
 import { UpdateVariantDto } from "./dto/update-variant.dto";
 import { ListAdminProductsQueryDto } from "./dto/list-admin-products.dto";
+import { ExportProductsQueryDto } from "./dto/export-products.dto";
 
 const CATALOG_EDITOR_ROLES = [UserRole.SUPER_ADMIN, UserRole.CATALOG_MANAGER] as const;
 
@@ -48,6 +50,18 @@ export class AdminCatalogController {
   @Roles(...CATALOG_EDITOR_ROLES, UserRole.READ_ONLY_ANALYST)
   listProducts(@Query() query: ListAdminProductsQueryDto) {
     return this.catalogService.listProducts(query);
+  }
+
+  // Must be declared before @Get("products/:id") — Nest/Express match
+  // routes in declaration order, so "export.csv" would otherwise be
+  // captured as the :id param instead of reaching this handler.
+  @Get("products/export.csv")
+  @Roles(...CATALOG_EDITOR_ROLES, UserRole.READ_ONLY_ANALYST)
+  async exportProductsCsv(@Query() query: ExportProductsQueryDto, @Res() res: Response) {
+    const csv = await this.catalogService.exportProductsCsv(query);
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="products-${new Date().toISOString().slice(0, 10)}.csv"`);
+    res.send(csv);
   }
 
   @Get("products/:id")

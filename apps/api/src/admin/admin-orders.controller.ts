@@ -1,4 +1,5 @@
-import { Body, Controller, Get, NotFoundException, Param, Patch, Query, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, NotFoundException, Param, Patch, Query, Req, Res, UseGuards } from "@nestjs/common";
+import type { Response } from "express";
 import { ApiTags } from "@nestjs/swagger";
 import { prisma, UserRole, PaymentStatus } from "@gcc-store/db";
 import { SessionAuthGuard } from "../auth/guards/session-auth.guard";
@@ -6,9 +7,11 @@ import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
 import type { AuthenticatedRequest } from "../auth/request-user";
 import { InvoicingService } from "../invoicing/invoicing.service";
+import { toCsv } from "../common/csv";
 import { AdminOrdersService } from "./admin-orders.service";
 import { REFUNDABLE_STATUSES } from "./refunds/admin-refunds.service";
 import { ListOrdersQueryDto } from "./dto/list-orders.dto";
+import { ExportOrdersQueryDto } from "./dto/export-orders.dto";
 import { UpdateOrderStatusDto } from "./dto/update-order-status.dto";
 
 @ApiTags("admin")
@@ -45,6 +48,36 @@ export class AdminOrdersController {
     ]);
 
     return { items, page: query.page, pageSize: query.pageSize, total };
+  }
+
+  // Must be declared before @Get(":id") — Nest/Express match routes in
+  // declaration order, so "export.csv" would otherwise be captured as the
+  // :id param instead of reaching this handler.
+  @Get("export.csv")
+  async exportCsv(@Query() query: ExportOrdersQueryDto, @Res() res: Response) {
+    const where = query.status ? { status: query.status } : {};
+    const orders = await prisma.order.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      select: {
+        orderNumber: true,
+        status: true,
+        currency: true,
+        totalMinorUnits: true,
+        guestEmail: true,
+        guestPhone: true,
+        createdAt: true,
+      },
+    });
+
+    const csv = toCsv(
+      ["Order Number", "Status", "Total", "Currency", "Customer Email", "Customer Phone", "Created At (UTC)"],
+      orders.map((o) => [o.orderNumber, o.status, (o.totalMinorUnits / 100).toFixed(2), o.currency, o.guestEmail, o.guestPhone, o.createdAt.toISOString()]),
+    );
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="orders-${new Date().toISOString().slice(0, 10)}.csv"`);
+    res.send(csv);
   }
 
   @Get(":id")

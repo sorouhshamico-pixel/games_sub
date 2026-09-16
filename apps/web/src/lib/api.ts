@@ -12,7 +12,10 @@ import type {
   SupportedCurrency,
 } from "@gcc-store/contracts";
 
-const API_BASE_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:4000/api/v1";
+// Exported so pages that link straight to a real file download (CSV
+// exports) can build the URL themselves — those are plain <a href> browser
+// navigations, not apiFetch() calls, so they need the base URL directly.
+export const API_BASE_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:4000/api/v1";
 
 export class ApiError extends Error {
   constructor(

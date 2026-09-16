@@ -2,7 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { formatMoney } from "@gcc-store/ui";
 import type { Locale } from "@gcc-store/i18n";
 import { Link, redirect } from "@/i18n/navigation";
-import { ApiError, getAdminOrders } from "@/lib/api";
+import { API_BASE_URL, ApiError, getAdminOrders } from "@/lib/api";
 import { getServerCookieHeader } from "@/lib/server-cookies";
 import { OrderStatusFilter } from "@/components/admin/OrderStatusFilter";
 
@@ -51,7 +51,15 @@ export default async function AdminOrdersPage({
     <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">{locale === "ar" ? "الطلبات" : "Orders"}</h1>
-        <OrderStatusFilter currentStatus={status} />
+        <div className="flex flex-wrap items-center gap-3">
+          <a
+            href={`${API_BASE_URL}/admin/orders/export.csv${status ? `?status=${status}` : ""}`}
+            className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)]"
+          >
+            {locale === "ar" ? "تصدير CSV" : "Export CSV"}
+          </a>
+          <OrderStatusFilter currentStatus={status} />
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-[var(--color-border)]">
