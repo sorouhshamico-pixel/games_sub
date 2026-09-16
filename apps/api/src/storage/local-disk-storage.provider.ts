@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import type { StorageProvider, UploadableFile } from "./storage-provider.interface";
 
 /**
@@ -19,8 +19,12 @@ export class LocalDiskStorageProvider implements StorageProvider {
   ) {}
 
   async upload(file: UploadableFile, key: string): Promise<{ url: string }> {
-    await mkdir(this.uploadsDir, { recursive: true });
-    await writeFile(join(this.uploadsDir, key), file.buffer);
+    // key can contain subdirectories (e.g. "products/<uuid>.png") — mkdir
+    // on uploadsDir alone isn't enough, the full parent path must exist
+    // before writeFile.
+    const destination = join(this.uploadsDir, key);
+    await mkdir(dirname(destination), { recursive: true });
+    await writeFile(destination, file.buffer);
     return { url: `${this.publicBaseUrl}/uploads/${key}` };
   }
 }
